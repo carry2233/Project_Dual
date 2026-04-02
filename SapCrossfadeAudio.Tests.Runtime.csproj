@@ -18,7 +18,7 @@
     <LangVersion>9.0</LangVersion>
     <RootNamespace></RootNamespace>
     <OutputType>Library</OutputType>
-    <AssemblyName>Assembly-CSharp</AssemblyName>
+    <AssemblyName>SapCrossfadeAudio.Tests.Runtime</AssemblyName>
     <TargetFramework>netstandard2.1</TargetFramework>
     <BaseDirectory>.</BaseDirectory>
   </PropertyGroup>
@@ -49,122 +49,11 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\0003_Script\Manager\GlobalCharacterManager.cs" />
-    <Compile Include="Assets\0003_Script\Main_Screen\IntroUISequence.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
-    <Compile Include="Assets\0005_External_Assets\NamuFX\_CommonAssets\Scripts\Viewer.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
-    <Compile Include="Assets\0003_Script\Effect\YToZPositionConverter.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
-    <Compile Include="Assets\0003_Script\World_Map\TileSelectionManager.cs" />
-    <Compile Include="Assets\0003_Script\Character\ClickMoveSystemManager.cs" />
-    <Compile Include="Assets\0003_Script\Character\CharacterAfterimageObject.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\AttackerController.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\CameraOrbit.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
-    <Compile Include="Assets\0003_Script\Main_Screen\SaveSelection.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
-    <Compile Include="Assets\0003_Script\World_Map\PlayerTileMembership.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\ParticleAnimationEvent.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\SlashDecal.cs" />
-    <Compile Include="Assets\0003_Script\Character\NavigationMoveSystem.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
-    <Compile Include="Assets\0003_Script\Main_Screen\SaveSlotButton.cs" />
-    <Compile Include="Assets\0003_Script\Manager\GlobalGameRuleManager.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
-    <Compile Include="Assets\0003_Script\Sound\BattleCameraController.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
-    <Compile Include="Assets\0003_Script\Main_Screen\SaveStorage.cs" />
-    <Compile Include="Assets\0003_Script\Character\DuelSkillDefinitionSO.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TutorialInfo\Scripts\Readme.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
-    <Compile Include="Assets\0003_Script\Sound\AudioSourcePool.cs" />
-    <Compile Include="Assets\0003_Script\Character\CharacterAnimationPlayer.cs" />
-    <Compile Include="Assets\0003_Script\Sound\BattleSoundEmitter.cs" />
-    <Compile Include="Assets\0003_Script\Character\CharacterStatSystem.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\Projectile.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
-    <Compile Include="Assets\0003_Script\Main_Screen\MainScreenManager.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\FPSCounter.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
-    <Compile Include="Assets\0003_Script\World_Map\HexTilePlacementManager.cs" />
-    <Compile Include="Assets\0003_Script\Character\CharacterAnimationClipSO..cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
-    <Compile Include="Assets\0003_Script\Sound\BattleAudioSettings.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\PlayerInput.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TeleType.cs" />
-    <Compile Include="Assets\0003_Script\Effect\QuadGrassWiggle.cs" />
-    <Compile Include="Assets\0003_Script\AI\CharacterDuelAI.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
-    <Compile Include="Assets\0003_Script\World_Map\TilePrefab.cs" />
-    <Compile Include="Assets\0003_Script\Sound\CharacterActionSound.cs" />
-    <Compile Include="Assets\0003_Script\Effect\PerObjectTextureOverride.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
-    <Compile Include="Assets\0003_Script\AI\EnemyAIController.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
-    <Compile Include="Assets\0003_Script\Character\MoveCommandController.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
-    <Compile Include="Assets\0005_External_Assets\Hit_Effects_FREE\Matthew Guz\Hits Effects FREE\Scene Demo\Script\Prefab Manager.cs" />
-    <Compile Include="Assets\0003_Script\World_Map\WorldMapCameraController.cs" />
-    <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\ElementsShowCase.cs" />
+    <Compile Include="Assets\GameSetting\SapCrossfadeAudio\Tests\Runtime\CrossfadePlayerTests.cs" />
+    <Compile Include="Assets\GameSetting\SapCrossfadeAudio\Tests\Runtime\CrossfadeHandleTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMPro.cginc" />
-    <None Include="Assets\0009_font\Bagel_Fat_One,Do_Hyeon,Noto_Sans_KR\Bagel_Fat_One\OFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - License.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
-    <None Include="Assets\0005_External_Assets\Hit_Effects_FREE\Matthew Guz\Hits Effects FREE\Documentation\Readme IMPORTANT.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Unity - OFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Oswald-Bold - OFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - AFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Anton OFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
-    <None Include="Assets\0009_font\Bagel_Fat_One,Noto_Sans_KR\Noto_Sans_KR\README.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
-    <None Include="Assets\0009_font\Bagel_Fat_One,Do_Hyeon,Noto_Sans_KR\Do_Hyeon\OFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Model\Katana\Katana License.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\SDFFunctions.hlsl" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Surface.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile SSD.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
-    <None Include="Assets\0009_font\Bagel_Fat_One,Do_Hyeon,Noto_Sans_KR\Noto_Sans_KR\README.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
-    <None Include="Assets\0009_font\Bagel_Fat_One,Noto_Sans_KR\Noto_Sans_KR\OFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Model\Rock\Stylized Rock Credits.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
-    <None Include="Assets\0009_font\Bagel_Fat_One,Do_Hyeon,Noto_Sans_KR\Noto_Sans_KR\OFL.txt" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Sprite.shader" />
-    <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Bangers - OFL.txt" />
-    <None Include="Assets\0009_font\Bagel_Fat_One,Noto_Sans_KR\Bagel_Fat_One\OFL.txt" />
+    <None Include="Assets\GameSetting\SapCrossfadeAudio\Tests\Runtime\SapCrossfadeAudio.Tests.Runtime.asmdef" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -703,28 +592,8 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Managed\UnityEngine\UnityEditor.XRModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.Collections.LowLevel.ILSupport">
-      <HintPath>Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>Library\PackageCache\com.unity.ext.nunit@d8c07649098d\net40\unity-custom\nunit.framework.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.IO.Hashing">
-      <HintPath>Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.Tests\System.IO.Hashing\System.IO.Hashing.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
-      <HintPath>Library\PackageCache\com.unity.visualscripting@191c0d7e3b69\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff\Mono.Cecil.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.Tests\System.Runtime.CompilerServices.Unsafe\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
@@ -1215,166 +1084,20 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\NetStandard\compat\2.1.0\shims\netfx\System.Xml.Serialization.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Sprite.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEditor.UI.Analytics">
-      <HintPath>Library\ScriptAssemblies\UnityEditor.UI.Analytics.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Rendering.LightTransport.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Rendering.LightTransport.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.2D.Editor.Overrides">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.2D.Editor.Overrides.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PPv2URPConverters">
-      <HintPath>Library\ScriptAssemblies\PPv2URPConverters.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Runtime.Shared">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.Shared.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.2D.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.2D.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.UnifiedRayTracing.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.UnifiedRayTracing.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.TextMeshPro.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Tilemap.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.2D.Tilemap.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.GPUDriven.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.GPUDriven.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Shaders">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Shaders.dll</HintPath>
+    <Reference Include="UnityEditor.UI">
+      <HintPath>Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.Multiplayer.Center.Common">
-      <HintPath>Library\ScriptAssemblies\Unity.Multiplayer.Center.Common.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.InternalAPIEngineBridge.004">
-      <HintPath>Library\ScriptAssemblies\Unity.InternalAPIEngineBridge.004.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Multiplayer.Center.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Multiplayer.Center.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Config.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Config.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipeline.Universal.ShaderLibrary">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipeline.Universal.ShaderLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.ShaderGraph.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.ShaderGraph.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Editor.Shared">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.Shared.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEditor.UI">
-      <HintPath>Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Unity.2D.Common.Path.Editor.csproj" />
-    <ProjectReference Include="Unity.InternalAPIEngineBridge.001.csproj" />
-    <ProjectReference Include="PsdPlugin.csproj" />
-    <ProjectReference Include="Unity.AI.Navigation.csproj" />
-    <ProjectReference Include="Unity.2D.IK.Runtime.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.SettingsProvider.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.Animation.Editor.csproj" />
-    <ProjectReference Include="Unity.InternalAPIEditorBridge.001.csproj" />
-    <ProjectReference Include="Unity.AI.Navigation.Updater.csproj" />
-    <ProjectReference Include="Unity.Timeline.csproj" />
-    <ProjectReference Include="Unity.2D.Common.Editor.csproj" />
-    <ProjectReference Include="Unity.AI.Navigation.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.Tooling.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.Animation.Runtime.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Shared.Editor.csproj" />
-    <ProjectReference Include="Unity.Searcher.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.PixelPerfect.Editor.csproj" />
-    <ProjectReference Include="Unity.PlasticSCM.Editor.csproj" />
-    <ProjectReference Include="Unity.Burst.Editor.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Core.csproj" />
-    <ProjectReference Include="Unity.Mathematics.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.Aseprite.Common.csproj" />
-    <ProjectReference Include="Unity.2D.PixelPerfect.csproj" />
-    <ProjectReference Include="Unity.Rider.Editor.csproj" />
-    <ProjectReference Include="Unity.AI.Navigation.Editor.ConversionSystem.csproj" />
-    <ProjectReference Include="Unity.2D.Aseprite.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.Psdimporter.Editor.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Flow.csproj" />
-    <ProjectReference Include="Unity.2D.Tilemap.Extras.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.Tilemap.Extras.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Flow.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.IK.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.SpriteShape.Runtime.csproj" />
-    <ProjectReference Include="Unity.VisualStudio.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.Common.Runtime.csproj" />
-    <ProjectReference Include="Unity.Collections.csproj" />
-    <ProjectReference Include="Unity.InputSystem.ForUI.csproj" />
-    <ProjectReference Include="Unity.Timeline.Editor.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.State.Editor.csproj" />
-    <ProjectReference Include="Unity.Mathematics.csproj" />
+    <ProjectReference Include="SapCrossfadeAudio.Core.csproj" />
     <ProjectReference Include="Unity.Burst.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Core.Editor.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.State.csproj" />
-    <ProjectReference Include="Unity.Collections.Editor.csproj" />
-    <ProjectReference Include="Unity.2D.SpriteShape.Editor.csproj" />
-    <ProjectReference Include="Unity.InputSystem.csproj" />
+    <ProjectReference Include="Unity.Collections.csproj" />
+    <ProjectReference Include="Unity.Mathematics.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>
