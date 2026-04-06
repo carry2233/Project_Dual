@@ -21,3 +21,33 @@ MonoBehaviour:
   useDashAnimationLoop: 1
   duelResolveAnimationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}
   useDuelResolveAnimationLoop: 0
+  selfHitRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  selfAdvantageRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  selfEvenRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  selfDisadvantageRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  selfDamagedRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  targetHitRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  targetAdvantageRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  targetEvenRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  targetDisadvantageRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0
+  targetDamagedRepelOverride:
+    useOverrideRepelForce: 0
+    overrideRepelForce: 0

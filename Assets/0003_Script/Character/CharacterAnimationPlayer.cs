@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System.Collections.Generic;
 public class CharacterAnimationPlayer : MonoBehaviour
 {
     [Header("필수 참조")]
@@ -22,9 +22,17 @@ public class CharacterAnimationPlayer : MonoBehaviour
 [SerializeField] private bool isManualAnimationPlaying; // 현재 수동 재생 상태로 적용 중인지 여부
 [SerializeField] private bool isManualAnimationLoop; // 현재 수동 재생 루프 여부
 
+[Header("캐릭터 비주얼 오브젝트 참조")]
+[SerializeField] private Transform characterVisualObject; // 프레임 데이터에 따라 로컬 위치를 덮어쓸 비주얼 오브젝트
 
 [Header("잔상 생성 위치 설정")]
 [SerializeField] private Transform afterimageSpawnPoint; // 잔상 생성 위치 기준 오브젝트
+
+[Header("이펙트 생성 부모 오브젝트 참조")]
+[SerializeField] private Transform effectParentRoot; // 생성된 이펙트 프리팹을 자식으로 둘 부모 오브젝트
+
+private readonly System.Collections.Generic.HashSet<int> playedEffectEventIndexSet
+    = new System.Collections.Generic.HashSet<int>(); // 현재 재생 사이클에서 이미 실행한 이펙트 이벤트 인덱스 저장용
 
 [Header("잔상 생성 설정")]
 [SerializeField] private CharacterAfterimageObject afterimagePrefab; // 잔상 오브젝트 프리팹
@@ -70,6 +78,11 @@ private void Awake() // 시작 시 참조 자동 연결
     if (afterimageSpawnPoint == null)
     {
         afterimageSpawnPoint = transform; // 생성 위치를 따로 안 넣었으면 자기 자신 위치 사용
+    }
+
+    if (effectParentRoot == null)
+    {
+        effectParentRoot = transform; // 따로 지정하지 않으면 자기 자신을 부모로 사용
     }
 
     CreateAfterimagePoolRootIfNeeded(); // 잔상 풀 부모 오브젝트 준비
@@ -131,21 +144,23 @@ public void StopManualAnimation() // 수동 애니메이션 종료
         }
     }
 
-    private void SetAnimationClip(CharacterAnimationClipSO newClip) // 현재 클립 교체
-    {
-        if (newClip == null || newClip.FrameCount == 0)
-        {
-            currentAnimationClip = null; // 비어 있으면 현재 클립 제거
-            currentFrameIndex = 0; // 프레임 인덱스 초기화
-            currentFrameTimer = 0f; // 프레임 타이머 초기화
-            return;
-        }
+private void SetAnimationClip(CharacterAnimationClipSO newClip) // 현재 클립 교체
+{
+    playedEffectEventIndexSet.Clear(); // 클립이 바뀌면 이펙트 실행 기록 초기화
 
-        currentAnimationClip = newClip; // 현재 클립 저장
-        currentFrameIndex = 0; // 첫 프레임부터 시작
-        currentFrameTimer = 0f; // 프레임 시간 초기화
-        ApplyCurrentFrame(); // 첫 프레임 즉시 적용
+    if (newClip == null || newClip.FrameCount == 0)
+    {
+        currentAnimationClip = null; // 비어 있으면 현재 클립 제거
+        currentFrameIndex = 0; // 프레임 인덱스 초기화
+        currentFrameTimer = 0f; // 프레임 타이머 초기화
+        return;
     }
+
+    currentAnimationClip = newClip; // 현재 클립 저장
+    currentFrameIndex = 0; // 첫 프레임부터 시작
+    currentFrameTimer = 0f; // 프레임 시간 초기화
+    ApplyCurrentFrame(); // 첫 프레임 즉시 적용
+}
 
     private void UpdateAnimationPlayback() // 현재 클립 재생 진행
     {
@@ -188,6 +203,7 @@ private void AdvanceFrame() // 다음 프레임으로 이동
         }
 
         currentFrameIndex = 0; // 루프 재생이면 첫 프레임으로 복귀
+        playedEffectEventIndexSet.Clear(); // 새 루프 사이클 시작이므로 이펙트 실행 기록 초기화
         ApplyCurrentFrame(); // 첫 프레임 적용
         return;
     }
@@ -196,25 +212,32 @@ private void AdvanceFrame() // 다음 프레임으로 이동
     ApplyCurrentFrame(); // 다음 프레임 적용
 }
 
-    private void ApplyCurrentFrame() // 현재 프레임 이미지를 출력기에 적용
+private void ApplyCurrentFrame() // 현재 프레임 이미지와 위치 덮어쓰기 적용
+{
+    if (perObjectTextureOverride == null || currentAnimationClip == null)
     {
-        if (perObjectTextureOverride == null || currentAnimationClip == null)
-        {
-            return; // 출력기 또는 클립이 없으면 종료
-        }
-
-        CharacterAnimationClipSO.AnimationFrameData frameData = currentAnimationClip.GetFrame(currentFrameIndex); // 현재 프레임 데이터 가져오기
-
-        if (frameData == null)
-        {
-            return; // 프레임 데이터가 없으면 종료
-        }
-
-        if (frameData.FrameSprite != null)
-        {
-            perObjectTextureOverride.SetSprite(frameData.FrameSprite); // 현재 프레임 스프라이트 적용
-        }
+        return; // 출력기 또는 클립이 없으면 종료
     }
+
+    CharacterAnimationClipSO.AnimationFrameData frameData = currentAnimationClip.GetFrame(currentFrameIndex); // 현재 프레임 데이터 가져오기
+
+    if (frameData == null)
+    {
+        return; // 프레임 데이터가 없으면 종료
+    }
+
+    if (frameData.FrameSprite != null)
+    {
+        perObjectTextureOverride.SetSprite(frameData.FrameSprite); // 현재 프레임 스프라이트 적용
+    }
+
+    if (characterVisualObject != null && frameData.UseOverrideVisualLocalPosition)
+    {
+        characterVisualObject.localPosition = frameData.OverrideVisualLocalPosition; // 체크된 프레임에서만 비주얼 오브젝트 로컬 위치 덮어쓰기
+    }
+
+    TrySpawnEffectEventsAtCurrentFrame(); // 현재 프레임에 해당하는 이펙트 이벤트 실행 시도
+}
 
 private float GetCurrentFrameInterval() // 현재 프레임 주기값 계산
 {
@@ -429,5 +452,99 @@ private Sprite GetCurrentDisplayedSprite() // 현재 재생 중 프레임의 스
     }
 
     return frameData.FrameSprite; // 현재 프레임 스프라이트 반환
+}
+
+private void TrySpawnEffectEventsAtCurrentFrame() // 현재 프레임에 해당하는 이펙트 이벤트 실행 시도
+{
+    if (currentAnimationClip == null)
+    {
+        return; // 현재 클립이 없으면 종료
+    }
+
+    IReadOnlyList<CharacterAnimationClipSO.EffectSpawnEventData> effectEventList = currentAnimationClip.EffectSpawnEventList; // 현재 클립의 이펙트 이벤트 목록 참조
+
+    if (effectEventList == null || effectEventList.Count == 0)
+    {
+        return; // 이벤트 목록이 없으면 종료
+    }
+
+    for (int i = 0; i < effectEventList.Count; i++)
+    {
+        CharacterAnimationClipSO.EffectSpawnEventData eventData = effectEventList[i]; // 현재 이벤트 데이터 참조
+
+        if (eventData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (!eventData.UseEffectSpawn)
+        {
+            continue; // 사용하지 않는 이벤트면 건너뜀
+        }
+
+        if (eventData.SpawnFrameIndex != currentFrameIndex)
+        {
+            continue; // 현재 프레임과 생성 프레임이 다르면 건너뜀
+        }
+
+        if (playedEffectEventIndexSet.Contains(i))
+        {
+            continue; // 현재 재생 사이클에서 이미 실행한 이벤트면 건너뜀
+        }
+
+        SpawnEffectEvent(eventData); // 현재 프레임 이펙트 생성
+        playedEffectEventIndexSet.Add(i); // 실행 완료한 이벤트로 기록
+    }
+}
+
+private void SpawnEffectEvent(CharacterAnimationClipSO.EffectSpawnEventData eventData) // 이펙트 이벤트 데이터 기준 프리팹 생성
+{
+    if (eventData == null)
+    {
+        return; // 이벤트 데이터가 없으면 종료
+    }
+
+    if (eventData.EffectPrefab == null)
+    {
+        return; // 프리팹이 없으면 종료
+    }
+
+    Transform parentRoot = effectParentRoot != null ? effectParentRoot : transform; // 실제 부모 오브젝트 결정
+    GameObject spawnedEffectObject = Instantiate(eventData.EffectPrefab, parentRoot); // 부모 오브젝트 자식으로 이펙트 생성
+
+    bool isFacingLeft = IsCurrentFacingLeft(); // 현재 캐릭터가 X- 방향인지 확인
+    Vector3 localPosition = isFacingLeft
+        ? eventData.SpawnLocalPositionWhenFacingLeft
+        : eventData.SpawnLocalPositionWhenFacingRight; // 방향별 생성 위치 결정
+
+    Vector3 localRotationEuler = isFacingLeft
+        ? eventData.SpawnLocalRotationWhenFacingLeft
+        : eventData.SpawnLocalRotationWhenFacingRight; // 방향별 생성 회전 결정
+
+    spawnedEffectObject.transform.localPosition = localPosition; // 로컬 위치 적용
+    spawnedEffectObject.transform.localRotation = Quaternion.Euler(localRotationEuler); // 로컬 회전 적용
+    spawnedEffectObject.transform.localScale = Vector3.one; // 기본 스케일 유지
+
+    CharacterEffectInstance effectInstance = spawnedEffectObject.GetComponent<CharacterEffectInstance>(); // 이펙트 인스턴스 관리 스크립트 참조
+
+    if (effectInstance == null)
+    {
+        effectInstance = spawnedEffectObject.AddComponent<CharacterEffectInstance>(); // 없으면 자동 추가
+    }
+
+    effectInstance.InitializeEffectInstance(
+        eventData.EffectStartTimelineTime, // 이 시점까지 재생된 상태로 시작
+        eventData.EffectLifetime, // 유지 시간
+        eventData.EffectPlaySpeedMultiplier); // 재생속도 배율
+}
+
+private bool IsCurrentFacingLeft() // 현재 캐릭터가 X- 방향인지 여부 반환
+{
+    if (navigationMovementSystem == null)
+    {
+        return false; // 이동 시스템이 없으면 기본은 X+ 방향 취급
+    }
+
+    return navigationMovementSystem.CurrentFacingXDirection == NavigationMovementSystem.FacingXDirectionType.XNegative; // 현재 X- 방향 여부 반환
 }
 }

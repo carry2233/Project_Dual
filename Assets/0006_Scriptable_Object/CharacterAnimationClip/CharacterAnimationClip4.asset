@@ -13,6 +13,19 @@ MonoBehaviour:
   m_Name: CharacterAnimationClip4
   m_EditorClassIdentifier: Assembly-CSharp::CharacterAnimationClipSO
   frameList:
-  - frameSprite: {fileID: 21300000, guid: 5f88c77e30715e14482ee96c014d7834, type: 3}
+  - frameSprite: {fileID: 21300000, guid: 1c3b2270a761f664283d4755f2be5c51, type: 3}
     useOverrideImageChangeInterval: 1
-    overrideImageChangeInterval: 0.1
+    overrideImageChangeInterval: 111
+    useOverrideVisualLocalPosition: 0
+    overrideVisualLocalPosition: {x: 0, y: 0, z: 0}
+  effectSpawnEventList:
+  - useEffectSpawn: 1
+    spawnFrameIndex: 0
+    spawnLocalPositionWhenFacingLeft: {x: -0.2, y: 0.75, z: 0}
+    spawnLocalPositionWhenFacingRight: {x: 0.2, y: 0.75, z: 0}
+    spawnLocalRotationWhenFacingLeft: {x: -112, y: -180, z: 10}
+    spawnLocalRotationWhenFacingRight: {x: -112, y: 0, z: 10}
+    effectStartTimelineTime: 0.2
+    effectLifetime: 1
+    effectPlaySpeedMultiplier: 1
+    effectPrefab: {fileID: 555128376930514880, guid: 78177450585d2e84897335bd37120498, type: 3}

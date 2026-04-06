@@ -16,3 +16,5 @@ MonoBehaviour:
   - frameSprite: {fileID: 21300000, guid: 2b2ff7c2e6d861c4a9581cfa0b88512b, type: 3}
     useOverrideImageChangeInterval: 0
     overrideImageChangeInterval: 0.5
+    useOverrideVisualLocalPosition: 1
+    overrideVisualLocalPosition: {x: 0.1, y: 0, z: 0}

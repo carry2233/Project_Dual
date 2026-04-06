@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: CharacterAnimationClip2
   m_EditorClassIdentifier: Assembly-CSharp::CharacterAnimationClipSO
   frameList:
-  - frameSprite: {fileID: 21300000, guid: 4c0df34b28db41b4abd27f7bb21e71c7, type: 3}
+  - frameSprite: {fileID: 21300000, guid: 42d2d6425cc083c49b6a9a29e767ff1d, type: 3}
     useOverrideImageChangeInterval: 0
     overrideImageChangeInterval: 0.3
-  - frameSprite: {fileID: 21300000, guid: 6cb2ee748b6ff5147a7f60d9e57a647a, type: 3}
+    useOverrideVisualLocalPosition: 0
+    overrideVisualLocalPosition: {x: 0, y: 0, z: 0}
+  - frameSprite: {fileID: 21300000, guid: 00b150f16463d0041af35d717f29426d, type: 3}
     useOverrideImageChangeInterval: 0
     overrideImageChangeInterval: 0.3
+    useOverrideVisualLocalPosition: 0
+    overrideVisualLocalPosition: {x: 0, y: 0, z: 0}
+  effectSpawnEventList: []

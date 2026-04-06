@@ -49,6 +49,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\0003_Script\AI\DuelSandbagTarget.cs" />
     <Compile Include="Assets\0003_Script\Manager\GlobalCharacterManager.cs" />
     <Compile Include="Assets\0003_Script\Main_Screen\IntroUISequence.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
     <Compile Include="Assets\0003_Script\World_Map\TilePrefab.cs" />
     <Compile Include="Assets\0003_Script\Sound\CharacterActionSound.cs" />
+    <Compile Include="Assets\0003_Script\Character\CharacterEffectInstance.cs" />
     <Compile Include="Assets\0003_Script\Effect\PerObjectTextureOverride.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
