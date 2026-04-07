@@ -16,8 +16,8 @@ MonoBehaviour:
   - frameSprite: {fileID: 21300000, guid: 1c3b2270a761f664283d4755f2be5c51, type: 3}
     useOverrideImageChangeInterval: 1
     overrideImageChangeInterval: 111
-    useOverrideVisualLocalPosition: 0
-    overrideVisualLocalPosition: {x: 0, y: 0, z: 0}
+    useOverrideVisualLocalPosition: 1
+    overrideVisualLocalPosition: {x: 0.1, y: 0, z: 0}
   effectSpawnEventList:
   - useEffectSpawn: 1
     spawnFrameIndex: 0
@@ -25,7 +25,7 @@ MonoBehaviour:
     spawnLocalPositionWhenFacingRight: {x: 0.2, y: 0.75, z: 0}
     spawnLocalRotationWhenFacingLeft: {x: -112, y: -180, z: 10}
     spawnLocalRotationWhenFacingRight: {x: -112, y: 0, z: 10}
-    effectStartTimelineTime: 0.2
+    effectStartTimelineTime: 0.1
     effectLifetime: 1
-    effectPlaySpeedMultiplier: 1
+    effectPlaySpeedMultiplier: 0.8
     effectPrefab: {fileID: 555128376930514880, guid: 78177450585d2e84897335bd37120498, type: 3}

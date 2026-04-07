@@ -18,3 +18,4 @@ MonoBehaviour:
     overrideImageChangeInterval: 0.5
     useOverrideVisualLocalPosition: 1
     overrideVisualLocalPosition: {x: 0.1, y: 0, z: 0}
+  effectSpawnEventList: []
