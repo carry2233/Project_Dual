@@ -18,12 +18,19 @@ public class AnimationFrameData
     [SerializeField] private bool useOverrideVisualLocalPosition; // 이 프레임에서 비주얼 오브젝트 로컬 위치를 덮어쓸지 여부
     [SerializeField] private Vector3 overrideVisualLocalPosition; // 이 프레임에서 덮어쓸 비주얼 오브젝트 로컬 위치값
 
+       [Header("비주얼 오브젝트 스케일 덮어쓰기 설정")]
+    [SerializeField] private bool useOverrideVisualLocalScale; // 이 프레임에서 비주얼 오브젝트 로컬 스케일을 덮어쓸지 여부
+    [SerializeField] private Vector3 overrideVisualLocalScale = Vector3.one; // 이 프레임에서 덮어쓸 비주얼 오브젝트 로컬 스케일값
+
     public Sprite FrameSprite => frameSprite; // 프레임 이미지 반환
     public bool UseOverrideImageChangeInterval => useOverrideImageChangeInterval; // 주기값 덮어쓰기 여부 반환
     public float OverrideImageChangeInterval => overrideImageChangeInterval; // 덮어쓸 주기값 반환
 
     public bool UseOverrideVisualLocalPosition => useOverrideVisualLocalPosition; // 비주얼 로컬 위치 덮어쓰기 여부 반환
     public Vector3 OverrideVisualLocalPosition => overrideVisualLocalPosition; // 덮어쓸 비주얼 로컬 위치값 반환
+
+     public bool UseOverrideVisualLocalScale => useOverrideVisualLocalScale; // 비주얼 로컬 스케일 덮어쓰기 여부 반환
+    public Vector3 OverrideVisualLocalScale => overrideVisualLocalScale; // 덮어쓸 비주얼 로컬 스케일값 반환
 }
 
     [Header("프레임 목록")]

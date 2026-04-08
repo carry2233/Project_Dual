@@ -18,9 +18,13 @@ MonoBehaviour:
     overrideImageChangeInterval: 0.3
     useOverrideVisualLocalPosition: 1
     overrideVisualLocalPosition: {x: 0.1, y: 0, z: 0}
+    useOverrideVisualLocalScale: 1
+    overrideVisualLocalScale: {x: 1, y: 1, z: 1}
   - frameSprite: {fileID: 21300000, guid: 00b150f16463d0041af35d717f29426d, type: 3}
     useOverrideImageChangeInterval: 0
     overrideImageChangeInterval: 0.3
     useOverrideVisualLocalPosition: 0
     overrideVisualLocalPosition: {x: 0, y: 0, z: 0}
+    useOverrideVisualLocalScale: 0
+    overrideVisualLocalScale: {x: 1, y: 1, z: 1}
   effectSpawnEventList: []

@@ -15,8 +15,8 @@ MonoBehaviour:
   skillName: 
   firstRowID: 2
   secondRowID: 2
-  minimumSpeedRatePercent: 111
-  maximumSpeedRatePercent: 170
+  minimumSpeedRatePercent: 300
+  maximumSpeedRatePercent: 400
   dashAnimationClip: {fileID: 11400000, guid: ee8d9685f786b2c4c999d8524fc7e6f6, type: 2}
   useDashAnimationLoop: 1
   duelResolveAnimationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}

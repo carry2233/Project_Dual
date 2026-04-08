@@ -190,6 +190,11 @@ public void SetMoveDestination(Vector2 destination) // 이동 목적지 전달
 
     if (characterDuelAI != null)
     {
+        if (characterDuelAI.IsMoveCommandBlockedByDuelState)
+        {
+            return; // 결투 넉백/후딜 보호 상태면 새 이동 명령 차단
+        }
+
         CharacterStatSystem statSystem = characterDuelAI.GetCharacterStatSystem(); // 현재 캐릭터 스탯 참조 가져오기
 
         if (statSystem != null && statSystem.IsActionLocked)

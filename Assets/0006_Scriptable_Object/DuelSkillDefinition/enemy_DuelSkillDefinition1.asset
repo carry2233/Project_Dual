@@ -15,12 +15,49 @@ MonoBehaviour:
   skillName: 
   firstRowID: 2
   secondRowID: 1
-  minimumSpeedRatePercent: 90
-  maximumSpeedRatePercent: 110
+  minimumSpeedRatePercent: 200
+  maximumSpeedRatePercent: 300
   dashAnimationClip: {fileID: 11400000, guid: ee8d9685f786b2c4c999d8524fc7e6f6, type: 2}
   useDashAnimationLoop: 1
-  duelResolveAnimationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}
-  useDuelResolveAnimationLoop: 0
+  dashStartSoundData:
+    audioClip: {fileID: 8300000, guid: c266e86e5ec11e344bf66dede26cbc46, type: 3}
+    volume: 0.5
+    audioGroupType: 1
+  hitResolveAnimationData:
+    animationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}
+    useLoop: 1
+  advantageResolveAnimationData:
+    animationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}
+    useLoop: 1
+  evenResolveAnimationData:
+    animationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}
+    useLoop: 1
+  disadvantageResolveAnimationData:
+    animationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}
+    useLoop: 1
+  damagedResolveAnimationData:
+    animationClip: {fileID: 11400000, guid: 5c1a14774ddaaf14e99dfb59e8ec0f4e, type: 2}
+    useLoop: 1
+  hitResolveSoundData:
+    audioClip: {fileID: 8300000, guid: 5174415e9879415498f7b0dd794d19c5, type: 3}
+    volume: 0.7
+    audioGroupType: 1
+  advantageResolveSoundData:
+    audioClip: {fileID: 8300000, guid: 2b019c6187fca1e48b47e28c891dc66c, type: 3}
+    volume: 0.7
+    audioGroupType: 1
+  evenResolveSoundData:
+    audioClip: {fileID: 8300000, guid: 4d4ef7516a431934681038a3dc391e55, type: 3}
+    volume: 0.7
+    audioGroupType: 1
+  disadvantageResolveSoundData:
+    audioClip: {fileID: 8300000, guid: 4e7a9f408abdba8459fdccbeaea95215, type: 3}
+    volume: 0.7
+    audioGroupType: 1
+  damagedResolveSoundData:
+    audioClip: {fileID: 8300000, guid: e4b229d1cd4c5954c982c44b6f42eb27, type: 3}
+    volume: 0.7
+    audioGroupType: 1
   selfHitRepelOverride:
     useOverrideRepelForce: 0
     overrideRepelForce: 0
