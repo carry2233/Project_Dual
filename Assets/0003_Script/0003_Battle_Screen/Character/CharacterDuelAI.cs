@@ -112,6 +112,13 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [SerializeField] private bool isInPostDuelRecovery; // 현재 결투 후 후딜 진행 중인지 여부
 [SerializeField] private float currentPostDuelRecoveryTimer; // 현재 결투 후 후딜 남은 시간
 
+[Header("아군 선택 순서 설정")]
+[SerializeField] private int friendlySelectionPriority = 0; // 아군 선택 정렬 기준 우선순위값
+[SerializeField] private int assignedFriendlySelectionOrder = 0; // 런타임에 부여된 실제 선택 순서값
+
+public int FriendlySelectionPriority => friendlySelectionPriority; // 아군 선택 정렬 기준 우선순위값 반환
+public int AssignedFriendlySelectionOrder => assignedFriendlySelectionOrder; // 실제 선택 순서값 반환
+
     private bool isAutoChasingCurrentTarget; // 현재 공격 대상을 자동 추적 이동 중인지 여부
 
     public bool IsAutoChasingCurrentTarget => isAutoChasingCurrentTarget; // 현재 공격 대상 자동 추적 여부 반환
@@ -1482,6 +1489,10 @@ private void PlayCurrentDuelResolveSound(GlobalGameRuleManager.DuelResultType du
     characterActionSound.PlaySound(audioClip, volume, audioGroupType); // 결과별 판정 사운드 재생
 }
 
+public void SetAssignedFriendlySelectionOrder(int newOrder) // 런타임 실제 선택 순서값 설정
+{
+    assignedFriendlySelectionOrder = Mathf.Max(0, newOrder); // 0 이상으로 보정 후 저장
+}
 
 
 }

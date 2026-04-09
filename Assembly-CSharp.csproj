@@ -93,6 +93,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\AudioSourcePool.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterEffectInstance.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\PerObjectTextureOverride.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterUI.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\PlayerTileMembership.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\Projectile.cs" />
@@ -115,16 +116,19 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\DuelSkillDefinitionSO.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterManager.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\QuadGrassWiggle.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationPlayer.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\GlobalCharacterDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationClipSO..cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\0005_External_Assets\Hit_Effects_FREE\Matthew Guz\Hits Effects FREE\Scene Demo\Script\Prefab Manager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\ElementsShowCase.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterListSlot.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleAudioSettings.cs" />
   </ItemGroup>
   <ItemGroup>
