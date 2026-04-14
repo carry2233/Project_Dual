@@ -288,43 +288,46 @@ private float GetCurrentBaseInterval() // 현재 상태에 따른 기본 주기 
 
 private void UpdateCurrentAnimationState() // 현재 상태 기준으로 재생할 클립 결정 및 즉시 반영
 {
-    CharacterAnimationClipSO targetClip = idleAnimationClip; // 기본은 대기 클립
-    bool shouldUseManualState = false; // 이번 프레임에 수동 재생 상태를 사용할지 여부
-    bool targetManualLoop = false; // 이번 프레임 수동 루프 여부
+    CharacterAnimationClipSO targetClip = idleAnimationClip; 
+    bool shouldUseManualState = false;
+    bool targetManualLoop = false;
 
+    // ✅ 결투 보호 상태일 때만 수동 애니 허용 (핵심 수정)
     if (characterDuelAI != null
         && characterDuelAI.IsDuelAnimationProtectedState
         && requestedManualAnimationClip != null)
     {
-        targetClip = requestedManualAnimationClip; // 결투 애니 보호 상태면 요청된 수동 애니메이션 유지
-        shouldUseManualState = true; // 수동 상태 사용
-        targetManualLoop = requestedManualAnimationLoop; // 요청된 루프 여부 반영
+        targetClip = requestedManualAnimationClip;
+        shouldUseManualState = true;
+        targetManualLoop = requestedManualAnimationLoop;
     }
     else if (navigationMovementSystem != null && navigationMovementSystem.IsMoving)
     {
-        targetClip = moveAnimationClip; // 이동 중이면 무조건 이동 애니메이션 사용
-        shouldUseManualState = false; // 자동 상태 사용
-        targetManualLoop = false; // 자동 상태는 수동 루프 아님
+        targetClip = moveAnimationClip;
+        shouldUseManualState = false;
+        targetManualLoop = false;
     }
-    else if (requestedManualAnimationClip != null)
+    else
     {
-        targetClip = requestedManualAnimationClip; // 이동이 아니면 요청된 수동 애니메이션 사용 가능
-        shouldUseManualState = true; // 수동 상태 사용
-        targetManualLoop = requestedManualAnimationLoop; // 요청된 루프 여부 반영
+        // ✅ 기존: 요청된 수동 애니 사용 가능
+        // ❌ 수정: 결투 상태 아닐 때는 무조건 idle로 강제
+        targetClip = idleAnimationClip;
+        shouldUseManualState = false;
+        targetManualLoop = false;
     }
 
-    bool clipChanged = currentAnimationClip != targetClip; // 현재 클립 변경 여부
-    bool manualStateChanged = isManualAnimationPlaying != shouldUseManualState; // 수동 상태 변경 여부
-    bool manualLoopChanged = isManualAnimationLoop != targetManualLoop; // 수동 루프 여부 변경 여부
+    bool clipChanged = currentAnimationClip != targetClip;
+    bool manualStateChanged = isManualAnimationPlaying != shouldUseManualState;
+    bool manualLoopChanged = isManualAnimationLoop != targetManualLoop;
 
     if (!clipChanged && !manualStateChanged && !manualLoopChanged)
     {
-        return; // 변경 사항이 없으면 종료
+        return;
     }
 
-    isManualAnimationPlaying = shouldUseManualState; // 현재 수동 재생 상태 반영
-    isManualAnimationLoop = targetManualLoop; // 현재 수동 루프 여부 반영
-    SetAnimationClip(targetClip); // 새 상태에 맞는 클립 즉시 적용
+    isManualAnimationPlaying = shouldUseManualState;
+    isManualAnimationLoop = targetManualLoop;
+    SetAnimationClip(targetClip);
 }
 
 public void RefreshAnimationByCurrentState() // 현재 상태 기준 애니메이션 즉시 갱신

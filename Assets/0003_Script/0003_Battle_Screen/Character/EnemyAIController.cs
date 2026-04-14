@@ -79,22 +79,40 @@ private void Update() // 매 프레임 AI 명령 처리
     UpdateChaseTarget(target); // 일반 추적 처리
 }
 
-    private void UpdateChaseTarget(CharacterDuelAI target) // 현재 타겟 추적 처리
+private void UpdateChaseTarget(CharacterDuelAI target) // 현재 타겟 추적 처리
+{
+    if (target == null)
     {
-        if (target == null)
-        {
-            navigationMovementSystem.StopMove(); // 타겟이 없으면 이동 정지
-            return;
-        }
-
-        float distanceToTarget = Vector2.Distance(transform.position, target.transform.position); // 타겟까지 거리 계산
-
-        if (distanceToTarget <= chaseStopDistance)
-        {
-            navigationMovementSystem.StopMove(); // 충분히 가까우면 이동 정지
-            return;
-        }
-
-        navigationMovementSystem.SetMoveDestination(target.transform.position); // 타겟 위치로 이동
+        navigationMovementSystem.StopMove(); // 타겟이 없으면 이동 정지
+        return;
     }
+
+    float distanceToTarget = Vector2.Distance(transform.position, target.transform.position); // 타겟까지 거리 계산
+    NavigationMovementSystem targetMovementSystem = target.GetNavigationMovementSystem(); // 타겟 이동 시스템 참조
+    bool isTargetUnderExternalForce = targetMovementSystem != null && targetMovementSystem.IsUnderExternalForce; // 타겟 넉백 상태 여부
+
+    if (isTargetUnderExternalForce)
+    {
+        float stopDistance = characterDuelAI != null
+            ? characterDuelAI.ApproachStopDistanceWhenTargetInExternalForce
+            : chaseStopDistance; // 결투 AI에 설정된 접근 제한 거리 사용
+
+        if (distanceToTarget <= stopDistance)
+        {
+            navigationMovementSystem.StopMove(); // 설정 거리까지만 접근 후 정지
+            return;
+        }
+
+        navigationMovementSystem.SetMoveDestination(target.transform.position); // 설정 거리까지 접근
+        return;
+    }
+
+    if (distanceToTarget <= chaseStopDistance)
+    {
+        navigationMovementSystem.StopMove(); // 충분히 가까우면 이동 정지
+        return;
+    }
+
+    navigationMovementSystem.SetMoveDestination(target.transform.position); // 타겟 위치로 이동
+}
 }
