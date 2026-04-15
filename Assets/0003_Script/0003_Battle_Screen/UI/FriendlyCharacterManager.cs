@@ -355,4 +355,54 @@ public void RebuildFriendlyCharacterList() // 씬의 아군 캐릭터 목록 재
     {
         return currentSelectedFriendlyCharacter == targetCharacter; // 현재 선택 캐릭터와 같은지 반환
     }
+
+    public bool IsRegisteredFriendlyCharacter(CharacterDuelAI targetCharacter) // 아군 목록에 실제 등록된 캐릭터인지 확인
+{
+    if (targetCharacter == null)
+    {
+        return false; // 대상이 없으면 false
+    }
+
+    for (int i = 0; i < friendlyCharacterEntryList.Count; i++)
+    {
+        FriendlyCharacterEntry entry = friendlyCharacterEntryList[i]; // 현재 엔트리 참조
+
+        if (entry == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (entry.CharacterDuelAI == targetCharacter)
+        {
+            return true; // 실제 목록에 등록된 캐릭터면 true
+        }
+    }
+
+    return false; // 목록에 없으면 false
+}
+
+public bool IsRegisteredFriendlyMoveCommandController(MoveCommandController targetController) // 아군 목록에 실제 등록된 이동 컨트롤러인지 확인
+{
+    if (targetController == null)
+    {
+        return false; // 대상이 없으면 false
+    }
+
+    for (int i = 0; i < friendlyCharacterEntryList.Count; i++)
+    {
+        FriendlyCharacterEntry entry = friendlyCharacterEntryList[i]; // 현재 엔트리 참조
+
+        if (entry == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (entry.MoveCommandController == targetController)
+        {
+            return true; // 실제 목록에 등록된 컨트롤러면 true
+        }
+    }
+
+    return false; // 목록에 없으면 false
+}
 }

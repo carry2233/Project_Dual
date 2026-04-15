@@ -1,5 +1,8 @@
 using UnityEngine;
+using System.Collections; // 코루틴 사용
 using System.Collections.Generic;
+
+
 public class CharacterAnimationPlayer : MonoBehaviour
 {
     [Header("필수 참조")]
@@ -52,6 +55,12 @@ private readonly System.Collections.Generic.HashSet<int> playedEffectEventIndexS
 [Header("이미지 고정 상태")]
 [SerializeField] private bool isImageFrozen; // 현재 이미지 고정 상태 여부
 
+[Header("결투 이펙트 생성 부모 오브젝트 참조")]
+[SerializeField] private Transform duelEffectParentRoot; // 본인 기준 결투 이펙트 부모 오브젝트
+[SerializeField] private Transform duelWorldEffectParentRoot; // 캐릭터 사이 위치 생성용 월드 이펙트 부모 오브젝트
+
+public Transform DuelEffectParentRoot => duelEffectParentRoot; // 본인 결투 이펙트 부모 오브젝트 반환
+
 private readonly System.Collections.Generic.List<CharacterAfterimageObject> afterimagePoolList
     = new System.Collections.Generic.List<CharacterAfterimageObject>(); // 잔상 풀 리스트
 
@@ -88,7 +97,18 @@ private void Awake() // 시작 시 참조 자동 연결
         effectParentRoot = transform; // 따로 지정하지 않으면 자기 자신을 부모로 사용
     }
 
+    if (duelEffectParentRoot == null)
+    {
+        duelEffectParentRoot = transform; // 따로 지정하지 않으면 자기 자신을 결투 이펙트 부모로 사용
+    }
+
+    if (duelWorldEffectParentRoot == null)
+    {
+        duelWorldEffectParentRoot = transform; // 따로 지정하지 않으면 자기 자신을 월드 이펙트 부모로 사용
+    }
+
     CreateAfterimagePoolRootIfNeeded(); // 잔상 풀 부모 오브젝트 준비
+
 }
 
 private void Update() // 매 프레임 애니메이션 상태 처리
@@ -575,4 +595,214 @@ public void SetImageFrozen(bool frozen) // 현재 출력 이미지를 유지한 
         UpdateCurrentAnimationState(); // 해제 시 현재 상태 기준 애니메이션 즉시 반영
     }
 }
+
+public void PlayDuelResolveEffect(
+    DuelSkillDefinitionSO duelSkillDefinition, // 현재 결투 기술 정의
+    GlobalGameRuleManager.DuelResultType resultType, // 이번 결투 결과
+    CharacterDuelAI otherCharacter) // 결투한 상대 캐릭터
+{
+    if (duelSkillDefinition == null) // 기술 정의가 없으면 종료
+    {
+        return;
+    }
+
+    if (!duelSkillDefinition.TryGetResolveEffectData(resultType, out DuelSkillDefinitionSO.DuelResultEffectData effectData)) // 결과별 이펙트 데이터 조회
+    {
+        return;
+    }
+
+    if (effectData == null) // 데이터가 없으면 종료
+    {
+        return;
+    }
+
+    if (effectData.UseBetweenCharactersEffect) // 두 캐릭터 사이 위치 생성 사용 시
+    {
+        StartCoroutine(SpawnDuelEffectAfterDelay(
+            effectData.BetweenCharactersEffectData, // 두 캐릭터 사이 생성 데이터
+            DuelEffectSpawnType.BetweenCharacters, // 생성 방식
+            otherCharacter)); // 상대 캐릭터 전달
+    }
+
+    if (effectData.UseSelfParentEffect) // 본인 부모 생성 사용 시
+    {
+        StartCoroutine(SpawnDuelEffectAfterDelay(
+            effectData.SelfParentEffectData, // 본인 부모 생성 데이터
+            DuelEffectSpawnType.SelfParent, // 생성 방식
+            otherCharacter)); // 상대 캐릭터 전달
+    }
+
+    if (effectData.UseTargetParentEffect) // 상대 부모 생성 사용 시
+    {
+        StartCoroutine(SpawnDuelEffectAfterDelay(
+            effectData.TargetParentEffectData, // 상대 부모 생성 데이터
+            DuelEffectSpawnType.TargetParent, // 생성 방식
+            otherCharacter)); // 상대 캐릭터 전달
+    }
+}
+
+private enum DuelEffectSpawnType
+{
+    BetweenCharacters, // 두 캐릭터 사이 월드 위치 생성
+    SelfParent, // 본인 결투 이펙트 부모 하위 생성
+    TargetParent // 상대 결투 이펙트 부모 하위 생성
+}
+
+private IEnumerator SpawnDuelEffectAfterDelay(
+    DuelSkillDefinitionSO.DuelEffectSpawnData spawnData, // 실제 생성 데이터
+    DuelEffectSpawnType spawnType, // 생성 방식
+    CharacterDuelAI otherCharacter) // 상대 캐릭터
+{
+    if (spawnData == null) // 생성 데이터가 없으면 종료
+    {
+        yield break;
+    }
+
+    if (spawnData.EffectPrefab == null) // 프리팹이 없으면 종료
+    {
+        yield break;
+    }
+
+    float safeDelay = Mathf.Max(0f, spawnData.SpawnDelay); // 음수 방지된 생성 딜레이
+
+    if (safeDelay > 0f) // 생성 딜레이가 있으면 대기
+    {
+        yield return new WaitForSeconds(safeDelay);
+    }
+
+    SpawnDuelEffectNow(spawnData, spawnType, otherCharacter); // 실제 이펙트 생성
+}
+
+private void SpawnDuelEffectNow(
+    DuelSkillDefinitionSO.DuelEffectSpawnData spawnData, // 실제 생성 데이터
+    DuelEffectSpawnType spawnType, // 생성 방식
+    CharacterDuelAI otherCharacter) // 상대 캐릭터
+{
+    if (spawnData == null || spawnData.EffectPrefab == null) // 필수 데이터가 없으면 종료
+    {
+        return;
+    }
+
+    Transform parentRoot = GetDuelEffectParentBySpawnType(spawnType, otherCharacter); // 생성 방식에 맞는 부모 결정
+    GameObject spawnedEffectObject = Instantiate(spawnData.EffectPrefab, parentRoot); // 이펙트 프리팹 생성
+
+    ApplyDuelEffectTransform(
+        spawnedEffectObject.transform, // 생성된 이펙트 Transform
+        spawnData, // 실제 생성 데이터
+        spawnType, // 생성 방식
+        otherCharacter); // 상대 캐릭터 전달
+
+    CharacterEffectInstance effectInstance = spawnedEffectObject.GetComponent<CharacterEffectInstance>(); // 이펙트 인스턴스 스크립트 참조
+
+    if (effectInstance == null) // 스크립트가 없으면 자동 추가
+    {
+        effectInstance = spawnedEffectObject.AddComponent<CharacterEffectInstance>();
+    }
+
+    effectInstance.InitializeEffectInstance(
+        spawnData.EffectStartTimelineTime, // 생성 시 시작 타임라인 시간
+        spawnData.EffectLifetime, // 생성 후 유지 시간
+        spawnData.EffectPlaySpeedMultiplier); // 이펙트 재생 기본속도 배율
+}
+
+private Transform GetDuelEffectParentBySpawnType(
+    DuelEffectSpawnType spawnType, // 생성 방식
+    CharacterDuelAI otherCharacter) // 상대 캐릭터
+{
+    switch (spawnType)
+    {
+        case DuelEffectSpawnType.BetweenCharacters:
+            return duelWorldEffectParentRoot != null ? duelWorldEffectParentRoot : transform; // 월드 이펙트 부모 반환
+
+        case DuelEffectSpawnType.SelfParent:
+            return duelEffectParentRoot != null ? duelEffectParentRoot : transform; // 본인 결투 이펙트 부모 반환
+
+        case DuelEffectSpawnType.TargetParent:
+            if (otherCharacter != null) // 상대가 있으면 상대의 애니메이션 플레이어 참조 시도
+            {
+                CharacterAnimationPlayer otherAnimationPlayer = otherCharacter.GetCharacterAnimationPlayer(); // 상대 애니메이션 플레이어 가져오기
+
+                if (otherAnimationPlayer != null && otherAnimationPlayer.DuelEffectParentRoot != null) // 상대 결투 이펙트 부모가 있으면 사용
+                {
+                    return otherAnimationPlayer.DuelEffectParentRoot;
+                }
+            }
+
+            return transform; // 상대 부모를 못 찾으면 자기 자신 사용
+    }
+
+    return transform; // 예외 상황 기본값
+}
+
+private void ApplyDuelEffectTransform(
+    Transform effectTransform, // 생성된 이펙트 Transform
+    DuelSkillDefinitionSO.DuelEffectSpawnData spawnData, // 실제 생성 데이터
+    DuelEffectSpawnType spawnType, // 생성 방식
+    CharacterDuelAI otherCharacter) // 상대 캐릭터
+{
+    if (effectTransform == null) // Transform이 없으면 종료
+    {
+        return;
+    }
+
+    Vector3 directionalPositionOffset = GetDuelEffectDirectionalPositionOffset(spawnData); // 현재 방향 기준 위치값
+    Vector3 directionalRotationOffset = GetDuelEffectDirectionalRotationOffset(spawnData); // 현재 방향 기준 회전값
+
+    switch (spawnType)
+    {
+        case DuelEffectSpawnType.BetweenCharacters:
+            Vector3 otherPosition = otherCharacter != null ? otherCharacter.transform.position : transform.position; // 상대 위치 계산
+            Vector3 middlePosition = (transform.position + otherPosition) * 0.5f; // 두 캐릭터 사이 위치 계산
+
+            effectTransform.position = middlePosition + directionalPositionOffset; // 원래 생성 위치에 방향별 위치값을 더해서 적용
+            effectTransform.rotation = Quaternion.Euler(directionalRotationOffset); // 원래 회전에 방향별 회전값을 더한 결과 적용
+            effectTransform.localScale = Vector3.one; // 기본 스케일 적용
+            break;
+
+        case DuelEffectSpawnType.SelfParent:
+            effectTransform.localPosition = directionalPositionOffset; // 방향별 위치값으로 덮어쓰기
+            effectTransform.localRotation = Quaternion.Euler(directionalRotationOffset); // 방향별 회전값으로 덮어쓰기
+            effectTransform.localScale = Vector3.one; // 기본 스케일 적용
+            break;
+
+        case DuelEffectSpawnType.TargetParent:
+            effectTransform.localPosition = directionalPositionOffset; // 방향별 위치값으로 덮어쓰기
+            effectTransform.localRotation = Quaternion.Euler(directionalRotationOffset); // 방향별 회전값으로 덮어쓰기
+            effectTransform.localScale = Vector3.one; // 기본 스케일 적용
+            break;
+    }
+}
+
+private Vector3 GetDuelEffectDirectionalPositionOffset(
+    DuelSkillDefinitionSO.DuelEffectSpawnData spawnData) // 현재 방향 기준 위치값 반환
+{
+    if (spawnData == null)
+    {
+        return Vector3.zero; // 데이터가 없으면 기본값 반환
+    }
+
+    if (IsCurrentFacingLeft())
+    {
+        return spawnData.SpawnPositionOffsetWhenFacingLeft; // X- 방향 위치값 반환
+    }
+
+    return spawnData.SpawnPositionOffsetWhenFacingRight; // X+ 방향 위치값 반환
+}
+
+private Vector3 GetDuelEffectDirectionalRotationOffset(
+    DuelSkillDefinitionSO.DuelEffectSpawnData spawnData) // 현재 방향 기준 회전값 반환
+{
+    if (spawnData == null)
+    {
+        return Vector3.zero; // 데이터가 없으면 기본값 반환
+    }
+
+    if (IsCurrentFacingLeft())
+    {
+        return spawnData.SpawnRotationOffsetWhenFacingLeft; // X- 방향 회전값 반환
+    }
+
+    return spawnData.SpawnRotationOffsetWhenFacingRight; // X+ 방향 회전값 반환
+}
+
 }

@@ -47,7 +47,7 @@ MonoBehaviour:
     volume: 0.7
     audioGroupType: 1
   evenResolveSoundData:
-    audioClip: {fileID: 8300000, guid: 4d4ef7516a431934681038a3dc391e55, type: 3}
+    audioClip: {fileID: 8300000, guid: 8ff71b8bddf2236429a7300b5012921d, type: 3}
     volume: 0.7
     audioGroupType: 1
   disadvantageResolveSoundData:
@@ -88,3 +88,173 @@ MonoBehaviour:
   targetDamagedRepelOverride:
     useOverrideRepelForce: 0
     overrideRepelForce: 0
+  hitResolveEffectData:
+    useBetweenCharactersEffect: 1
+    betweenCharactersEffectData:
+      effectPrefab: {fileID: 7128970148635031368, guid: 736dd2389aaa06f42948020f09d5fadc, type: 3}
+      spawnDelay: 0
+      effectLifetime: 1.5
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 0.8
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useSelfParentEffect: 0
+    selfParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useTargetParentEffect: 0
+    targetParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+  advantageResolveEffectData:
+    useBetweenCharactersEffect: 1
+    betweenCharactersEffectData:
+      effectPrefab: {fileID: 7128970148635031368, guid: 736dd2389aaa06f42948020f09d5fadc, type: 3}
+      spawnDelay: 0
+      effectLifetime: 1.5
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 0.8
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useSelfParentEffect: 0
+    selfParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useTargetParentEffect: 0
+    targetParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+  evenResolveEffectData:
+    useBetweenCharactersEffect: 1
+    betweenCharactersEffectData:
+      effectPrefab: {fileID: 7128970148635031368, guid: 736dd2389aaa06f42948020f09d5fadc, type: 3}
+      spawnDelay: 0
+      effectLifetime: 1.5
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1.5
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useSelfParentEffect: 0
+    selfParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useTargetParentEffect: 0
+    targetParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+  disadvantageResolveEffectData:
+    useBetweenCharactersEffect: 1
+    betweenCharactersEffectData:
+      effectPrefab: {fileID: 7128970148635031368, guid: 736dd2389aaa06f42948020f09d5fadc, type: 3}
+      spawnDelay: 0
+      effectLifetime: 1.5
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 0.8
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useSelfParentEffect: 0
+    selfParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useTargetParentEffect: 0
+    targetParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+  damagedResolveEffectData:
+    useBetweenCharactersEffect: 1
+    betweenCharactersEffectData:
+      effectPrefab: {fileID: 7128970148635031368, guid: 736dd2389aaa06f42948020f09d5fadc, type: 3}
+      spawnDelay: 0
+      effectLifetime: 1.5
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 0.8
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+    useSelfParentEffect: 1
+    selfParentEffectData:
+      effectPrefab: {fileID: 1227528642613145783, guid: 07e5693882fb63f42a683d3fe3efac4b, type: 3}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1.3
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 180, y: 90, z: -90}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 90, z: -90}
+    useTargetParentEffect: 0
+    targetParentEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 1
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 1
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
