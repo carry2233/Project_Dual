@@ -17,6 +17,21 @@ MonoBehaviour:
   secondRowID: 1
   minimumSpeedRatePercent: 200
   maximumSpeedRatePercent: 300
+  hitStaggerDamageData:
+    useStaggerDamage: 1
+    staggerDamage: 20
+  advantageStaggerDamageData:
+    useStaggerDamage: 1
+    staggerDamage: 14
+  evenStaggerDamageData:
+    useStaggerDamage: 1
+    staggerDamage: 8
+  disadvantageStaggerDamageData:
+    useStaggerDamage: 0
+    staggerDamage: 0
+  damagedStaggerDamageData:
+    useStaggerDamage: 0
+    staggerDamage: 0
   dashAnimationClip: {fileID: 11400000, guid: ee8d9685f786b2c4c999d8524fc7e6f6, type: 2}
   useDashAnimationLoop: 1
   dashStartSoundData:

@@ -84,6 +84,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\DuelSandbagTarget.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterDuelAI.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\DamageFloaterCanvasObject.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
@@ -141,6 +142,7 @@
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Oswald-Bold - OFL.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - AFL.txt" />
+    <None Include="Assets\0009_font\11\Hahmlet\OFL.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Anton OFL.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
@@ -151,17 +153,22 @@
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF.shader" />
+    <None Include="Assets\0009_font\11\Do_Hyeon\OFL.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile SSD.shader" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
+    <None Include="Assets\0009_font\11\Black_Han_Sans\OFL.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Model\Rock\Stylized Rock Credits.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
+    <None Include="Assets\0009_font\11\Noto_Sans_KR\OFL.txt" />
+    <None Include="Assets\0009_font\11\Hahmlet\README.txt" />
+    <None Include="Assets\0009_font\11\Noto_Sans_KR\README.txt" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Shaders\TMP_Sprite.shader" />
     <None Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Fonts\Bangers - OFL.txt" />
   </ItemGroup>

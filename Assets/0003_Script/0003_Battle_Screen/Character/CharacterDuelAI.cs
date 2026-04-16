@@ -839,22 +839,6 @@ private void TryResolveDuel() // 결투 판정 처리
         return;
     }
 
-    if (resolvedTarget.IsSandbagTargetCharacter())
-    {
-        GlobalGameRuleManager.DuelResultType selfResult = GlobalGameRuleManager.DuelResultType.Hit; // 샌드백을 공격한 쪽은 무조건 적중
-        GlobalGameRuleManager.DuelResultType otherResult = GlobalGameRuleManager.DuelResultType.Damaged; // 샌드백 쪽은 무조건 피격
-
-        ApplyResolvedDuelOutcome(selfResult, resolvedTarget); // 자신 결과 즉시 적용
-        resolvedTarget.ApplyResolvedDuelOutcome(otherResult, this); // 상대 결과 즉시 적용
-
-        ApplyRepelForce(resolvedTarget, globalGameRuleManager, selfResult, otherResult); // 넉백 즉시 적용
-
-        FinishDuelResolutionProcessing(resolvedTarget); // 실행 잠금 해제
-        EndDuel(false); // 자신 결투 종료, 판정 애니메이션은 유지
-        resolvedTarget.ReceiveResolvedDuel(otherResult); // 상대 결투 종료 처리
-        return; // 샌드백 전용 판정 후 종료
-    }
-
     CharacterStatSystem otherStat = resolvedTarget.GetCharacterStatSystem(); // 상대의 스탯 참조
 
     if (characterStatSystem == null || otherStat == null)
@@ -885,6 +869,25 @@ private void TryResolveDuel() // 결투 판정 처리
     GlobalGameRuleManager.DuelCombatDebugData otherDebugData =
         globalGameRuleManager.CreateDuelCombatDebugData(otherStat, otherRolledSpeedRatePercent, otherBattleSpeed, selfBattleSpeed); // 상대의 디버그 계산 데이터 생성
 
+    if (resolvedTarget.IsSandbagTargetCharacter())
+    {
+        GlobalGameRuleManager.DuelResultType selfResult = GlobalGameRuleManager.DuelResultType.Hit; // 샌드백을 공격한 쪽은 무조건 적중
+        GlobalGameRuleManager.DuelResultType otherResult = GlobalGameRuleManager.DuelResultType.Damaged; // 샌드백 쪽은 무조건 피격
+
+        ApplyResolvedDuelOutcome(selfResult, resolvedTarget); // 자신 결과 즉시 적용
+        resolvedTarget.ApplyResolvedDuelOutcome(otherResult, this); // 상대 결과 즉시 적용
+
+        ApplyResolvedNumericalDamage(selfResult, resolvedTarget, selfDebugData.attackPowerValue); // 자신의 수치 피해 적용
+        resolvedTarget.ApplyResolvedNumericalDamage(otherResult, this, otherDebugData.attackPowerValue); // 상대의 수치 피해 적용
+
+        ApplyRepelForce(resolvedTarget, globalGameRuleManager, selfResult, otherResult); // 넉백 즉시 적용
+
+        FinishDuelResolutionProcessing(resolvedTarget); // 실행 잠금 해제
+        EndDuel(false); // 자신 결투 종료, 판정 애니메이션은 유지
+        resolvedTarget.ReceiveResolvedDuel(otherResult); // 상대 결투 종료 처리
+        return; // 샌드백 전용 판정 후 종료
+    }
+
     float selfDifferenceRate = globalGameRuleManager.CalculateDifferenceRate(selfDebugData.attackPowerValue, otherDebugData.attackPowerValue); // 자신의 차이율 계산
     float otherDifferenceRate = globalGameRuleManager.CalculateDifferenceRate(otherDebugData.attackPowerValue, selfDebugData.attackPowerValue); // 상대의 차이율 계산
 
@@ -902,6 +905,9 @@ private void TryResolveDuel() // 결투 판정 처리
 
     ApplyResolvedDuelOutcome(selfResultNormal, resolvedTarget); // 자신 결과 즉시 적용
     resolvedTarget.ApplyResolvedDuelOutcome(otherResultNormal, this); // 상대 결과 즉시 적용
+
+    ApplyResolvedNumericalDamage(selfResultNormal, resolvedTarget, selfDebugData.attackPowerValue); // 자신의 수치 피해 적용
+    resolvedTarget.ApplyResolvedNumericalDamage(otherResultNormal, this, otherDebugData.attackPowerValue); // 상대의 수치 피해 적용
 
     ApplyRepelForce(resolvedTarget, globalGameRuleManager, selfResultNormal, otherResultNormal); // 양쪽 넉백 즉시 적용
 
@@ -1809,6 +1815,53 @@ private void PlayCurrentDuelResolveEffect(
         resolvedTarget); // 결투 상대 전달
 }
 
+private void ApplyResolvedNumericalDamage(
+    GlobalGameRuleManager.DuelResultType resultType, // 이번 결투 결과
+    CharacterDuelAI resolvedTarget, // 실제 피해를 받을 상대
+    int attackPowerValue) // 이번 판정에서 계산된 공격위력값
+{
+    if (resolvedTarget == null)
+    {
+        return; // 상대가 없으면 종료
+    }
 
+    CharacterStatSystem targetStatSystem = resolvedTarget.GetCharacterStatSystem(); // 상대 스탯 참조 가져오기
+
+    if (targetStatSystem == null)
+    {
+        return; // 스탯 참조가 없으면 종료
+    }
+
+    CharacterAnimationPlayer targetAnimationPlayer = resolvedTarget.GetCharacterAnimationPlayer(); // 상대 애니메이션 플레이어 참조 가져오기
+
+    if (resultType == GlobalGameRuleManager.DuelResultType.Hit)
+    {
+        int finalHealthDamage = targetStatSystem.ApplyHealthDamage(attackPowerValue); // 방어력 반영 체력피해 적용
+
+        if (finalHealthDamage > 0 && targetAnimationPlayer != null)
+        {
+            targetAnimationPlayer.ShowHealthDamageFloater(finalHealthDamage); // 최종 체력피해 숫자 표시
+        }
+    }
+
+    DuelSkillDefinitionSO currentSkill = GetCurrentSelectedDuelSkill(); // 현재 선택 기술 가져오기
+
+    if (currentSkill == null)
+    {
+        return; // 기술이 없으면 종료
+    }
+
+    if (!currentSkill.TryGetStaggerDamage(resultType, out int rawStaggerDamage))
+    {
+        return; // 해당 결과의 와해피해 설정이 없으면 종료
+    }
+
+    int finalStaggerDamage = targetStatSystem.ApplyStaggerDamage(rawStaggerDamage); // 저지율 반영 와해피해 적용
+
+    if (finalStaggerDamage > 0 && targetAnimationPlayer != null)
+    {
+        targetAnimationPlayer.ShowStaggerDamageFloater(finalStaggerDamage); // 최종 와해피해 숫자 표시
+    }
+}
 
 }

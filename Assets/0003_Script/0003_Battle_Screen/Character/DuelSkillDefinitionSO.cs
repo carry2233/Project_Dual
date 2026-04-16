@@ -15,6 +15,27 @@ public class DuelSkillDefinitionSO : ScriptableObject
 [SerializeField] private int maximumSpeedRatePercent = 110; // 이 기술의 최대 속도율
 
 
+[System.Serializable]
+public class DuelResultStaggerDamageData
+{
+    [Header("와해피해 사용 여부")]
+    [SerializeField] private bool useStaggerDamage; // 해당 결과에서 와해피해 사용 여부
+
+    [Header("와해피해 값")]
+    [SerializeField] private int staggerDamage; // 해당 결과에서 줄 기본 와해피해 값
+
+    public bool UseStaggerDamage => useStaggerDamage; // 와해피해 사용 여부 반환
+    public int StaggerDamage => staggerDamage; // 와해피해 값 반환
+}
+
+[Header("결투 결과별 와해피해")]
+[SerializeField] private DuelResultStaggerDamageData hitStaggerDamageData = new DuelResultStaggerDamageData(); // 적중 결과 와해피해 설정
+[SerializeField] private DuelResultStaggerDamageData advantageStaggerDamageData = new DuelResultStaggerDamageData(); // 우세 결과 와해피해 설정
+[SerializeField] private DuelResultStaggerDamageData evenStaggerDamageData = new DuelResultStaggerDamageData(); // 비등 결과 와해피해 설정
+[SerializeField] private DuelResultStaggerDamageData disadvantageStaggerDamageData = new DuelResultStaggerDamageData(); // 열세 결과 와해피해 설정
+[SerializeField] private DuelResultStaggerDamageData damagedStaggerDamageData = new DuelResultStaggerDamageData(); // 피격 결과 와해피해 설정
+
+
 [Header("기술 연출 애니메이션")]
 [SerializeField] private CharacterAnimationClipSO dashAnimationClip; // 돌진 시 재생할 애니메이션 클립
 [SerializeField] private bool useDashAnimationLoop = false; // 돌진 애니메이션 루프 재생 여부
@@ -391,4 +412,43 @@ private DuelResultEffectData GetResolveEffectData(GlobalGameRuleManager.DuelResu
     return null; // 예외 상황 기본값
 }
 
+
+public bool TryGetStaggerDamage(
+    GlobalGameRuleManager.DuelResultType resultType, // 조회할 결투 결과
+    out int staggerDamage) // 반환할 와해피해 값
+{
+    DuelResultStaggerDamageData targetData = GetStaggerDamageData(resultType); // 결과 타입에 맞는 와해피해 데이터 가져오기
+
+    if (targetData == null || !targetData.UseStaggerDamage)
+    {
+        staggerDamage = 0; // 사용 안 하면 0 반환
+        return false; // 해당 결과에서 와해피해 미사용
+    }
+
+    staggerDamage = Mathf.Max(0, targetData.StaggerDamage); // 음수 방지 후 반환
+    return staggerDamage > 0; // 0보다 클 때만 유효 처리
+}
+
+private DuelResultStaggerDamageData GetStaggerDamageData(GlobalGameRuleManager.DuelResultType resultType) // 결과 타입에 맞는 와해피해 데이터 반환
+{
+    switch (resultType)
+    {
+        case GlobalGameRuleManager.DuelResultType.Hit:
+            return hitStaggerDamageData; // 적중 결과 데이터 반환
+
+        case GlobalGameRuleManager.DuelResultType.Advantage:
+            return advantageStaggerDamageData; // 우세 결과 데이터 반환
+
+        case GlobalGameRuleManager.DuelResultType.Even:
+            return evenStaggerDamageData; // 비등 결과 데이터 반환
+
+        case GlobalGameRuleManager.DuelResultType.Disadvantage:
+            return disadvantageStaggerDamageData; // 열세 결과 데이터 반환
+
+        case GlobalGameRuleManager.DuelResultType.Damaged:
+            return damagedStaggerDamageData; // 피격 결과 데이터 반환
+    }
+
+    return null; // 예외 상황 기본값
+}
 }

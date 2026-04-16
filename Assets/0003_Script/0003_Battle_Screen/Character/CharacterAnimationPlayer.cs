@@ -59,6 +59,58 @@ private readonly System.Collections.Generic.HashSet<int> playedEffectEventIndexS
 [SerializeField] private Transform duelEffectParentRoot; // 본인 기준 결투 이펙트 부모 오브젝트
 [SerializeField] private Transform duelWorldEffectParentRoot; // 캐릭터 사이 위치 생성용 월드 이펙트 부모 오브젝트
 
+
+[System.Serializable]
+public class DamageFloaterSpawnSettings
+{
+    [Header("유지 시간")]
+    [SerializeField] private float lifetime = 1f; // 플로터 전체 유지 시간
+
+    [Header("투명 설정")]
+    [SerializeField] private float fadeStartTime = 0.2f; // 텍스트 투명화 시작 시점
+    [SerializeField] private int minimumAlphaPercent = 0; // 최소 투명률(%)
+    [SerializeField] private float fadeDurationToMinimumAlpha = 0.3f; // 최소 투명률까지 도달 시간
+    [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f); // 투명 변화 커브
+
+    [Header("이동 설정")]
+    [SerializeField] private Vector3 moveDirection = new Vector3(0.5f, 1f, 0f); // 이동 방향
+    [SerializeField] private float moveStartTime = 0f; // 이동 시작 시점
+    [SerializeField] private float moveDuration = 0.5f; // 이동 종료까지 걸리는 시간
+    [SerializeField] private AnimationCurve moveCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f); // 이동 커브
+
+    public float Lifetime => lifetime; // 유지 시간 반환
+    public float FadeStartTime => fadeStartTime; // 투명 시작 시점 반환
+    public int MinimumAlphaPercent => minimumAlphaPercent; // 최소 투명률 반환
+    public float FadeDurationToMinimumAlpha => fadeDurationToMinimumAlpha; // 최소 투명률 도달 시간 반환
+    public AnimationCurve FadeCurve => fadeCurve; // 투명 커브 반환
+    public Vector3 MoveDirection => moveDirection; // 이동 방향 반환
+    public float MoveStartTime => moveStartTime; // 이동 시작 시점 반환
+    public float MoveDuration => moveDuration; // 이동 시간 반환
+    public AnimationCurve MoveCurve => moveCurve; // 이동 커브 반환
+}
+
+[Header("데미지 플로터 생성 부모 오브젝트 참조")]
+[SerializeField] private Transform damageFloaterSpawnParent; // 데미지 플로터를 자식으로 둘 부모 오브젝트
+
+[Header("체력피해 플로터 설정")]
+[SerializeField] private DamageFloaterCanvasObject healthDamageFloaterPrefab; // 체력피해 표시용 월드 캔버스 프리팹
+[SerializeField] private DamageFloaterSpawnSettings healthDamageFloaterSettings = new DamageFloaterSpawnSettings(); // 체력피해 표시 설정
+
+[Header("와해피해 플로터 설정")]
+[SerializeField] private DamageFloaterCanvasObject staggerDamageFloaterPrefab; // 와해피해 표시용 월드 캔버스 프리팹
+[SerializeField] private DamageFloaterSpawnSettings staggerDamageFloaterSettings = new DamageFloaterSpawnSettings(); // 와해피해 표시 설정
+
+[Header("데미지 플로터 풀링 상태")]
+[SerializeField] private Transform damageFloaterPoolRoot; // 데미지 플로터 풀 부모 오브젝트
+[SerializeField] private int pooledHealthDamageFloaterCount; // 현재 생성된 체력피해 플로터 수
+[SerializeField] private int pooledStaggerDamageFloaterCount; // 현재 생성된 와해피해 플로터 수
+
+private readonly List<DamageFloaterCanvasObject> healthDamageFloaterPoolList
+    = new List<DamageFloaterCanvasObject>(); // 체력피해 플로터 풀 리스트
+
+private readonly List<DamageFloaterCanvasObject> staggerDamageFloaterPoolList
+    = new List<DamageFloaterCanvasObject>(); // 와해피해 플로터 풀 리스트
+
 public Transform DuelEffectParentRoot => duelEffectParentRoot; // 본인 결투 이펙트 부모 오브젝트 반환
 
 private readonly System.Collections.Generic.List<CharacterAfterimageObject> afterimagePoolList
@@ -107,8 +159,13 @@ private void Awake() // 시작 시 참조 자동 연결
         duelWorldEffectParentRoot = transform; // 따로 지정하지 않으면 자기 자신을 월드 이펙트 부모로 사용
     }
 
-    CreateAfterimagePoolRootIfNeeded(); // 잔상 풀 부모 오브젝트 준비
+    if (damageFloaterSpawnParent == null)
+    {
+        damageFloaterSpawnParent = transform; // 따로 지정하지 않으면 자기 자신을 데미지 플로터 부모로 사용
+    }
 
+    CreateAfterimagePoolRootIfNeeded(); // 잔상 풀 부모 오브젝트 준비
+    CreateDamageFloaterPoolRootIfNeeded(); // 데미지 플로터 풀 부모 오브젝트 준비
 }
 
 private void Update() // 매 프레임 애니메이션 상태 처리
@@ -805,4 +862,122 @@ private Vector3 GetDuelEffectDirectionalRotationOffset(
     return spawnData.SpawnRotationOffsetWhenFacingRight; // X+ 방향 회전값 반환
 }
 
+
+public void ShowHealthDamageFloater(int finalAppliedDamage) // 최종 체력피해 숫자 표시
+{
+    if (finalAppliedDamage <= 0)
+    {
+        return; // 표시할 값이 없으면 종료
+    }
+
+    if (healthDamageFloaterPrefab == null)
+    {
+        return; // 프리팹이 없으면 종료
+    }
+
+    DamageFloaterCanvasObject floaterObject = GetPooledHealthDamageFloaterObject(); // 체력피해 플로터 풀에서 가져오기
+
+    if (floaterObject == null)
+    {
+        return; // 가져오지 못하면 종료
+    }
+
+    floaterObject.transform.SetParent(damageFloaterSpawnParent, false); // 피해 캐릭터의 플로터 부모 자식으로 배치
+    floaterObject.gameObject.SetActive(true); // 사용 전 활성화
+    floaterObject.InitializeFloater(finalAppliedDamage.ToString(), healthDamageFloaterSettings); // 숫자와 설정 전달
+}
+
+public void ShowStaggerDamageFloater(int finalAppliedDamage) // 최종 와해피해 숫자 표시
+{
+    if (finalAppliedDamage <= 0)
+    {
+        return; // 표시할 값이 없으면 종료
+    }
+
+    if (staggerDamageFloaterPrefab == null)
+    {
+        return; // 프리팹이 없으면 종료
+    }
+
+    DamageFloaterCanvasObject floaterObject = GetPooledStaggerDamageFloaterObject(); // 와해피해 플로터 풀에서 가져오기
+
+    if (floaterObject == null)
+    {
+        return; // 가져오지 못하면 종료
+    }
+
+    floaterObject.transform.SetParent(damageFloaterSpawnParent, false); // 피해 캐릭터의 플로터 부모 자식으로 배치
+    floaterObject.gameObject.SetActive(true); // 사용 전 활성화
+    floaterObject.InitializeFloater(finalAppliedDamage.ToString(), staggerDamageFloaterSettings); // 숫자와 설정 전달
+}
+
+private void CreateDamageFloaterPoolRootIfNeeded() // 데미지 플로터 풀 부모 오브젝트 생성
+{
+    if (damageFloaterPoolRoot != null)
+    {
+        return; // 이미 있으면 종료
+    }
+
+    Transform baseParent = damageFloaterSpawnParent != null ? damageFloaterSpawnParent : transform; // 기본 부모 결정
+    GameObject poolRootObject = new GameObject($"{name}_DamageFloaterPoolRoot"); // 풀 루트 오브젝트 생성
+    damageFloaterPoolRoot = poolRootObject.transform; // 루트 저장
+    damageFloaterPoolRoot.SetParent(baseParent, false); // 데미지 플로터 생성 부모 하위로 배치
+    damageFloaterPoolRoot.localPosition = Vector3.zero; // 로컬 위치 초기화
+    damageFloaterPoolRoot.localRotation = Quaternion.identity; // 로컬 회전 초기화
+    damageFloaterPoolRoot.localScale = Vector3.one; // 로컬 스케일 초기화
+}
+
+private DamageFloaterCanvasObject GetPooledHealthDamageFloaterObject() // 체력피해 플로터를 가져오거나 새로 생성
+{
+    return GetPooledDamageFloaterObject(
+        healthDamageFloaterPrefab, // 체력피해 프리팹 사용
+        healthDamageFloaterPoolList, // 체력피해 풀 리스트 사용
+        ref pooledHealthDamageFloaterCount); // 체력피해 풀 개수 갱신
+}
+
+private DamageFloaterCanvasObject GetPooledStaggerDamageFloaterObject() // 와해피해 플로터를 가져오거나 새로 생성
+{
+    return GetPooledDamageFloaterObject(
+        staggerDamageFloaterPrefab, // 와해피해 프리팹 사용
+        staggerDamageFloaterPoolList, // 와해피해 풀 리스트 사용
+        ref pooledStaggerDamageFloaterCount); // 와해피해 풀 개수 갱신
+}
+
+private DamageFloaterCanvasObject GetPooledDamageFloaterObject(
+    DamageFloaterCanvasObject prefab, // 사용할 프리팹
+    List<DamageFloaterCanvasObject> poolList, // 사용할 풀 리스트
+    ref int pooledCount) // 풀 개수 저장 변수
+{
+    if (prefab == null)
+    {
+        return null; // 프리팹이 없으면 종료
+    }
+
+    for (int i = 0; i < poolList.Count; i++)
+    {
+        DamageFloaterCanvasObject pooledObject = poolList[i]; // 현재 풀 오브젝트 참조
+
+        if (pooledObject == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (!pooledObject.gameObject.activeSelf)
+        {
+            return pooledObject; // 비활성 오브젝트 재사용
+        }
+    }
+
+    if (damageFloaterPoolRoot == null)
+    {
+        CreateDamageFloaterPoolRootIfNeeded(); // 풀 루트가 없으면 생성
+    }
+
+    DamageFloaterCanvasObject newObject = Instantiate(prefab, damageFloaterPoolRoot); // 새 플로터 생성
+    newObject.gameObject.SetActive(false); // 생성 직후 비활성화
+    poolList.Add(newObject); // 풀 목록에 등록
+    pooledCount = poolList.Count; // 현재 풀 개수 갱신
+
+    return newObject; // 새 플로터 반환
+}
 }
