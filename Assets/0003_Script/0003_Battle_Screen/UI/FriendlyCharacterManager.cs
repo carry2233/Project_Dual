@@ -405,4 +405,23 @@ public bool IsRegisteredFriendlyMoveCommandController(MoveCommandController targ
 
     return false; // 목록에 없으면 false
 }
+
+public void AssignStatusUIToSlot(FriendlyCharacterListSlot targetSlot) // 슬롯에 상태 UI 갱신 대상 캐릭터를 배정
+{
+    if (targetSlot == null)
+    {
+        return; // 슬롯이 없으면 종료
+    }
+
+    CharacterDuelAI targetCharacter = targetSlot.TargetCharacter; // 슬롯이 담당하는 캐릭터 참조
+
+    if (targetCharacter == null)
+    {
+        targetSlot.BindStatusUI(null); // 캐릭터가 없으면 UI 연결 해제
+        return;
+    }
+
+    CharacterStatSystem targetStatSystem = targetCharacter.GetComponent<CharacterStatSystem>(); // 대상 캐릭터의 스탯 시스템 탐색
+    targetSlot.BindStatusUI(targetStatSystem); // 슬롯의 상태 UI에 스탯 시스템 배정
+}
 }

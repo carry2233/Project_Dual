@@ -3,8 +3,6 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using UnityEngine.AI; // NavMesh 위치 검사 사용
 using Unity.AI.Navigation; // NavMeshSurface 참조 사용
-using UnityEngine.UI; // 차단용 UI 이미지 참조 사용
-using UnityEngine.EventSystems; // UI 레이캐스트 결과 검사 사용
 
 /// <summary>
 /// 클릭 이동 시스템 매니저
@@ -34,12 +32,6 @@ public class ClickMoveSystemManager : MonoBehaviour
     [SerializeField] private FriendlyCharacterManager friendlyCharacterManager; // 아군 캐릭터 관리 매니저 참조
 
     public MoveCommandController CurrentSelectedUnit => currentSelectedUnit; // 현재 선택된 유닛 반환
-
-    [Header("목적지 입력 차단 UI 설정")]
-[SerializeField] private List<Image> blockedMoveCommandUIImages = new List<Image>(); // 클릭 시 목적지 지정이 차단될 UI 이미지 목록
-
-[Header("목적지 입력 차단 레이어 설정")]
-[SerializeField] private LayerMask blockedMoveCommandLayerMask; // 클릭 시 목적지 지정이 차단될 월드 레이어 마스크
 
     [Header("선택 입력 설정")]
     [SerializeField] private InputTriggerType selectInputTriggerType = InputTriggerType.MouseButton; // 선택 입력 방식
@@ -177,13 +169,7 @@ private void HandleMoveInput() // 목적지 입력 또는 공격 대상 입력 �
         return; // 현재 선택 유닛이 실제 아군 목록 등록 대상이 아니면 종료
     }
 
-    if (IsMoveCommandBlocked()) // 목적지 지정 차단 여부 검사
-    {
-        return; // 차단 상황이면 목적지 지정 자체를 중단
-    }
-
     Vector2 mouseWorldPosition = GetMouseWorldPosition2D(); // 현재 마우스 월드 좌표 계산
-
     Collider2D hitCollider = Physics2D.OverlapPoint(mouseWorldPosition); // 클릭 위치의 콜라이더 탐색
 
     if (hitCollider != null)
@@ -216,6 +202,7 @@ private void HandleMoveInput() // 목적지 입력 또는 공격 대상 입력 �
     currentSelectedUnit.SetMoveDestination(mouseWorldPosition); // 빈 곳 클릭 시 이동 명령 전달
     UpdateSelectionVisualState(); // 표시 상태 즉시 갱신
 }
+
     /// <summary>
     /// 현재 선택된 유닛을 교체
     /// </summary>
@@ -585,139 +572,5 @@ private bool IsMovePositionAllowedOnNavMesh(Vector2 targetPosition) // 클릭 �
 
     return distanceToClickedPoint <= navMeshSampleMaxDistance; // 클릭 지점과 충분히 가까울 때만 허용
 }
-
-private bool IsMoveCommandBlocked() // 현재 클릭이 목적지 지정 차단 대상인지 판정
-{
-    if (IsPointerOverBlockedMoveCommandUI()) // 차단용 UI 이미지 영역 클릭인지 검사
-    {
-        return true; // UI 이미지 영역 클릭이면 목적지 지정 차단
-    }
-
-    if (IsPointerOverBlockedMoveCommandUILayer()) // 차단용 UI 레이어 영역 클릭인지 검사
-    {
-        return true; // 차단 UI 레이어 클릭이면 목적지 지정 차단
-    }
-
-    return false; // 어느 차단 조건에도 해당하지 않으면 허용
-}
-
-private bool IsPointerOverBlockedMoveCommandUI() // 현재 마우스가 차단용 UI 이미지 영역 위에 있는지 검사
-{
-    if (Mouse.current == null)
-    {
-        return false; // 마우스 장치가 없으면 차단 안 함
-    }
-
-    if (blockedMoveCommandUIImages == null || blockedMoveCommandUIImages.Count == 0)
-    {
-        return false; // 등록된 차단 UI가 없으면 차단 안 함
-    }
-
-    Vector2 mouseScreenPosition = Mouse.current.position.ReadValue(); // 현재 마우스 스크린 좌표
-
-    for (int i = 0; i < blockedMoveCommandUIImages.Count; i++)
-    {
-        Image targetImage = blockedMoveCommandUIImages[i]; // 검사할 UI 이미지 참조
-
-        if (targetImage == null)
-        {
-            continue; // 비어 있는 참조는 건너뜀
-        }
-
-        RectTransform targetRectTransform = targetImage.rectTransform; // UI 이미지의 사각형 정보 참조
-
-        if (targetRectTransform == null)
-        {
-            continue; // RectTransform이 없으면 건너뜀
-        }
-
-        Camera uiEventCamera = GetUIEventCamera(targetImage); // 현재 UI 이미지 판정에 사용할 이벤트 카메라 계산
-
-        if (RectTransformUtility.RectangleContainsScreenPoint(targetRectTransform, mouseScreenPosition, uiEventCamera))
-        {
-            return true; // 등록된 차단 UI 이미지 영역 위면 차단
-        }
-    }
-
-    return false; // 어떤 차단 UI 위도 아니면 허용
-}
-
-private Camera GetUIEventCamera(Image targetImage) // UI 사각형 판정에 사용할 이벤트 카메라 반환
-{
-    if (targetImage == null)
-    {
-        return null; // 이미지가 없으면 null 반환
-    }
-
-    Canvas parentCanvas = targetImage.canvas; // 이미지가 속한 캔버스 참조
-
-    if (parentCanvas == null)
-    {
-        return null; // 캔버스가 없으면 null 반환
-    }
-
-    if (parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
-    {
-        return null; // 오버레이 캔버스는 카메라 없이 판정
-    }
-
-    if (parentCanvas.worldCamera != null)
-    {
-        return parentCanvas.worldCamera; // 캔버스 전용 카메라가 있으면 우선 사용
-    }
-
-    return targetCamera; // 없으면 이동 시스템 카메라 사용
-}
-
-private bool IsPointerOverBlockedMoveCommandUILayer() // 현재 마우스가 차단용 UI 레이어 영역 위에 있는지 검사
-{
-    if (blockedMoveCommandLayerMask.value == 0)
-    {
-        return false; // 차단 레이어가 비어 있으면 차단 안 함
-    }
-
-    if (Mouse.current == null)
-    {
-        return false; // 마우스 장치가 없으면 차단 안 함
-    }
-
-    if (EventSystem.current == null)
-    {
-        return false; // EventSystem이 없으면 UI 레이어 검사 불가
-    }
-
-    PointerEventData pointerEventData = new PointerEventData(EventSystem.current); // 현재 마우스 위치 기반 UI 레이캐스트용 데이터 생성
-    pointerEventData.position = Mouse.current.position.ReadValue(); // 현재 마우스 스크린 좌표 설정
-
-    List<RaycastResult> raycastResults = new List<RaycastResult>(); // UI 레이캐스트 결과 저장 리스트
-    EventSystem.current.RaycastAll(pointerEventData, raycastResults); // 현재 마우스 아래의 모든 UI 검사
-
-    for (int i = 0; i < raycastResults.Count; i++)
-    {
-        GameObject hitObject = raycastResults[i].gameObject; // 현재 맞은 UI 오브젝트 참조
-
-        if (hitObject == null)
-        {
-            continue; // 오브젝트가 없으면 건너뜀
-        }
-
-        Image hitImage = hitObject.GetComponent<Image>(); // 현재 오브젝트의 Image 컴포넌트 검사
-
-        if (hitImage == null)
-        {
-            continue; // Image가 없으면 차단 대상 UI로 보지 않음
-        }
-
-        int hitLayer = hitObject.layer; // 현재 UI 오브젝트의 레이어 값
-
-        if ((blockedMoveCommandLayerMask.value & (1 << hitLayer)) != 0)
-        {
-            return true; // 차단 레이어에 해당하는 UI 이미지면 목적지 지정 차단
-        }
-    }
-
-    return false; // 차단 레이어에 해당하는 UI 이미지가 없으면 허용
-}
-
 
 }

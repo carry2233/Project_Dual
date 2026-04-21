@@ -1,4 +1,3 @@
-using System; // 상태값 변경 알림 이벤트용
 using UnityEngine;
 
 /// <summary>
@@ -62,19 +61,6 @@ public int MaximumSpeedRatePercent => maximumSpeedRatePercent; // 최대 속도�
 public int PowerRatePercent => powerRatePercent; // 위력률 퍼센트 반환
 public bool IsActionLocked => isActionLocked; // 행동 불가 여부 반환
 
-    public event Action<CharacterStatSystem> OnStatusValueChanged; // 체력/와해량 변경 알림 이벤트
-
-    private void Awake() // 시작 시 현재값 범위 보정
-    {
-        currentHealth = Mathf.Clamp(currentHealth, 0, Mathf.Max(0, maxHealth)); // 현재 체력 범위 보정
-        currentStaggerAmount = Mathf.Clamp(currentStaggerAmount, 0, Mathf.Max(0, maxStaggerAmount)); // 현재 와해량 범위 보정
-    }
-
-    private void NotifyStatusValueChanged() // UI 즉시 갱신 알림 전달
-    {
-        OnStatusValueChanged?.Invoke(this); // 구독 중인 UI들에게 현재 상태 변경 알림
-    }
-
 public void SetActionLocked(bool locked) // 행동 가능 여부 설정
 {
     isActionLocked = locked; // 행동 불가 여부 저장
@@ -98,7 +84,6 @@ public int ApplyHealthDamage(int rawDamage) // 방어력 퍼센트를 반영한 
     }
 
     currentHealth = Mathf.Max(0, currentHealth - finalDamage); // 현재 체력 차감
-    NotifyStatusValueChanged(); // 체력 UI 즉시 갱신 알림
 
     return finalDamage; // 실제 적용된 최종 피해 반환
 }
@@ -116,7 +101,6 @@ public int ApplyStaggerDamage(int rawStaggerDamage) // 저지율 퍼센트를 �
     }
 
     currentStaggerAmount = Mathf.Clamp(currentStaggerAmount + finalStaggerDamage, 0, Mathf.Max(0, maxStaggerAmount)); // 현재 와해량 증가
-    NotifyStatusValueChanged(); // 와해 UI 즉시 갱신 알림
 
     return finalStaggerDamage; // 실제 적용된 최종 와해피해 반환
 }

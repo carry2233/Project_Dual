@@ -15,4 +15,4 @@ MonoBehaviour:
   firstRowID: 1
   secondRowID: 2
   detailUIPrefab: {fileID: 6988253213661785462, guid: f9b70b33d4adac24d9e07280754d1cc4, type: 3}
-  battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: 4f92f4de47fb2f2439102bb536d32aed, type: 3}
+  battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: b384722a4335b804b87ee8997a449d0d, type: 3}

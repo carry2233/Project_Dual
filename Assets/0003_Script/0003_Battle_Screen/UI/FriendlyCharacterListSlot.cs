@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class FriendlyCharacterListSlot : MonoBehaviour
 {
     [Header("필수 참조")]
@@ -8,6 +9,11 @@ public class FriendlyCharacterListSlot : MonoBehaviour
     [SerializeField] private GlobalCharacterDefinition globalCharacterDefinition; // 캐릭터 전역 정의 참조
     [SerializeField] private CharacterDuelAI targetCharacter; // 이 슬롯이 나타내는 캐릭터
     [SerializeField] private int assignedSelectionOrder; // 이 슬롯에 연결된 실제 선택 순서값
+
+        [Header("상태 UI 참조")]
+    [SerializeField] private FriendlyCharacterStatusUI friendlyCharacterStatusUI; // 체력/와해량 표시 UI 참조
+
+    public CharacterStatSystem TargetCharacterStatSystem => targetCharacter != null ? targetCharacter.GetComponent<CharacterStatSystem>() : null; // 연결된 캐릭터의 스탯 시스템 반환
 
     [Header("버튼 참조")]
     [SerializeField] private Button detailUIToggleButton; // 상세 UI 토글 버튼
@@ -23,37 +29,51 @@ public class FriendlyCharacterListSlot : MonoBehaviour
     public CharacterDuelAI TargetCharacter => targetCharacter; // 연결된 캐릭터 반환
     public int AssignedSelectionOrder => assignedSelectionOrder; // 실제 선택 순서값 반환
 
-    private void Awake() // 시작 시 버튼 이벤트 연결
+private void Awake() // 시작 시 버튼 이벤트 연결 및 상태 UI 참조 보정
+{
+    if (friendlyCharacterStatusUI == null)
     {
-        if (detailUIToggleButton != null)
-        {
-            detailUIToggleButton.onClick.AddListener(OnClickDetailUIToggleButton); // 상세 UI 토글 버튼 이벤트 연결
-        }
-
-        if (selectOrDeselectButton != null)
-        {
-            selectOrDeselectButton.onClick.AddListener(OnClickSelectOrDeselectButton); // 선택/선택해제 버튼 이벤트 연결
-        }
+        friendlyCharacterStatusUI = GetComponent<FriendlyCharacterStatusUI>(); // 같은 오브젝트에서 상태 UI 탐색
     }
+
+    if (detailUIToggleButton != null)
+    {
+        detailUIToggleButton.onClick.AddListener(OnClickDetailUIToggleButton); // 상세 UI 토글 버튼 이벤트 연결
+    }
+
+    if (selectOrDeselectButton != null)
+    {
+        selectOrDeselectButton.onClick.AddListener(OnClickSelectOrDeselectButton); // 선택/선택해제 버튼 이벤트 연결
+    }
+}
 
     private void Update() // 매 프레임 선택 상태 색상 갱신
     {
         RefreshSelectionVisual(); // 선택 상태 색상 갱신
     }
 
-    public void InitializeSlot(
-        FriendlyCharacterManager targetManager, // 아군 캐릭터 매니저
-        GlobalCharacterDefinition targetDefinition, // 캐릭터 정의
-        CharacterDuelAI targetDuelAI, // 연결 캐릭터
-        int targetAssignedSelectionOrder) // 실제 선택 순서값
-    {
-        friendlyCharacterManager = targetManager; // 매니저 저장
-        globalCharacterDefinition = targetDefinition; // 정의 저장
-        targetCharacter = targetDuelAI; // 연결 캐릭터 저장
-        assignedSelectionOrder = targetAssignedSelectionOrder; // 실제 선택 순서값 저장
+public void InitializeSlot(
+    FriendlyCharacterManager targetManager, // 아군 캐릭터 매니저
+    GlobalCharacterDefinition targetDefinition, // 캐릭터 정의
+    CharacterDuelAI targetDuelAI, // 연결 캐릭터
+    int targetAssignedSelectionOrder) // 실제 선택 순서값
+{
+    friendlyCharacterManager = targetManager; // 매니저 저장
+    globalCharacterDefinition = targetDefinition; // 정의 저장
+    targetCharacter = targetDuelAI; // 연결 캐릭터 저장
+    assignedSelectionOrder = targetAssignedSelectionOrder; // 실제 선택 순서값 저장
 
-        RefreshSelectionVisual(); // 초기 색상 갱신
+    if (friendlyCharacterManager != null)
+    {
+        friendlyCharacterManager.AssignStatusUIToSlot(this); // 매니저를 통해 이 슬롯의 상태 UI 대상 배정
     }
+    else
+    {
+        BindStatusUI(TargetCharacterStatSystem); // 매니저가 없으면 직접 스탯 시스템 연결
+    }
+
+    RefreshSelectionVisual(); // 초기 색상 갱신
+}
 
     private void OnClickDetailUIToggleButton() // 상세 UI 토글 버튼 클릭 처리
     {
@@ -113,4 +133,14 @@ public class FriendlyCharacterListSlot : MonoBehaviour
         bool isSelected = friendlyCharacterManager != null && friendlyCharacterManager.IsCharacterCurrentlySelected(targetCharacter); // 현재 선택 여부 확인
         selectionStateImage.color = isSelected ? selectedColor : normalColor; // 색상 적용
     }
+
+    public void BindStatusUI(CharacterStatSystem targetStatSystem) // 슬롯 상태 UI에 스탯 시스템 연결
+{
+    if (friendlyCharacterStatusUI == null)
+    {
+        return; // 상태 UI가 없으면 종료
+    }
+
+    friendlyCharacterStatusUI.SetTargetStatSystem(targetStatSystem); // 상태 UI에 대상 스탯 전달
+}
 }

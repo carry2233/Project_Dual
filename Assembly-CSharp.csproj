@@ -83,6 +83,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\DuelSandbagTarget.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterDuelAI.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterStatusUI.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\DamageFloaterCanvasObject.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
