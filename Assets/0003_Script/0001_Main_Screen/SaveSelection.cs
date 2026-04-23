@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class SaveSelection : MonoBehaviour
 {
+
+    [Header("씬 이동 설정")]
+    [SerializeField] private string worldMapSceneName = "WorldMap"; // 저장본 선택 후 이동할 월드맵 씬 이름
+
     [Header("저장 참조")]
     [SerializeField] private SaveStorage saveStorage; // 저장 데이터 관리 스크립트
     [SerializeField] private SaveSlotButton saveSlotButtonPrefab; // 저장본 버튼 프리팹
@@ -35,10 +40,18 @@ public class SaveSelection : MonoBehaviour
     private Coroutine emptyNameWarningCoroutine; // 빈 입력 경고 UI 코루틴
     private SaveSlotButton pendingDeleteSlotButton; // 삭제 대기 중인 저장본 버튼
 
-    private void Awake() // 시작 전 기본 UI 상태 초기화
+    [Header("시작 소유 캐릭터 목록")]
+    [SerializeField] private List<SaveStorage.OwnedCharacterData> startingOwnedCharacterList = new List<SaveStorage.OwnedCharacterData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 목록
+
+private void Awake() // 시작 전 기본 UI 상태 초기화
+{
+    if (saveStorage == null)
     {
-        SetInitialUIState(); // 기본 UI 상태 적용
+        saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // SaveStorage 자동 참조
     }
+
+    SetInitialUIState(); // 기본 UI 상태 적용
+}
 
 private void Start() // 시작 시 저장본 목록 구성
 {
@@ -148,7 +161,7 @@ public void RefreshSaveSlotList() // 저장본 버튼 목록 다시 생성
         SaveStorage.SaveEntry entry = saveList[i]; // 현재 저장본 데이터 참조
 
         SaveSlotButton newSlotButton = Instantiate(saveSlotButtonPrefab, contentRectTransform); // 저장본 버튼 생성
-        newSlotButton.Initialize(this, entry.saveName, entry.saveNumber); // 저장본 버튼 초기화
+        newSlotButton.Initialize(this, entry.saveId, entry.saveName, entry.saveNumber); // 저장본 버튼 초기화
 
         createdSlotButtonList.Add(newSlotButton); // 생성 버튼 목록에 추가
     }
@@ -255,7 +268,7 @@ private void TryCreateSave() // 저장본 생성 시도
         return; // 생성 중단
     }
 
-    bool createResult = saveStorage.CreateSave(inputName); // 저장본 생성 시도
+    bool createResult = saveStorage.CreateSave(inputName, startingOwnedCharacterList); // 시작 캐릭터 목록 포함해 저장본 생성 시도
 
     if (!createResult) return; // 생성 실패 시 종료
 
@@ -307,35 +320,45 @@ private void CloseDeleteConfirmUI() // 삭제 확인 UI 닫기
     pendingDeleteSlotButton = null; // 삭제 대기 대상 초기화
     UpdateBlockedButtonsState(); // 모달 UI 닫힘 상태 반영
 }
-    private void ExecuteDeletePendingSave() // 삭제 대기 저장본 삭제 실행
+
+private void ExecuteDeletePendingSave() // 삭제 대기 저장본 삭제 실행
+{
+    if (pendingDeleteSlotButton == null)
     {
-        if (pendingDeleteSlotButton == null)
-        {
-            CloseDeleteConfirmUI(); // 대상 없으면 UI 닫기
-            return; // 삭제 종료
-        }
-
-        if (saveStorage == null)
-        {
-            CloseDeleteConfirmUI(); // 저장 참조 없으면 UI 닫기
-            return; // 삭제 종료
-        }
-
-        bool deleteResult = saveStorage.DeleteSaveByNumber(pendingDeleteSlotButton.SaveNumber); // 번호 기준 저장본 삭제
-
-        CloseDeleteConfirmUI(); // 삭제 확인 UI 닫기
-
-        if (!deleteResult) return; // 삭제 실패 시 종료
-
-        RefreshSaveSlotList(); // 저장본 버튼 목록 다시 생성
+        CloseDeleteConfirmUI(); // 대상 없으면 UI 닫기
+        return; // 삭제 종료
     }
 
-    public void NotifySaveSlotClicked(SaveSlotButton clickedSlotButton) // 저장본 본체 클릭 알림 처리
+    if (saveStorage == null)
     {
-        if (clickedSlotButton == null) return; // 대상이 없으면 종료
-
-        Debug.Log($"[SaveSelection] 저장본 클릭 미구현 - 이름: {clickedSlotButton.SaveName}, 번호: {clickedSlotButton.SaveNumber}"); // 디버그 로그 출력
+        Debug.LogWarning("[SaveSelection] SaveStorage 참조가 없어 삭제할 수 없습니다."); // 저장 참조 없음 경고
+        CloseDeleteConfirmUI(); // 저장 참조 없으면 UI 닫기
+        return; // 삭제 종료
     }
+
+    int targetSaveId = pendingDeleteSlotButton.SaveId; // 삭제 대상 고유 ID 저장
+    bool deleteResult = saveStorage.DeleteSaveById(targetSaveId); // 고유 ID 기준 저장본 삭제
+
+    Debug.Log($"[SaveSelection] 삭제 시도 - SaveId: {targetSaveId}, 결과: {deleteResult}"); // 삭제 결과 로그
+
+    CloseDeleteConfirmUI(); // 삭제 확인 UI 닫기
+
+    if (!deleteResult) return; // 삭제 실패 시 종료
+
+    RefreshSaveSlotList(); // 저장본 버튼 목록 다시 생성
+    Debug.Log("[SaveSelection] 저장본 목록 갱신 완료"); // 목록 갱신 로그
+}
+
+public void NotifySaveSlotClicked(SaveSlotButton clickedSlotButton) // 저장본 본체 클릭 알림 처리
+{
+    if (clickedSlotButton == null) return; // 대상이 없으면 종료
+    if (saveStorage == null) return; // 저장 참조가 없으면 종료
+    if (string.IsNullOrEmpty(worldMapSceneName)) return; // 이동할 씬 이름이 비어 있으면 종료
+
+    saveStorage.SetCurrentSelectedSaveId(clickedSlotButton.SaveId); // 현재 선택된 저장본 ID 기록
+    saveStorage.LoadOwnedCharacterListFromSave(clickedSlotButton.SaveId); // 해당 세이브의 소유 캐릭터 목록을 현재 목록에 적용
+    SceneManager.LoadScene(worldMapSceneName); // 월드맵 씬으로 이동
+}
 
     private void CloseSaveNameInputUI() // 이름 입력 UI 닫기
 {

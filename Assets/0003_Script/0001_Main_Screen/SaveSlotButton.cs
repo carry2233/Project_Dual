@@ -12,24 +12,28 @@ public class SaveSlotButton : MonoBehaviour
     [SerializeField] private TMP_Text saveNameText; // 저장본 이름 표시 텍스트
     [SerializeField] private TMP_Text saveNumberText; // 저장본 번호 표시 텍스트
 
-    [Header("저장본 정보")]
-    [SerializeField] private string saveName; // 저장본 이름
-    [SerializeField] private int saveNumber; // 저장본 번호
+[Header("저장본 정보")]
+[SerializeField] private int saveId; // 저장본 고유 ID
+[SerializeField] private string saveName; // 저장본 이름
+[SerializeField] private int saveNumber; // 저장본 표시 번호
+
+public int SaveId => saveId; // 저장본 고유 ID 반환
+public string SaveName => saveName; // 저장본 이름 반환
+public int SaveNumber => saveNumber; // 저장본 표시 번호 반환
 
     private SaveSelection ownerSaveSelection; // 상위 저장 선택 스크립트 참조
 
-    public string SaveName => saveName; // 저장본 이름 반환
-    public int SaveNumber => saveNumber; // 저장본 번호 반환
 
-    public void Initialize(SaveSelection targetSelection, string targetSaveName, int targetSaveNumber) // 저장본 버튼 초기화
-    {
-        ownerSaveSelection = targetSelection; // 상위 저장 선택 스크립트 저장
-        saveName = targetSaveName; // 저장본 이름 저장
-        saveNumber = targetSaveNumber; // 저장본 번호 저장
+public void Initialize(SaveSelection targetSelection, int targetSaveId, string targetSaveName, int targetSaveNumber) // 저장본 버튼 초기화
+{
+    ownerSaveSelection = targetSelection; // 상위 저장 선택 스크립트 저장
+    saveId = targetSaveId; // 저장본 고유 ID 저장
+    saveName = targetSaveName; // 저장본 이름 저장
+    saveNumber = targetSaveNumber; // 저장본 표시 번호 저장
 
-        RefreshVisual(); // 텍스트 갱신
-        RebindButtonEvents(); // 버튼 이벤트 다시 연결
-    }
+    RefreshVisual(); // 텍스트 갱신
+    RebindButtonEvents(); // 버튼 이벤트 다시 연결
+}
 
     private void OnDestroy() // 삭제 시 버튼 이벤트 정리
     {
@@ -81,21 +85,23 @@ public class SaveSlotButton : MonoBehaviour
         }
     }
 
-    private void OnClickSlotMainButton() // 저장본 본체 버튼 클릭 처리
-    {
-        Debug.Log($"[SaveSlotButton] 저장본 선택 기능 미구현 - 이름: {saveName}, 번호: {saveNumber}"); // 디버그 로그 출력
+private void OnClickSlotMainButton() // 저장본 본체 버튼 클릭 처리
+{
+    Debug.Log($"[SaveSlotButton] 저장본 선택 - ID: {saveId}, 이름: {saveName}, 번호: {saveNumber}"); // 디버그 로그 출력
 
-        if (ownerSaveSelection != null)
-        {
-            ownerSaveSelection.NotifySaveSlotClicked(this); // 상위 선택 스크립트에 클릭 알림 전달
-        }
-    }
-
-    private void OnClickDeleteSaveButton() // 저장본 삭제 버튼 클릭 처리
+    if (ownerSaveSelection != null)
     {
-        if (ownerSaveSelection == null) return; // 상위 선택 스크립트가 없으면 종료
-        ownerSaveSelection.OpenDeleteConfirmUI(this); // 삭제 확인 UI 열기 요청
+        ownerSaveSelection.NotifySaveSlotClicked(this); // 상위 선택 스크립트에 클릭 알림 전달
     }
+}
+
+private void OnClickDeleteSaveButton() // 저장본 삭제 버튼 클릭 처리
+{
+    Debug.Log($"[SaveSlotButton] 삭제 버튼 클릭 - ID: {saveId}, 이름: {saveName}, 번호: {saveNumber}"); // 삭제 클릭 로그
+
+    if (ownerSaveSelection == null) return; // 상위 선택 스크립트가 없으면 종료
+    ownerSaveSelection.OpenDeleteConfirmUI(this); // 삭제 확인 UI 열기 요청
+}
 
     public void SetInteractable(bool isInteractable) // 저장본 버튼 클릭 가능 여부 설정
 {

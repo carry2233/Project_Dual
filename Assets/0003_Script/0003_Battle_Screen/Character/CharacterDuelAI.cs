@@ -22,6 +22,11 @@ public class CharacterDuelAI : MonoBehaviour
     [SerializeField] private MoveCommandController moveCommandController; // 플레이어 이동 명령 컨트롤러 참조
     [SerializeField] private EnemyAIController enemyAIController; // 적 AI 명령 컨트롤러 참조
 
+        [Header("캐릭터 식별 정보")]
+[SerializeField] private int firstRowID = 0; // 캐릭터 1열 ID
+[SerializeField] private int secondRowID = 0; // 캐릭터 2열 ID
+[SerializeField] private int individualID = 0; // 캐릭터 개체별 ID (0 이하면 미할당으로 간주)
+
     [Header("물리 접촉 무시 설정")]
 [SerializeField] private Collider2D physicalContactCollider; // 본인 물리접촉 전용 콜라이더
 [SerializeField] private float duelTargetCollisionIgnoreDuration = 0.2f; // 돌진 시작 후 상대와 충돌 무시할 시간
@@ -40,10 +45,7 @@ public Collider2D PhysicalContactCollider => physicalContactCollider; // 본인 
     [SerializeField] private int teamNumber = 0; // 현재 캐릭터의 팀 번호
     [SerializeField] private ControlMode controlMode = ControlMode.PlayerControlled; // 현재 캐릭터의 조작 방식
 
-    [Header("캐릭터 식별 정보")]
-[SerializeField] private int firstRowID = 0; // 캐릭터 1열 ID
-[SerializeField] private int secondRowID = 0; // 캐릭터 2열 ID
-[SerializeField] private int individualID = 0; // 캐릭터 개체별 ID (0 이하면 미할당으로 간주)
+
 
 [Header("결투 거리 설정")]
 [SerializeField] private float searchRange = 20f; // 탐색 거리

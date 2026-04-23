@@ -18,6 +18,12 @@ public class HexTilePlacementManager : MonoBehaviour
         OddColumn  // Flat Top 계열에서 주로 사용되는 홀수 열 오프셋
     }
 
+    [Header("저장/복원 설정")]
+[SerializeField] private int saveSlotNumber = 0; // 현재 활성 저장본 ID
+[SerializeField] private string saveFileName = "HexTilePlacementSave.json"; // 수동 저장용 기본 파일 이름
+
+private SaveStorage saveStorage; // 전역 저장소 참조
+
 [Header("타일맵 참조")]
 [SerializeField] private Tilemap targetTilemap; // 배치 기준이 되는 육각형 타일맵
 [SerializeField] private Transform placementParent; // 생성된 프리팹들을 정리해서 넣을 부모
@@ -107,10 +113,6 @@ public enum MapShapeType
 [SerializeField] private float curvedIslandWidth = 1.75f; // 곡선 중심선 기준 섬 두께
 
 
-[Header("저장/복원 설정")]
-[SerializeField] private int saveSlotNumber = 0; // 저장본 번호
-[SerializeField] private string saveFileName = "HexTilePlacementSave.json"; // 저장 파일 이름
-
 [Header("버튼 참조")]
 [SerializeField] private Button saveButton; // 저장 실행 버튼
 [SerializeField] private Button loadButton; // 복원 실행 버튼
@@ -176,15 +178,38 @@ private void OnDestroy() // 버튼 이벤트 해제
         clearSaveButton.onClick.RemoveListener(ClearPlacementSaveFile); // 저장본 초기화 버튼 해제
     }
 }
-    private void Start() // 게임 시작 시 자동 배치 처리
+    
+private void Start() // 게임 시작 시 저장본 기준 자동 생성 또는 복원 처리
+{
+    saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // SaveStorage 자동 참조
+
+    if (saveStorage != null && saveStorage.CurrentSelectedSaveId > 0)
     {
-        if (placeOnStart == false)
+        saveSlotNumber = saveStorage.CurrentSelectedSaveId; // 현재 선택된 저장본 ID 적용
+    }
+
+    if (saveSlotNumber <= 0)
+    {
+        Debug.LogWarning("[HexTilePlacementManager] 유효한 저장본 ID가 없어 기존 자동 배치 흐름만 사용합니다.", this); // 저장본 ID 없음 경고
+
+        if (placeOnStart == true)
         {
-            return; // 자동 배치가 꺼져 있으면 종료
+            PlacePrefabsInRange(); // 기존 자동 배치 실행
         }
 
-        PlacePrefabsInRange(); // 설정된 범위대로 프리팹 배치
+        return;
     }
+
+    if (HasPlacementSaveFile() == true)
+    {
+        LoadPlacementFromJson(); // 저장본이 있으면 복원
+    }
+    else
+    {
+        PlacePrefabsInRange(); // 저장본이 없으면 새 생성
+        SavePlacementToJson(); // 새 생성 결과를 현재 저장본 ID로 저장
+    }
+}
 
 public void PlacePrefabsInRange() // 현재 설정값 기준으로 범위 내 타일 생성 실행
 {
@@ -533,11 +558,22 @@ private Transform GetPlacementRoot() // 실제 배치 부모 반환
 
 private string GetSaveFilePath() // 저장 파일 전체 경로 반환
 {
-    return Path.Combine(Application.persistentDataPath, saveFileName); // persistentDataPath 기준 파일 경로 생성
+    if (saveStorage != null && saveSlotNumber > 0)
+    {
+        return saveStorage.GetTileLayoutSaveFilePath(saveSlotNumber); // 저장본 ID 기준 파일 경로 사용
+    }
+
+    return Path.Combine(Application.persistentDataPath, saveFileName); // 예외 시 기본 파일명 사용
 }
 
 public void SavePlacementToJson() // 현재 배치 상태를 JSON으로 저장
 {
+    if (saveSlotNumber <= 0)
+    {
+        Debug.LogWarning("[HexTilePlacementManager] 저장할 저장본 ID가 유효하지 않습니다.", this); // 저장본 ID 없음 경고
+        return;
+    }
+
     Transform root = GetPlacementRoot(); // 저장 기준 부모
     PlacementSaveData saveData = new PlacementSaveData(); // 저장 데이터 생성
     saveData.saveSlotNumber = saveSlotNumber; // 저장본 번호 기록
@@ -570,6 +606,12 @@ public void SavePlacementToJson() // 현재 배치 상태를 JSON으로 저장
 
 public void LoadPlacementFromJson() // JSON 저장본을 기준으로 배치 복원
 {
+    if (saveSlotNumber <= 0)
+    {
+        Debug.LogWarning("[HexTilePlacementManager] 복원할 저장본 ID가 유효하지 않습니다.", this); // 저장본 ID 없음 경고
+        return;
+    }
+
     string savePath = GetSaveFilePath(); // 저장 파일 경로
 
     if (File.Exists(savePath) == false)
@@ -624,7 +666,7 @@ public void LoadPlacementFromJson() // JSON 저장본을 기준으로 배치 복
 
         nextTileNumber = Mathf.Max(nextTileNumber, tileData.tileNumber + 1); // 다음 생성용 번호 보정
 
-        if (targetTilemap != null) // 타일맵이 있으면 셀 기록도 복원
+        if (targetTilemap != null)
         {
             Vector3 worldPosition = root.TransformPoint(localPosition); // 로컬 위치를 월드 위치로 변환
             Vector3Int cellPosition = targetTilemap.WorldToCell(worldPosition); // 월드 위치 기준 셀 계산
@@ -635,7 +677,7 @@ public void LoadPlacementFromJson() // JSON 저장본을 기준으로 배치 복
     RefreshStartPointReferenceFromPlacedObjects(); // 복원 후 시작점 타일 참조 재탐색
     ApplyPlayerStartTileMembership(); // 플레이어 시작 타일 소속 정보 반영
 
-    Debug.Log($"[HexTilePlacementManager] 배치 복원 완료 : 저장본 번호 {saveData.saveSlotNumber}", this); // 복원 완료 로그
+    Debug.Log($"[HexTilePlacementManager] 배치 복원 완료 : 저장본 ID {saveData.saveSlotNumber}", this); // 복원 완료 로그
 }
 
 public void ClearPlacementSaveFile() // 저장본 파일 초기화
@@ -1090,7 +1132,10 @@ private void ApplyPlayerStartTileMembership() // 시작점 타일 정보를 플�
     playerTileMembership.SetCurrentTile(startTilePrefab, lastSpawnedStartPointTileObject.transform); // 플레이어 현재 타일 정보 설정
 }
 
-
+private bool HasPlacementSaveFile() // 현재 저장본 ID의 타일 저장본 존재 여부 확인
+{
+    return File.Exists(GetSaveFilePath()); // 현재 저장 경로 기준 파일 존재 여부 반환
+}
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected() // 선택 시 원점 셀 중심 위치를 기즈모로 표시
