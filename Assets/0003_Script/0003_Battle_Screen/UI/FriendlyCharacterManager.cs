@@ -27,6 +27,11 @@ public class FriendlyCharacterManager : MonoBehaviour
     [Header("필수 참조")]
     [SerializeField] private ClickMoveSystemManager clickMoveSystemManager; // 선택 반영용 클릭 이동 시스템 매니저
 
+    [Header("캐릭터 정보 매니저 참조")]
+    [SerializeField] private CharacterInfoManager characterInfoManager; // 전역 캐릭터 정보 매니저 참조
+    public IReadOnlyList<GlobalCharacterDefinition> GlobalCharacterDefinitionList =>
+    characterInfoManager != null ? characterInfoManager.GlobalCharacterDefinitionList : null; // 전역 정의 목록 반환
+
     [Header("아군 진영 설정")]
     [SerializeField] private List<int> friendlyTeamNumbers = new List<int>(); // 아군으로 판정할 팀 번호 리스트
 
@@ -47,9 +52,7 @@ public class FriendlyCharacterManager : MonoBehaviour
     [Header("상세 UI 토글 설정")]
     [SerializeField] private Key toggleDetailUIKey = Key.Tab; // 선택 캐릭터 상세 UI 토글 키
     [SerializeField] private Transform detailUIParent; // 상세 UI 생성 부모
-
-    [Header("캐릭터 전역 정의 목록")]
-    [SerializeField] private List<GlobalCharacterDefinition> globalCharacterDefinitionList = new List<GlobalCharacterDefinition>(); // 캐릭터 전역 정의 목록
+    
 
     [Header("현재 아군 캐릭터 목록")]
     [SerializeField] private List<FriendlyCharacterEntry> friendlyCharacterEntryList = new List<FriendlyCharacterEntry>(); // 정렬 후 아군 캐릭터 목록
@@ -63,21 +66,30 @@ public class FriendlyCharacterManager : MonoBehaviour
 
     public IReadOnlyList<FriendlyCharacterEntry> FriendlyCharacterEntryList => friendlyCharacterEntryList; // 아군 목록 반환
     public CharacterDuelAI CurrentSelectedFriendlyCharacter => currentSelectedFriendlyCharacter; // 현재 선택된 아군 캐릭터 반환
-    public IReadOnlyList<GlobalCharacterDefinition> GlobalCharacterDefinitionList => globalCharacterDefinitionList; // 전역 정의 목록 반환
     public Key ToggleDetailUIKey => toggleDetailUIKey; // 상세 UI 토글 키 반환
 
-    private void Awake() // 시작 시 참조 자동 연결
+private void Awake() // 시작 시 참조 자동 연결
+{
+    if (clickMoveSystemManager == null)
     {
-        if (clickMoveSystemManager == null)
-        {
-            clickMoveSystemManager = FindFirstObjectByType<ClickMoveSystemManager>(); // 씬에서 자동 탐색
-        }
-
-        if (detailUIParent == null)
-        {
-            detailUIParent = transform; // 부모가 없으면 자기 자신 사용
-        }
+        clickMoveSystemManager = FindFirstObjectByType<ClickMoveSystemManager>(); // 씬에서 자동 탐색
     }
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = CharacterInfoManager.Instance; // 전역 인스턴스 우선 참조
+    }
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = FindFirstObjectByType<CharacterInfoManager>(); // 씬에 있는 매니저 자동 탐색
+    }
+
+    if (detailUIParent == null)
+    {
+        detailUIParent = transform; // 부모가 없으면 자기 자신 사용
+    }
+}
 
 private void Start() // 시작 시 아군 목록 구성
 {
@@ -302,32 +314,30 @@ public void RebuildFriendlyCharacterList() // 씬의 아군 캐릭터 목록 재
         currentDetailUIOwnerCharacter = targetCharacter; // 현재 UI 소유 캐릭터 저장
     }
 
-    public GlobalCharacterDefinition FindDefinitionByCharacter(CharacterDuelAI targetCharacter) // 캐릭터와 일치하는 정의 탐색
+public GlobalCharacterDefinition FindDefinitionByCharacter(CharacterDuelAI targetCharacter) // 캐릭터와 일치하는 정의 탐색
+{
+    if (targetCharacter == null)
     {
-        if (targetCharacter == null)
-        {
-            return null; // 대상이 없으면 null 반환
-        }
-
-        for (int i = 0; i < globalCharacterDefinitionList.Count; i++)
-        {
-            GlobalCharacterDefinition definition = globalCharacterDefinitionList[i]; // 현재 정의 참조
-
-            if (definition == null)
-            {
-                continue; // 비어 있으면 건너뜀
-            }
-
-            if (!definition.IsMatch(targetCharacter))
-            {
-                continue; // 식별값이 다르면 건너뜀
-            }
-
-            return definition; // 일치하는 정의 반환
-        }
-
-        return null; // 찾지 못했으면 null 반환
+        return null; // 대상이 없으면 null 반환
     }
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = CharacterInfoManager.Instance; // 전역 인스턴스 재참조 시도
+    }
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = FindFirstObjectByType<CharacterInfoManager>(); // 씬에서 재탐색 시도
+    }
+
+    if (characterInfoManager == null)
+    {
+        return null; // 정보 매니저가 없으면 종료
+    }
+
+    return characterInfoManager.FindDefinitionByCharacter(targetCharacter); // 전역 정보 매니저에 탐색 위임
+}
 
     public FriendlyCharacterEntry GetFriendlyCharacterEntryByOrder(int targetOrder) // 실제 선택 순서값으로 목록 엔트리 탐색
     {

@@ -5,11 +5,12 @@ using UnityEngine.EventSystems; // UI 클릭 차단용
 using UnityEngine.InputSystem; // 새 입력 시스템 사용
 
 /// <summary>
-/// 타일 선택 + 선택 해제 + 카메라 연출 통합 매니저
+/// 타일 선택 + 선택 해제 + 카메라 연출 + 외부 UI 잠금 연동 매니저
 /// - 좌클릭으로 타일 선택
 /// - 선택 해제 버튼 처리
 /// - 카메라 루트/가상카메라 위치 연출 처리
-/// - 연출 중 / 선택 중 월드맵 이동 잠금
+/// - 연출 중 / 선택 중 / 캐릭터 관리창 활성화 중 월드맵 이동 잠금
+/// - 캐릭터 관리창 활성화 시 현재 타일 선택 해제 및 새 타일 선택 차단
 /// </summary>
 public class TileSelectionManager : MonoBehaviour
 {
@@ -59,6 +60,7 @@ public class TileSelectionManager : MonoBehaviour
     private Vector3 savedCameraLocalPosition; // 선택 직전에 저장한 카메라 로컬 위치
     private Quaternion savedCameraLocalRotation; // 선택 직전에 저장한 카메라 로컬 회전
     private bool hasSavedCameraState = false; // 선택 직전 카메라 상태 저장 여부
+    private bool isSelectionInputBlockedByUI = false; // 외부 UI 상태로 인한 타일 선택 차단 여부
 
     public SelectionState CurrentState => currentState; // 현재 상태 외부 확인용
     public TilePrefab CurrentSelectedTile => currentSelectedTile; // 현재 선택 타일 외부 확인용
@@ -89,6 +91,11 @@ private void Awake() // 시작 전 기본 참조와 초기값 저장
 
 private void Update() // 매 프레임 클릭 입력 처리
 {
+    if (isSelectionInputBlockedByUI == true)
+    {
+        return; // 외부 UI가 열려 있으면 타일 선택 입력 차단
+    }
+
     if (Mouse.current == null)
     {
         return; // 마우스 장치가 없으면 종료
@@ -276,20 +283,21 @@ private IEnumerator AnimateSelectionRoutine(bool isSelecting) // 선택/해제 �
         }
     }
 
-    private void UpdateMovementLock() // 현재 상태에 따라 월드맵 이동 잠금 적용
+private void UpdateMovementLock() // 현재 상태에 따라 월드맵 이동 잠금 적용
+{
+    if (worldMapCameraController == null)
     {
-        if (worldMapCameraController == null)
-        {
-            return; // 참조가 없으면 종료
-        }
-
-        bool shouldLock =
-            currentState == SelectionState.Selecting ||
-            currentState == SelectionState.Selected ||
-            currentState == SelectionState.Deselecting; // 선택 관련 상태면 잠금
-
-        worldMapCameraController.SetMovementLock(shouldLock); // 이동 잠금 적용
+        return; // 참조가 없으면 종료
     }
+
+    bool shouldLock =
+        currentState == SelectionState.Selecting ||
+        currentState == SelectionState.Selected ||
+        currentState == SelectionState.Deselecting ||
+        isSelectionInputBlockedByUI == true; // 선택 관련 상태 또는 외부 UI 활성 상태면 잠금
+
+    worldMapCameraController.SetMovementLock(shouldLock); // 이동 잠금 적용
+}
 
     private void SaveCurrentCameraStateBeforeSelection() // 선택 직전 카메라 상태 저장
 {
@@ -303,5 +311,29 @@ private IEnumerator AnimateSelectionRoutine(bool isSelecting) // 선택/해제 �
     savedCameraLocalPosition = cinemachineCameraTransform.localPosition; // 현재 카메라 로컬 위치 저장
     savedCameraLocalRotation = cinemachineCameraTransform.localRotation; // 현재 카메라 로컬 회전 저장
     hasSavedCameraState = true; // 저장 완료 표시
+}
+
+public void SetCharacterManagementUIOpen(bool isOpen) // 캐릭터 관리창 열림 상태 적용
+{
+    isSelectionInputBlockedByUI = isOpen; // 외부 UI에 의한 입력 차단 상태 저장
+
+    if (isOpen == true)
+    {
+        if (currentState != SelectionState.None)
+        {
+            ClearSelection(); // 관리창이 열리면 현재 타일 선택 해제
+        }
+        else
+        {
+            SetDeselectButtonVisible(false); // 선택 상태가 아니면 선택 해제 버튼 숨김
+        }
+    }
+
+    UpdateMovementLock(); // 현재 상태 기준으로 월드맵 이동 잠금 갱신
+}
+
+public bool IsSelectionInputBlockedByUI() // 외부 UI에 의한 선택 차단 상태 반환
+{
+    return isSelectionInputBlockedByUI; // 현재 선택 차단 상태 반환
 }
 }

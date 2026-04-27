@@ -16,3 +16,4 @@ MonoBehaviour:
   secondRowID: 2
   detailUIPrefab: {fileID: 6988253213661785462, guid: f9b70b33d4adac24d9e07280754d1cc4, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
+  managementCharacterSlotPrefab: {fileID: 6573314813019425848, guid: dec19dd9c3cf68f4aa7c2b132a6045e0, type: 3}
