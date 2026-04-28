@@ -271,48 +271,57 @@ public void RebuildFriendlyCharacterList() // 씬의 아군 캐릭터 목록 재
         ToggleDetailUIForCharacter(currentSelectedFriendlyCharacter); // 현재 선택 캐릭터 기준 토글
     }
 
-    public void ToggleDetailUIForCharacter(CharacterDuelAI targetCharacter) // 특정 캐릭터 상세 UI 토글
+public void ToggleDetailUIForCharacter(CharacterDuelAI targetCharacter) // 특정 캐릭터 상세 UI 토글
+{
+    if (targetCharacter == null)
     {
-        if (targetCharacter == null)
-        {
-            return; // 대상이 없으면 종료
-        }
-
-        if (!IsFriendlyCharacter(targetCharacter))
-        {
-            return; // 아군이 아니면 종료
-        }
-
-        if (currentSpawnedDetailUIObject != null && currentDetailUIOwnerCharacter == targetCharacter)
-        {
-            Destroy(currentSpawnedDetailUIObject); // 같은 캐릭터의 UI가 이미 있으면 삭제
-            currentSpawnedDetailUIObject = null; // 현재 생성 UI 참조 초기화
-            currentDetailUIOwnerCharacter = null; // UI 소유 캐릭터 초기화
-            return;
-        }
-
-        if (currentSpawnedDetailUIObject != null)
-        {
-            Destroy(currentSpawnedDetailUIObject); // 다른 캐릭터 UI가 있으면 먼저 삭제
-            currentSpawnedDetailUIObject = null; // 현재 생성 UI 참조 초기화
-            currentDetailUIOwnerCharacter = null; // UI 소유 캐릭터 초기화
-        }
-
-        GlobalCharacterDefinition matchedDefinition = FindDefinitionByCharacter(targetCharacter); // 캐릭터에 맞는 정의 탐색
-
-        if (matchedDefinition == null)
-        {
-            return; // 정의가 없으면 종료
-        }
-
-        if (matchedDefinition.DetailUIPrefab == null)
-        {
-            return; // 상세 UI 프리팹이 없으면 종료
-        }
-
-        currentSpawnedDetailUIObject = Instantiate(matchedDefinition.DetailUIPrefab, detailUIParent); // 상세 UI 생성
-        currentDetailUIOwnerCharacter = targetCharacter; // 현재 UI 소유 캐릭터 저장
+        return; // 대상이 없으면 종료
     }
+
+    if (!IsFriendlyCharacter(targetCharacter))
+    {
+        return; // 아군이 아니면 종료
+    }
+
+    if (currentSpawnedDetailUIObject != null && currentDetailUIOwnerCharacter == targetCharacter)
+    {
+        Destroy(currentSpawnedDetailUIObject); // 같은 캐릭터의 UI가 이미 있으면 삭제
+        currentSpawnedDetailUIObject = null; // 현재 생성 UI 참조 초기화
+        currentDetailUIOwnerCharacter = null; // UI 소유 캐릭터 초기화
+        return;
+    }
+
+    if (currentSpawnedDetailUIObject != null)
+    {
+        Destroy(currentSpawnedDetailUIObject); // 다른 캐릭터 UI가 있으면 먼저 삭제
+        currentSpawnedDetailUIObject = null; // 현재 생성 UI 참조 초기화
+        currentDetailUIOwnerCharacter = null; // UI 소유 캐릭터 초기화
+    }
+
+    GlobalCharacterDefinition matchedDefinition = FindDefinitionByCharacter(targetCharacter); // 캐릭터에 맞는 정의 탐색
+
+    if (matchedDefinition == null)
+    {
+        return; // 정의가 없으면 종료
+    }
+
+    if (matchedDefinition.DetailUIPrefab == null)
+    {
+        return; // 상세 UI 프리팹이 없으면 종료
+    }
+
+    CharacterStatSystem targetStatSystem = targetCharacter.GetComponent<CharacterStatSystem>(); // 대상 캐릭터의 스탯 시스템 탐색
+
+    currentSpawnedDetailUIObject = Instantiate(matchedDefinition.DetailUIPrefab, detailUIParent); // 상세 UI 생성
+    currentDetailUIOwnerCharacter = targetCharacter; // 현재 UI 소유 캐릭터 저장
+
+    CharacterDetailInfoWindow detailInfoWindow = currentSpawnedDetailUIObject.GetComponent<CharacterDetailInfoWindow>(); // 상세 UI 스크립트 탐색
+
+    if (detailInfoWindow != null)
+    {
+        detailInfoWindow.Initialize(targetStatSystem); // 상세 UI에 스탯 시스템 전달
+    }
+}
 
 public GlobalCharacterDefinition FindDefinitionByCharacter(CharacterDuelAI targetCharacter) // 캐릭터와 일치하는 정의 탐색
 {

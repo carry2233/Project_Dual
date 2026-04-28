@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+/// 저장본 생성, 삭제, 불러오기, 현재 선택 저장본 ID 관리,
+/// 소유 캐릭터 목록과 캐릭터별 스탯정보 저장/복원을 담당한다.
+/// </summary>
 public class SaveStorage : MonoBehaviour
 {
 
@@ -25,7 +29,46 @@ public class OwnedCharacterData
 {
     public int firstRowID; // 캐릭터 첫 번째 행 ID
     public int secondRowID; // 캐릭터 두 번째 행 ID
+    public int individualID; // 캐릭터 개체별 고유 ID
 }
+
+[Serializable] 
+public class OwnedCharacterStatData
+{
+    [Header("캐릭터 ID")]
+    public int firstRowID; // 캐릭터 첫 번째 행 ID
+    public int secondRowID; // 캐릭터 두 번째 행 ID
+    public int individualID; // 캐릭터 개체별 고유 ID
+    
+    [Header("레벨")]
+    public int levelstats; // 레벨 수치
+
+    [Header("이속")]
+    public float baseMoveSpeed; // 기본 이동속도
+    public int moveSpeedPercent; // 이동속도 퍼센트
+    public float finalMoveSpeed; // 최종 이동속도
+
+    [Header("전투 스탯")]
+    public int attackPower; // 공격력
+    public int defenseValue; // 방어력
+    public int maxHealth; // 최대 체력
+    public int currentHealth; // 현재 체력
+
+    [Header("체급")]
+    public int bodySize; // 체급
+
+    [Header("속도")]
+    public int speedStat; // 속도 수치
+
+    [Header("위력률")]
+    public int powerRatePercent; // 위력률 퍼센트
+
+    [Header("와해 스탯")]
+    public int maxStaggerAmount; // 최대 와해량
+    public int currentStaggerAmount; // 현재 와해량
+    public int staggerResistancePercent; // 와해 저항률
+}
+
 
 [Serializable]
 public class SaveEntry
@@ -34,10 +77,17 @@ public class SaveEntry
     public string saveName; // 저장본 이름
     public int saveNumber; // 화면 표시용 번호
     public List<OwnedCharacterData> ownedCharacterList = new List<OwnedCharacterData>(); // 이 저장본에 소속된 캐릭터 목록
+    public List<OwnedCharacterStatData> ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 이 저장본에 소속된 캐릭터 스탯정보 목록
 }
 
 [Header("현재 소유 캐릭터 목록")]
 [SerializeField] private List<OwnedCharacterData> currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 세이브 기준으로 사용 중인 소유 캐릭터 목록
+
+[Header("현재 소유 캐릭터 스탯정보 목록")]
+[SerializeField] private List<OwnedCharacterStatData> currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 세이브 기준 캐릭터 스탯정보 목록
+
+public List<OwnedCharacterStatData> CurrentOwnedCharacterStatList => GetOwnedCharacterStatListCopy(currentOwnedCharacterStatList); // 현재 캐릭터 스탯정보 목록 복사 반환
+
 
 public List<OwnedCharacterData> CurrentOwnedCharacterList => GetOwnedCharacterListCopy(currentOwnedCharacterList); // 현재 소유 캐릭터 목록 복사 반환
 
@@ -75,6 +125,7 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.saveName = source.saveName; // 이름 복사
         copy.saveNumber = source.saveNumber; // 번호 복사
         copy.ownedCharacterList = GetOwnedCharacterListCopy(source.ownedCharacterList); // 소유 캐릭터 목록 복사
+        copy.ownedCharacterStatList = GetOwnedCharacterStatListCopy(source.ownedCharacterStatList); // 소유 캐릭터 스탯정보 목록 복사
 
         result.Add(copy); // 복사본 추가
     }
@@ -88,7 +139,7 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         return currentSaveFileData.saveList.Count < maxSaveCount; // 최대 개수 미만이면 생성 가능
     }
 
-public bool CreateSave(string newSaveName, List<OwnedCharacterData> startOwnedCharacterList) // 새 저장본 생성
+public bool CreateSave(string newSaveName, List<OwnedCharacterData> startOwnedCharacterList, List<OwnedCharacterStatData> startOwnedCharacterStatList) // 새 저장본 생성
 {
     if (!CanCreateNewSave()) return false; // 최대 개수면 생성 불가
 
@@ -100,11 +151,14 @@ public bool CreateSave(string newSaveName, List<OwnedCharacterData> startOwnedCh
     newEntry.saveName = trimmedName; // 저장본 이름 설정
     newEntry.saveNumber = currentSaveFileData.saveList.Count + 1; // 표시용 번호 설정
     newEntry.ownedCharacterList = GetOwnedCharacterListCopy(startOwnedCharacterList); // 시작 캐릭터 목록 저장
+    newEntry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(startOwnedCharacterStatList); // 시작 캐릭터 스탯정보 저장
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
     currentSaveFileData.saveList.Add(newEntry); // 목록에 저장본 추가
 
-    ApplyCurrentOwnedCharacterList(newEntry.ownedCharacterList); // 현재 소유 캐릭터 목록에도 그대로 적용
+    ApplyCurrentOwnedCharacterList(newEntry.ownedCharacterList); // 현재 소유 캐릭터 목록 적용
+    ApplyCurrentOwnedCharacterStatList(newEntry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 적용
+
     SortAndReindex(); // 번호 정렬 및 재정렬
     SaveToFile(); // 파일 저장
 
@@ -179,10 +233,15 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
 
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
-        if (currentSaveFileData.saveList[i].ownedCharacterList == null)
-        {
-            currentSaveFileData.saveList[i].ownedCharacterList = new List<OwnedCharacterData>(); // 캐릭터 목록 null 방지
-        }
+    if (currentSaveFileData.saveList[i].ownedCharacterList == null)
+    {
+        currentSaveFileData.saveList[i].ownedCharacterList = new List<OwnedCharacterData>(); // 캐릭터 목록 null 방지
+    }
+
+    if (currentSaveFileData.saveList[i].ownedCharacterStatList == null)
+    {
+        currentSaveFileData.saveList[i].ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 캐릭터 스탯정보 목록 null 방지
+    }
 
         if (currentSaveFileData.saveList[i].saveId <= 0)
         {
@@ -195,7 +254,8 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
         }
     }
 
-    currentOwnedCharacterList = new List<OwnedCharacterData>(); // 시작 시 현재 소유 캐릭터 목록 기본 초기화
+    currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 소유 캐릭터 스탯정보 목록 초기화
     SortAndReindex(); // 번호 정렬 및 재정렬
     SaveToFile(); // 정리된 상태 다시 저장
 }
@@ -292,6 +352,7 @@ private List<OwnedCharacterData> GetOwnedCharacterListCopy(List<OwnedCharacterDa
         OwnedCharacterData copy = new OwnedCharacterData(); // 복사 데이터 생성
         copy.firstRowID = source.firstRowID; // 첫 번째 행 ID 복사
         copy.secondRowID = source.secondRowID; // 두 번째 행 ID 복사
+        copy.individualID = source.individualID; // 개체별 고유 ID 복사
 
         copyList.Add(copy); // 복사본 추가
     }
@@ -304,7 +365,7 @@ public void ApplyCurrentOwnedCharacterList(List<OwnedCharacterData> sourceList) 
     currentOwnedCharacterList = GetOwnedCharacterListCopy(sourceList); // 현재 목록을 복사 적용
 }
 
-public bool LoadOwnedCharacterListFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록을 현재 목록으로 적용
+public bool LoadOwnedCharacterListFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록과 스탯정보를 현재 목록으로 적용
 {
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
@@ -315,7 +376,8 @@ public bool LoadOwnedCharacterListFromSave(int targetSaveId) // 특정 저장본
             continue; // 다른 저장본이면 건너뜀
         }
 
-        ApplyCurrentOwnedCharacterList(entry.ownedCharacterList); // 현재 소유 캐릭터 목록에 적용
+        ApplyCurrentOwnedCharacterList(entry.ownedCharacterList); // 현재 소유 캐릭터 목록 적용
+        ApplyCurrentOwnedCharacterStatList(entry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 적용
         return true; // 적용 성공
     }
 
@@ -336,4 +398,88 @@ public List<OwnedCharacterData> GetOwnedCharacterListBySaveId(int targetSaveId) 
 
     return new List<OwnedCharacterData>(); // 없으면 빈 리스트 반환
 }
+
+
+public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록과 스탯정보를 현재 데이터로 적용
+{
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != targetSaveId)
+        {
+            continue; // 다른 저장본이면 건너뜀
+        }
+
+        ApplyCurrentOwnedCharacterList(entry.ownedCharacterList); // 현재 소유 캐릭터 목록에 적용
+        ApplyCurrentOwnedCharacterStatList(entry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 목록에 적용
+        return true; // 적용 성공
+    }
+
+    return false; // 대상 저장본 없음
+}
+
+public List<OwnedCharacterStatData> GetOwnedCharacterStatListBySaveId(int targetSaveId) // 특정 저장본의 캐릭터 스탯정보 목록 복사 반환
+{
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId == targetSaveId)
+        {
+            return GetOwnedCharacterStatListCopy(entry.ownedCharacterStatList); // 복사본 반환
+        }
+    }
+
+    return new List<OwnedCharacterStatData>(); // 없으면 빈 리스트 반환
+}
+
+private List<OwnedCharacterStatData> GetOwnedCharacterStatListCopy(List<OwnedCharacterStatData> sourceList) // 캐릭터 스탯정보 목록 깊은 복사 반환
+{
+    List<OwnedCharacterStatData> copyList = new List<OwnedCharacterStatData>(); // 복사용 리스트
+
+    if (sourceList == null)
+    {
+        return copyList; // 원본이 없으면 빈 리스트 반환
+    }
+
+    for (int i = 0; i < sourceList.Count; i++)
+    {
+        OwnedCharacterStatData source = sourceList[i]; // 원본 데이터 참조
+        if (source == null) continue; // 비어 있으면 건너뜀
+
+        OwnedCharacterStatData copy = new OwnedCharacterStatData(); // 복사 데이터 생성
+        copy.firstRowID = source.firstRowID; // 첫 번째 행 ID 복사
+        copy.secondRowID = source.secondRowID; // 두 번째 행 ID 복사
+        copy.individualID = source.individualID; // 개체별 고유 ID 복사
+
+        copy.levelstats = source.levelstats; // 레벨 복사
+        copy.baseMoveSpeed = source.baseMoveSpeed; // 기본 이동속도 복사
+        copy.moveSpeedPercent = source.moveSpeedPercent; // 이동속도 퍼센트 복사
+        copy.finalMoveSpeed = source.finalMoveSpeed; // 최종 이동속도 복사
+
+        copy.attackPower = source.attackPower; // 공격력 복사
+        copy.defenseValue = source.defenseValue; // 방어력 복사
+        copy.maxHealth = source.maxHealth; // 최대 체력 복사
+        copy.currentHealth = source.currentHealth; // 현재 체력 복사
+        copy.bodySize = source.bodySize; // 체급 복사
+        copy.speedStat = source.speedStat; // 속도 수치 복사
+        copy.powerRatePercent = source.powerRatePercent; // 위력률 복사
+        copy.maxStaggerAmount = source.maxStaggerAmount; // 최대 와해량 복사
+        copy.currentStaggerAmount = source.currentStaggerAmount; // 현재 와해량 복사
+        copy.staggerResistancePercent = source.staggerResistancePercent; // 와해 저항률 복사
+
+        copyList.Add(copy); // 복사본 추가
+    }
+
+    return copyList; // 복사 리스트 반환
+}
+
+public void ApplyCurrentOwnedCharacterStatList(List<OwnedCharacterStatData> sourceList) // 현재 소유 캐릭터 스탯정보 목록 적용
+{
+    currentOwnedCharacterStatList = GetOwnedCharacterStatListCopy(sourceList); // 현재 스탯정보 목록 복사 적용
+}
+
+
+
 }

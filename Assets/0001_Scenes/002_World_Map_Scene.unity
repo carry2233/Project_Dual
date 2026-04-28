@@ -3129,7 +3129,7 @@ MonoBehaviour:
   alwaysPlaceOriginCell: 1
   playerTileMembership: {fileID: 1969857760}
   mapShapeType: 0
-  randomSeed: 106
+  randomSeed: 96
   noiseScale: 0.15
   shapeThreshold: 0.2
   edgeFalloffStrength: 1.2

@@ -5,6 +5,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// 저장본 선택 화면에서 저장본 생성, 삭제, 선택,
+/// 시작 소유 캐릭터 목록과 시작 캐릭터 스탯정보 전달을 담당한다.
+/// </summary>
+
 public class SaveSelection : MonoBehaviour
 {
 
@@ -42,6 +47,9 @@ public class SaveSelection : MonoBehaviour
 
     [Header("시작 소유 캐릭터 목록")]
     [SerializeField] private List<SaveStorage.OwnedCharacterData> startingOwnedCharacterList = new List<SaveStorage.OwnedCharacterData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 목록
+
+ [Header("시작 소유 캐릭터 스탯정보 목록")]
+[SerializeField] private List<SaveStorage.OwnedCharacterStatData> startingOwnedCharacterStatList = new List<SaveStorage.OwnedCharacterStatData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 스탯정보 목록
 
 private void Awake() // 시작 전 기본 UI 상태 초기화
 {
@@ -268,7 +276,7 @@ private void TryCreateSave() // 저장본 생성 시도
         return; // 생성 중단
     }
 
-    bool createResult = saveStorage.CreateSave(inputName, startingOwnedCharacterList); // 시작 캐릭터 목록 포함해 저장본 생성 시도
+    bool createResult = saveStorage.CreateSave(inputName, startingOwnedCharacterList, startingOwnedCharacterStatList); // 시작 캐릭터 목록과 스탯정보 포함 생성
 
     if (!createResult) return; // 생성 실패 시 종료
 
@@ -280,7 +288,6 @@ private void TryCreateSave() // 저장본 생성 시도
     RefreshSaveSlotList(); // 저장본 버튼 목록 갱신
     UpdateBlockedButtonsState(); // 모달 UI 닫힘 상태 반영
 }
-
     private void ShowEmptyNameWarningUI() // 빈 입력 경고 UI 표시
     {
         if (emptyNameWarningUI == null) return; // 참조 없으면 종료
@@ -356,7 +363,7 @@ public void NotifySaveSlotClicked(SaveSlotButton clickedSlotButton) // 저장본
     if (string.IsNullOrEmpty(worldMapSceneName)) return; // 이동할 씬 이름이 비어 있으면 종료
 
     saveStorage.SetCurrentSelectedSaveId(clickedSlotButton.SaveId); // 현재 선택된 저장본 ID 기록
-    saveStorage.LoadOwnedCharacterListFromSave(clickedSlotButton.SaveId); // 해당 세이브의 소유 캐릭터 목록을 현재 목록에 적용
+    saveStorage.LoadOwnedCharacterDataFromSave(clickedSlotButton.SaveId); // 해당 세이브의 소유 캐릭터 목록과 스탯정보를 현재 목록에 적용
     SceneManager.LoadScene(worldMapSceneName); // 월드맵 씬으로 이동
 }
 

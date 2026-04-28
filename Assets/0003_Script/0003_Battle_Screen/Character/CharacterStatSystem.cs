@@ -2,8 +2,9 @@ using System; // 상태값 변경 알림 이벤트용
 using UnityEngine;
 
 /// <summary>
-/// 캐릭터 스탯 보관 스크립트
-/// - 현재 단계에서는 기능 없이 변수만 관리
+/// 캐릭터의 레벨, 전투 스탯, 체력, 와해량, 이동속도 계산값을 관리한다.
+/// 기본 이동속도와 이동속도 퍼센트를 계산해 최종 이동속도를 만들고,
+/// 해당 값을 NavigationMovementSystem에 적용한다.
 /// </summary>
 public class CharacterStatSystem : MonoBehaviour
 {
@@ -25,7 +26,10 @@ public class CharacterStatSystem : MonoBehaviour
 
 [Header("속도 관련")]
 [SerializeField] private int speedStat; // 기본 속도 수치
-[SerializeField] private float moveSpeedPerSpeedPoint = 1f; // 속도 1당 이동속도 적용값
+[SerializeField] private float baseMoveSpeed = 5f; // 기본 이동속도
+[SerializeField] private int moveSpeedPercent = 100; // 이동속도 퍼센트
+[SerializeField] private float finalMoveSpeed; // 최종 적용 이동속도
+[SerializeField] private NavigationMovementSystem navigationMovementSystem; // 이동속도를 적용할 네비 이동 시스템
 
 [Header("결투 속도 관련")]
 [SerializeField] private int battleSpeed; // 이번 결투에 계산되어 적용된 전투속도
@@ -54,7 +58,9 @@ public int BodySize => bodySize; // 체급 반환
 public int MaxHealth => maxHealth; // 최대 체력 반환
 public int CurrentHealth => currentHealth; // 현재 체력 반환
 public int SpeedStat => speedStat; // 기본 속도 수치 반환
-public float MoveSpeedPerSpeedPoint => moveSpeedPerSpeedPoint; // 속도 1당 이동속도 적용값 반환
+public float BaseMoveSpeed => baseMoveSpeed; // 기본 이동속도 반환
+public int MoveSpeedPercent => moveSpeedPercent; // 이동속도 퍼센트 반환
+public float FinalMoveSpeed => finalMoveSpeed; // 최종 적용 이동속도 반환
 
 public int BattleSpeed => battleSpeed; // 현재 저장된 전투속도 반환
 public int MinimumSpeedRatePercent => minimumSpeedRatePercent; // 최소 속도율 반환
@@ -62,13 +68,22 @@ public int MaximumSpeedRatePercent => maximumSpeedRatePercent; // 최대 속도�
 public int PowerRatePercent => powerRatePercent; // 위력률 퍼센트 반환
 public bool IsActionLocked => isActionLocked; // 행동 불가 여부 반환
 
-    public event Action<CharacterStatSystem> OnStatusValueChanged; // 체력/와해량 변경 알림 이벤트
+    public event Action<CharacterStatSystem> OnStatusValueChanged; // 스탯 값 변경 알림 이벤트
 
-    private void Awake() // 시작 시 현재값 범위 보정
+    
+
+private void Awake() // 시작 시 현재값 범위 보정
+{
+    currentHealth = Mathf.Clamp(currentHealth, 0, Mathf.Max(0, maxHealth)); // 현재 체력 범위 보정
+    currentStaggerAmount = Mathf.Clamp(currentStaggerAmount, 0, Mathf.Max(0, maxStaggerAmount)); // 현재 와해량 범위 보정
+
+    if (navigationMovementSystem == null)
     {
-        currentHealth = Mathf.Clamp(currentHealth, 0, Mathf.Max(0, maxHealth)); // 현재 체력 범위 보정
-        currentStaggerAmount = Mathf.Clamp(currentStaggerAmount, 0, Mathf.Max(0, maxStaggerAmount)); // 현재 와해량 범위 보정
+        navigationMovementSystem = GetComponent<NavigationMovementSystem>(); // 네비 이동 시스템 자동 참조
     }
+
+    RefreshFinalMoveSpeed(); // 최종 이동속도 계산 및 적용
+}
 
     private void NotifyStatusValueChanged() // UI 즉시 갱신 알림 전달
     {
@@ -119,5 +134,18 @@ public int ApplyStaggerDamage(int rawStaggerDamage) // 저지율 퍼센트를 �
     NotifyStatusValueChanged(); // 와해 UI 즉시 갱신 알림
 
     return finalStaggerDamage; // 실제 적용된 최종 와해피해 반환
+}
+
+public void RefreshFinalMoveSpeed() // 최종 이동속도를 계산하고 이동 시스템에 적용합니다.
+{
+    float calculatedMoveSpeed = baseMoveSpeed * (moveSpeedPercent / 100f); // 기본 이동속도와 퍼센트 계산
+    finalMoveSpeed = Mathf.Floor(calculatedMoveSpeed * 10f) / 10f; // 소수점 첫째 자리까지만 남기고 뒤는 버림
+
+    if (navigationMovementSystem != null)
+    {
+        navigationMovementSystem.SetMoveSpeed(finalMoveSpeed); // 이동 시스템에 최종 이동속도 적용
+    }
+
+    NotifyStatusValueChanged(); // UI 갱신 알림
 }
 }

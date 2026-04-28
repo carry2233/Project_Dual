@@ -123,6 +123,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterManager.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\QuadGrassWiggle.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\CharacterDetailInfoWindow.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationPlayer.cs" />

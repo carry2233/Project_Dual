@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GlobalCharacterDefinition
   firstRowID: 1
   secondRowID: 1
-  detailUIPrefab: {fileID: 6988253213661785462, guid: e3a8349beda6c704d91d034534eff05f, type: 3}
+  detailUIPrefab: {fileID: 2177999571878758286, guid: 2f605ecbc84772444b4aeb3a282c9eef, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 1c9d70606cdd44f43a1fc3a120a8edfb, type: 3}

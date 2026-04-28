@@ -2,10 +2,8 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// 네비 이동 시스템
-/// - 순수 이동 처리 전담
-/// - NavMesh로 경로 계산
-/// - Rigidbody2D로 실제 이동
+/// 캐릭터의 NavMesh 경로 계산과 Rigidbody2D 기반 실제 이동을 처리한다.
+/// CharacterStatSystem에서 계산된 최종 이동속도를 받아 이동속도 값에 적용한다.
 /// </summary>
 public class NavigationMovementSystem : MonoBehaviour
 {
@@ -541,5 +539,10 @@ public void SetForcedFacingDirection(FacingXDirectionType directionType) // 강�
 public void ClearForcedFacingDirection() // 강제 방향 고정 해제
 {
     useForcedFacingDirection = false; // 강제 방향 사용 해제
+}
+
+public void SetMoveSpeed(float newMoveSpeed) // 외부에서 계산된 이동속도를 적용합니다.
+{
+    moveSpeed = Mathf.Max(0f, newMoveSpeed); // 음수 방지 후 이동속도 저장
 }
 }

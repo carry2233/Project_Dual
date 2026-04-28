@@ -2092,7 +2092,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -254.8, y: 133.54678}
+  m_AnchoredPosition: {x: -254.8, y: 133.54683}
   m_SizeDelta: {x: 500, y: 256.9075}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &770366915
@@ -5260,7 +5260,11 @@ MonoBehaviour:
   saveFileName: save_data.json
   maxSaveCount: 3
   tileLayoutSaveFilePrefix: HexTilePlacementSave_
-  currentOwnedCharacterList: []
+  currentOwnedCharacterList:
+  - firstRowID: 0
+    secondRowID: 0
+    individualID: 0
+  currentOwnedCharacterStatList: []
 --- !u!4 &1871097358
 Transform:
   m_ObjectHideFlags: 0
@@ -5405,8 +5409,45 @@ MonoBehaviour:
   startingOwnedCharacterList:
   - firstRowID: 1
     secondRowID: 1
+    individualID: 11
   - firstRowID: 1
     secondRowID: 2
+    individualID: 22
+  startingOwnedCharacterStatList:
+  - firstRowID: 1
+    secondRowID: 1
+    individualID: 11
+    levelstats: 55
+    baseMoveSpeed: 10
+    moveSpeedPercent: 100
+    finalMoveSpeed: 0
+    attackPower: 0
+    defenseValue: 0
+    maxHealth: 0
+    currentHealth: 0
+    bodySize: 0
+    speedStat: 111
+    powerRatePercent: 0
+    maxStaggerAmount: 1111
+    currentStaggerAmount: 0
+    staggerResistancePercent: 10
+  - firstRowID: 1
+    secondRowID: 2
+    individualID: 22
+    levelstats: 66
+    baseMoveSpeed: 5
+    moveSpeedPercent: 200
+    finalMoveSpeed: 0
+    attackPower: 0
+    defenseValue: 0
+    maxHealth: 0
+    currentHealth: 0
+    bodySize: 0
+    speedStat: 222
+    powerRatePercent: 0
+    maxStaggerAmount: 2222
+    currentStaggerAmount: 0
+    staggerResistancePercent: 50
 --- !u!4 &1943530136
 Transform:
   m_ObjectHideFlags: 0
