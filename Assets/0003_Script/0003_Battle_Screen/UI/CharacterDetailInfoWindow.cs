@@ -21,6 +21,31 @@ public class CharacterDetailInfoWindow : MonoBehaviour
     [Header("레벨 표시 UI")]
     [SerializeField] private TMP_Text levelText; // 레벨 값을 표시할 텍스트
 
+    [Header("저장 스탯 표시 UI")]
+
+[Header("이속")]
+[SerializeField] private TMP_Text baseMoveSpeedText; // 기본 이동속도 표시 텍스트
+[SerializeField] private TMP_Text moveSpeedPercentText; // 이동속도 퍼센트 표시 텍스트
+[SerializeField] private TMP_Text finalMoveSpeedText; // 최종 이동속도 표시 텍스트
+
+[Header("전투 스탯")]
+[SerializeField] private TMP_Text attackPowerText; // 공격력 표시 텍스트
+[SerializeField] private TMP_Text defenseValueText; // 방어력 표시 텍스트
+[SerializeField] private TMP_Text maxHealthText; // 최대 체력 표시 텍스트
+[SerializeField] private TMP_Text currentHealthText; // 현재 체력 표시 텍스트
+
+[Header("체급")]
+[SerializeField] private TMP_Text bodySizeText; // 체급 표시 텍스트
+[Header("속도")]
+[SerializeField] private TMP_Text speedStatText; // 속도 수치 표시 텍스트
+[Header("위력률")]
+[SerializeField] private TMP_Text powerRatePercentText; // 위력률 표시 텍스트
+[Header("와해 스탯")]
+[SerializeField] private TMP_Text maxStaggerAmountText; // 최대 와해량 표시 텍스트
+[SerializeField] private TMP_Text staggerResistancePercentText; // 와해 저항률 표시 텍스트
+
+private SaveStorage.OwnedCharacterStatData targetStatData; // 상세 UI가 참조할 저장 스탯정보
+
     private CharacterStatSystem targetStatSystem; // 상세 UI가 참조할 캐릭터 스탯 시스템
 
     /// <summary>
@@ -33,6 +58,12 @@ public class CharacterDetailInfoWindow : MonoBehaviour
         public GameObject targetUIObject; // 토글 대상 UI 오브젝트
         public Scrollbar targetScrollbar; // 비활성화 시 값이 0으로 초기화될 Scrollbar
     }
+
+    public void Initialize(SaveStorage.OwnedCharacterStatData newTargetStatData) // 저장 스탯정보 기준으로 상세 UI를 초기화합니다.
+{
+    targetStatData = newTargetStatData; // 저장 스탯정보 저장
+    RefreshSavedStatTexts(); // 저장 스탯 표시 갱신
+}
 
     private void Awake()
     {
@@ -195,5 +226,52 @@ private void RefreshLevelText(CharacterStatSystem statSystem) // 현재 레벨 �
     }
 
     levelText.text = "LV." + statSystem.LevelStats; // 레벨 표시
+}
+
+private void RefreshSavedStatTexts() // 저장된 캐릭터 스탯을 텍스트에 표시합니다.
+{
+    if (targetStatData == null)
+    {
+        SetText(levelText, "LV.-");
+        SetText(baseMoveSpeedText, "기본 이동속도: -");
+        SetText(moveSpeedPercentText, "이동속도율: -");
+        SetText(finalMoveSpeedText, "이동속도: -");
+        SetText(attackPowerText, "공격력: -");
+        SetText(defenseValueText, "방어율: -");
+        SetText(maxHealthText, "최대 체력: -");
+        SetText(currentHealthText, "현재 체력: -");
+        SetText(bodySizeText, "체급: -");
+        SetText(speedStatText, "속도: -");
+        SetText(powerRatePercentText, "위력률: -");
+        SetText(maxStaggerAmountText, "최대 와해량: -");
+        SetText(staggerResistancePercentText, "와해 저항률: -");
+        return;
+    }
+
+    SetText(levelText, "LV." + targetStatData.levelstats);
+    SetText(baseMoveSpeedText, "기본 이동속도: " + targetStatData.baseMoveSpeed);
+    SetText(moveSpeedPercentText, "이동속도율: " + targetStatData.moveSpeedPercent +"%");
+    SetText(finalMoveSpeedText, "이동속도: " + targetStatData.finalMoveSpeed);
+
+    SetText(attackPowerText, "공격력: " + targetStatData.attackPower);
+    SetText(defenseValueText, "방어율: " + targetStatData.defenseValue +"%");
+    SetText(maxHealthText, "최대 체력: " + targetStatData.maxHealth);
+    SetText(currentHealthText, "현재 체력: " + targetStatData.currentHealth);
+
+    SetText(bodySizeText, "체급: " + targetStatData.bodySize);
+    SetText(speedStatText, "속도: " + targetStatData.speedStat);
+    SetText(powerRatePercentText, "위력률: " + targetStatData.powerRatePercent +"%");
+    SetText(maxStaggerAmountText, "최대 와해량: " + targetStatData.maxStaggerAmount);
+    SetText(staggerResistancePercentText, "와해 저항률: " + targetStatData.staggerResistancePercent +"%");
+}
+
+private void SetText(TMP_Text targetText, string value) // TMP 텍스트 값을 안전하게 설정합니다.
+{
+    if (targetText == null)
+    {
+        return; // 텍스트가 없으면 종료
+    }
+
+    targetText.text = value; // 텍스트 표시
 }
 }

@@ -11,9 +11,10 @@ using System.Collections.Generic; // 리스트 사용
 /// </summary>
 public class CharacterManagementManager : MonoBehaviour
 {
-    [Header("UI 참조")]
-    [SerializeField] private Button toggleButton; // 캐릭터 관리창 토글 버튼
-    [SerializeField] private GameObject characterManagementPanelObject; // 캐릭터 관리창 패널 오브젝트
+[Header("UI 참조")]
+[SerializeField] private Button openButton; // 캐릭터 관리창 활성화 버튼
+[SerializeField] private Button closeButton; // 캐릭터 관리창 비활성화 버튼
+[SerializeField] private GameObject characterManagementPanelObject; // 캐릭터 관리창 패널 오브젝트
 
     [Header("외부 참조")]
     [SerializeField] private TileSelectionManager tileSelectionManager; // 타일 선택 및 월드맵 잠금 제어 스크립트
@@ -25,6 +26,14 @@ public class CharacterManagementManager : MonoBehaviour
 [SerializeField] private CharacterInfoManager characterInfoManager; // 캐릭터 정보 매니저 참조
 [SerializeField] private SaveStorage saveStorage; // 저장 데이터 매니저 참조
 
+[Header("상세 UI 생성 참조")]
+[SerializeField] private Transform detailUIParent; // 상세 UI가 생성될 부모 오브젝트
+
+[Header("스크롤뷰 Content 크기 조절")]
+[SerializeField] private RectTransform contentRectTransform; // 스크롤뷰 Content 오브젝트 RectTransform
+
+private GameObject currentDetailUIObject; // 현재 생성된 상세 UI 오브젝트
+
 private readonly List<GameObject> createdSlotObjectList = new List<GameObject>(); // 현재 생성된 관리창 슬롯 목록
 
     private bool isPanelOpen = false; // 현재 패널 열림 상태
@@ -33,9 +42,14 @@ private readonly List<GameObject> createdSlotObjectList = new List<GameObject>()
 
 private void Awake() // 시작 전 버튼 연결 및 참조 초기화
 {
-    if (toggleButton != null)
+    if (openButton != null)
     {
-        toggleButton.onClick.AddListener(ToggleCharacterManagementPanel); // 버튼 클릭 시 토글 연결
+        openButton.onClick.AddListener(OpenCharacterManagementPanel); // 활성화 버튼 클릭 시 관리창 열기
+    }
+
+    if (closeButton != null)
+    {
+        closeButton.onClick.AddListener(CloseCharacterManagementPanel); // 비활성화 버튼 클릭 시 관리창 닫기
     }
 
     if (characterInfoManager == null)
@@ -61,18 +75,18 @@ private void Awake() // 시작 전 버튼 연결 및 참조 초기화
     ApplyPanelState(false); // 시작 시 패널 닫힘 상태 적용
 }
 
-    private void OnDestroy() // 종료 시 버튼 이벤트 해제
+private void OnDestroy() // 종료 시 버튼 이벤트 해제
+{
+    if (openButton != null)
     {
-        if (toggleButton != null)
-        {
-            toggleButton.onClick.RemoveListener(ToggleCharacterManagementPanel); // 버튼 이벤트 해제
-        }
+        openButton.onClick.RemoveListener(OpenCharacterManagementPanel); // 활성화 버튼 이벤트 해제
     }
 
-    public void ToggleCharacterManagementPanel() // 캐릭터 관리창 패널 토글
+    if (closeButton != null)
     {
-        ApplyPanelState(isPanelOpen == false); // 현재 상태를 반전하여 적용
+        closeButton.onClick.RemoveListener(CloseCharacterManagementPanel); // 비활성화 버튼 이벤트 해제
     }
+}
 
     public void OpenCharacterManagementPanel() // 캐릭터 관리창 패널 열기
     {
@@ -92,6 +106,8 @@ private void ApplyPanelState(bool shouldOpen) // 패널 상태 적용 및 외부
     {
         characterManagementPanelObject.SetActive(isPanelOpen); // 패널 활성/비활성 적용
     }
+
+    RefreshToggleButtonState(); // 관리창 상태에 따른 버튼 활성 상태 갱신
 
     if (tileSelectionManager != null)
     {
@@ -158,8 +174,15 @@ private void CreateCharacterManagementSlots() // 현재 소유 캐릭터 목록 
             continue; // 프리팹이 없으면 건너뜀
         }
 
-        GameObject slotObject = Instantiate(slotPrefab, characterSlotParent); // 슬롯 생성
-        tempSlotList.Add(slotObject); // 임시 목록에 추가
+GameObject slotObject = Instantiate(slotPrefab, characterSlotParent); // 슬롯 생성
+
+CharacterManagementSlot managementSlot = slotObject.GetComponent<CharacterManagementSlot>(); // 슬롯 스크립트 참조
+if (managementSlot != null)
+{
+    managementSlot.Initialize(this, ownedData.firstRowID, ownedData.secondRowID, ownedData.individualID); // 슬롯 담당 캐릭터 정보 전달
+}
+
+tempSlotList.Add(slotObject); // 임시 목록에 추가
     }
 
     tempSlotList.Sort(CompareSlotPriority); // 우선순위 기준 정렬
@@ -169,6 +192,8 @@ private void CreateCharacterManagementSlots() // 현재 소유 캐릭터 목록 
         tempSlotList[i].transform.SetSiblingIndex(i); // Grid Layout Group 배치 순서 적용
         createdSlotObjectList.Add(tempSlotList[i]); // 생성 슬롯 목록에 등록
     }
+
+    RefreshContentRightValue(); // 생성된 슬롯 수 기준으로 Content 오른쪽값 갱신
 }
 
 private int CompareSlotPriority(GameObject a, GameObject b) // 슬롯 우선순위 비교
@@ -207,5 +232,101 @@ private void ClearCharacterManagementSlots() // 생성된 관리창 슬롯 삭�
     }
 
     createdSlotObjectList.Clear(); // 생성 슬롯 목록 초기화
+    RefreshContentRightValue(); // 슬롯 삭제 후 Content 오른쪽값 초기화
+    ClearCharacterDetailUI(); // 관리창 슬롯 삭제 시 상세 UI도 같이 삭제
+
+    
 }
+
+public void OpenCharacterDetailUI(int firstRowID, int secondRowID, int individualID) // 선택 캐릭터 상세 UI 생성
+{
+    if (detailUIParent == null)
+    {
+        return; // 상세 UI 부모가 없으면 종료
+    }
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = CharacterInfoManager.Instance; // 캐릭터 정보 매니저 재참조
+    }
+
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance; // 저장 매니저 재참조
+    }
+
+    if (characterInfoManager == null || saveStorage == null)
+    {
+        return; // 필수 참조가 없으면 종료
+    }
+
+    GlobalCharacterDefinition definition = characterInfoManager.FindDefinitionByID(firstRowID, secondRowID); // 캐릭터 정의 탐색
+    if (definition == null || definition.DetailUIPrefab == null)
+    {
+        return; // 상세 UI 프리팹이 없으면 종료
+    }
+
+    ClearCharacterDetailUI(); // 기존 상세 UI 제거
+
+    currentDetailUIObject = Instantiate(definition.DetailUIPrefab, detailUIParent); // 상세 UI 생성
+
+    CharacterDetailInfoWindow detailInfoWindow = currentDetailUIObject.GetComponent<CharacterDetailInfoWindow>(); // 상세 UI 스크립트 참조
+    if (detailInfoWindow == null)
+    {
+        return; // 상세 UI 스크립트가 없으면 종료
+    }
+
+    SaveStorage.OwnedCharacterStatData statData = saveStorage.FindCurrentOwnedCharacterStatData(firstRowID, secondRowID, individualID); // 저장된 스탯 정보 탐색
+    detailInfoWindow.Initialize(statData); // 상세 UI에 스탯 정보 전달
+}
+
+private void ClearCharacterDetailUI() // 생성된 상세 UI 삭제
+{
+    if (currentDetailUIObject != null)
+    {
+        Destroy(currentDetailUIObject); // 기존 상세 UI 삭제
+        currentDetailUIObject = null; // 참조 초기화
+    }
+}
+
+private void RefreshToggleButtonState() // 관리창 상태에 따라 활성화/비활성화 버튼 표시 상태 갱신
+{
+    if (openButton != null)
+    {
+        openButton.gameObject.SetActive(isPanelOpen == false); // 관리창이 닫혀 있을 때만 활성화 버튼 표시
+    }
+
+    if (closeButton != null)
+    {
+        closeButton.gameObject.SetActive(isPanelOpen == true); // 관리창이 열려 있을 때만 비활성화 버튼 표시
+    }
+}
+
+private void RefreshContentRightValue() // 슬롯 수와 Grid Layout Group 셀 크기 기준으로 Content 오른쪽값 갱신
+{
+    if (contentRectTransform == null)
+    {
+        return; // Content RectTransform이 없으면 종료
+    }
+
+    if (characterSlotParent == null)
+    {
+        return; // 슬롯 부모가 없으면 종료
+    }
+
+    GridLayoutGroup gridLayoutGroup = characterSlotParent.GetComponent<GridLayoutGroup>(); // 슬롯 부모의 Grid Layout Group 참조
+
+    if (gridLayoutGroup == null)
+    {
+        return; // Grid Layout Group이 없으면 종료
+    }
+
+    int slotCount = createdSlotObjectList.Count; // 현재 생성된 슬롯 수
+    float rightValue = slotCount * gridLayoutGroup.cellSize.x; // 슬롯 수 * 셀 X 크기
+
+    Vector2 size = contentRectTransform.sizeDelta; // 현재 Content 너비/높이 값
+    size.x = rightValue; // 슬롯 수 * 셀 크기 값을 너비로 적용
+    contentRectTransform.sizeDelta = size; // 변경된 너비 적용
+}
+
 }

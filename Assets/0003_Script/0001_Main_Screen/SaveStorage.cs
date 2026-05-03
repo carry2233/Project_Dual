@@ -17,6 +17,13 @@ private class SaveFileData
     public List<SaveEntry> saveList = new List<SaveEntry>(); // 저장본 목록
 }
 
+[Serializable]
+public class NotepadPageData
+{
+    public int pageIndex; // 메모장 페이지 인덱스
+    public string pageText; // 해당 페이지의 텍스트
+}
+
 [Header("저장 설정")]
 [SerializeField] private string saveFileName = "save_data.json"; // 저장 파일 이름
 [SerializeField] private int maxSaveCount = 20; // 최대 저장본 개수
@@ -78,6 +85,7 @@ public class SaveEntry
     public int saveNumber; // 화면 표시용 번호
     public List<OwnedCharacterData> ownedCharacterList = new List<OwnedCharacterData>(); // 이 저장본에 소속된 캐릭터 목록
     public List<OwnedCharacterStatData> ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 이 저장본에 소속된 캐릭터 스탯정보 목록
+    public List<NotepadPageData> notepadPageList = new List<NotepadPageData>(); // 이 저장본에 소속된 메모장 페이지 목록
 }
 
 [Header("현재 소유 캐릭터 목록")]
@@ -126,6 +134,7 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.saveNumber = source.saveNumber; // 번호 복사
         copy.ownedCharacterList = GetOwnedCharacterListCopy(source.ownedCharacterList); // 소유 캐릭터 목록 복사
         copy.ownedCharacterStatList = GetOwnedCharacterStatListCopy(source.ownedCharacterStatList); // 소유 캐릭터 스탯정보 목록 복사
+        copy.notepadPageList = GetNotepadPageListCopy(source.notepadPageList); // 메모장 페이지 목록 복사
 
         result.Add(copy); // 복사본 추가
     }
@@ -152,6 +161,7 @@ public bool CreateSave(string newSaveName, List<OwnedCharacterData> startOwnedCh
     newEntry.saveNumber = currentSaveFileData.saveList.Count + 1; // 표시용 번호 설정
     newEntry.ownedCharacterList = GetOwnedCharacterListCopy(startOwnedCharacterList); // 시작 캐릭터 목록 저장
     newEntry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(startOwnedCharacterStatList); // 시작 캐릭터 스탯정보 저장
+    newEntry.notepadPageList = new List<NotepadPageData>(); // 새 세이브의 메모장 페이지 목록 초기화
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
     currentSaveFileData.saveList.Add(newEntry); // 목록에 저장본 추가
@@ -195,6 +205,7 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
     {
         currentSaveFileData = new SaveFileData(); // 파일이 없으면 새 데이터 생성
         currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+        currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
         SaveToFile(); // 빈 파일 저장
         return; // 로드 종료
     }
@@ -205,6 +216,7 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
     {
         currentSaveFileData = new SaveFileData(); // 비어 있으면 새 데이터 생성
         currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+        currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
         SaveToFile(); // 빈 파일 저장
         return; // 로드 종료
     }
@@ -215,6 +227,7 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
     {
         currentSaveFileData = new SaveFileData(); // 실패 시 새 데이터 생성
         currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+        currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
         SaveToFile(); // 빈 파일 저장
         return; // 로드 종료
     }
@@ -233,15 +246,20 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
 
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
-    if (currentSaveFileData.saveList[i].ownedCharacterList == null)
-    {
-        currentSaveFileData.saveList[i].ownedCharacterList = new List<OwnedCharacterData>(); // 캐릭터 목록 null 방지
-    }
+        if (currentSaveFileData.saveList[i].ownedCharacterList == null)
+        {
+            currentSaveFileData.saveList[i].ownedCharacterList = new List<OwnedCharacterData>(); // 캐릭터 목록 null 방지
+        }
 
-    if (currentSaveFileData.saveList[i].ownedCharacterStatList == null)
-    {
-        currentSaveFileData.saveList[i].ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 캐릭터 스탯정보 목록 null 방지
-    }
+        if (currentSaveFileData.saveList[i].ownedCharacterStatList == null)
+        {
+            currentSaveFileData.saveList[i].ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 캐릭터 스탯정보 목록 null 방지
+        }
+
+        if (currentSaveFileData.saveList[i].notepadPageList == null)
+        {
+            currentSaveFileData.saveList[i].notepadPageList = new List<NotepadPageData>(); // 메모장 페이지 목록 null 방지
+        }
 
         if (currentSaveFileData.saveList[i].saveId <= 0)
         {
@@ -259,6 +277,7 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
     SortAndReindex(); // 번호 정렬 및 재정렬
     SaveToFile(); // 정리된 상태 다시 저장
 }
+
     public void SaveToFile() // 현재 저장 데이터 파일 저장
     {
         string path = GetSaveFilePath(); // 저장 파일 경로 가져오기
@@ -479,6 +498,158 @@ public void ApplyCurrentOwnedCharacterStatList(List<OwnedCharacterStatData> sour
 {
     currentOwnedCharacterStatList = GetOwnedCharacterStatListCopy(sourceList); // 현재 스탯정보 목록 복사 적용
 }
+
+public OwnedCharacterStatData FindCurrentOwnedCharacterStatData(int firstRowID, int secondRowID, int individualID) // 현재 소유 캐릭터 스탯정보 탐색
+{
+    for (int i = 0; i < currentOwnedCharacterStatList.Count; i++)
+    {
+        OwnedCharacterStatData statData = currentOwnedCharacterStatList[i]; // 현재 스탯정보 참조
+
+        if (statData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (statData.firstRowID != firstRowID)
+        {
+            continue; // 첫 번째 행 ID가 다르면 건너뜀
+        }
+
+        if (statData.secondRowID != secondRowID)
+        {
+            continue; // 두 번째 행 ID가 다르면 건너뜀
+        }
+
+        if (statData.individualID != individualID)
+        {
+            continue; // 개체별 ID가 다르면 건너뜀
+        }
+
+        return statData; // 일치하는 스탯정보 반환
+    }
+
+    return null; // 찾지 못했으면 null 반환
+}
+
+public string GetCurrentSelectedNotepadPageText(int pageIndex) // 현재 선택 저장본의 특정 메모장 페이지 텍스트 반환
+{
+    if (pageIndex <= 0) return string.Empty; // 잘못된 페이지면 빈 텍스트 반환
+    if (currentSelectedSaveId <= 0) return string.Empty; // 선택된 저장본이 없으면 빈 텍스트 반환
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 현재 선택 저장본이 아니면 건너뜀
+        }
+
+        if (entry.notepadPageList == null)
+        {
+            entry.notepadPageList = new List<NotepadPageData>(); // 메모장 목록 null 방지
+        }
+
+        for (int j = 0; j < entry.notepadPageList.Count; j++)
+        {
+            NotepadPageData pageData = entry.notepadPageList[j]; // 현재 페이지 데이터 참조
+            if (pageData == null) continue; // 비어 있으면 건너뜀
+
+            if (pageData.pageIndex == pageIndex)
+            {
+                return pageData.pageText == null ? string.Empty : pageData.pageText; // 저장된 텍스트 반환
+            }
+        }
+
+        return string.Empty; // 해당 페이지 저장값이 없으면 빈 텍스트 반환
+    }
+
+    return string.Empty; // 저장본을 못 찾으면 빈 텍스트 반환
+}
+
+public void SetCurrentSelectedNotepadPageText(int pageIndex, string pageText) // 현재 선택 저장본의 특정 메모장 페이지 텍스트 저장
+{
+    if (pageIndex <= 0) return; // 잘못된 페이지면 종료
+    if (currentSelectedSaveId <= 0) return; // 선택된 저장본이 없으면 종료
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 현재 선택 저장본이 아니면 건너뜀
+        }
+
+        if (entry.notepadPageList == null)
+        {
+            entry.notepadPageList = new List<NotepadPageData>(); // 메모장 목록 null 방지
+        }
+
+        for (int j = 0; j < entry.notepadPageList.Count; j++)
+        {
+            NotepadPageData pageData = entry.notepadPageList[j]; // 현재 페이지 데이터 참조
+            if (pageData == null) continue; // 비어 있으면 건너뜀
+
+            if (pageData.pageIndex == pageIndex)
+            {
+                pageData.pageText = pageText == null ? string.Empty : pageText; // 기존 페이지 텍스트 갱신
+                SaveToFile(); // 파일 저장
+                return; // 저장 종료
+            }
+        }
+
+        NotepadPageData newPageData = new NotepadPageData(); // 새 페이지 데이터 생성
+        newPageData.pageIndex = pageIndex; // 페이지 인덱스 저장
+        newPageData.pageText = pageText == null ? string.Empty : pageText; // 페이지 텍스트 저장
+
+        entry.notepadPageList.Add(newPageData); // 메모장 페이지 목록에 추가
+        entry.notepadPageList.Sort((a, b) => a.pageIndex.CompareTo(b.pageIndex)); // 페이지 인덱스 기준 정렬
+        SaveToFile(); // 파일 저장
+        return; // 저장 종료
+    }
+}
+
+private List<NotepadPageData> GetNotepadPageListCopy(List<NotepadPageData> sourceList) // 메모장 페이지 목록 깊은 복사 반환
+{
+    List<NotepadPageData> copyList = new List<NotepadPageData>(); // 복사용 리스트
+
+    if (sourceList == null)
+    {
+        return copyList; // 원본이 없으면 빈 리스트 반환
+    }
+
+    for (int i = 0; i < sourceList.Count; i++)
+    {
+        NotepadPageData source = sourceList[i]; // 원본 페이지 데이터 참조
+        if (source == null) continue; // 비어 있으면 건너뜀
+
+        NotepadPageData copy = new NotepadPageData(); // 복사 데이터 생성
+        copy.pageIndex = source.pageIndex; // 페이지 인덱스 복사
+        copy.pageText = source.pageText; // 페이지 텍스트 복사
+
+        copyList.Add(copy); // 복사본 추가
+    }
+
+    return copyList; // 복사 리스트 반환
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
