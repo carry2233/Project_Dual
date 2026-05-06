@@ -3,6 +3,7 @@ using TMPro; // TMP 입력필드/텍스트 사용
 using UnityEngine; // Unity 기본 기능
 using UnityEngine.UI; // 버튼 사용
 
+
 /// <summary>
 /// 메모장 UI 열기/닫기, 앞/뒤 페이지 이동, 페이지 텍스트 표시 및 SaveStorage 저장 갱신을 담당한다.
 /// </summary>
@@ -32,26 +33,32 @@ public class NotepadSystem : MonoBehaviour
     [Header("페이지 설정")]
     [SerializeField] private int startFrontPageIndex = 1; // 시작 앞페이지 인덱스
 
+
     private SaveStorage saveStorage; // 저장 데이터 관리 스크립트
     private int currentFrontPageIndex = 1; // 현재 앞페이지 인덱스
 
-    private void Awake() // 시작 전 참조 초기화
-    {
-        saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // SaveStorage 자동 참조
-        currentFrontPageIndex = Mathf.Max(1, startFrontPageIndex); // 시작 페이지 보정
-        ApplyNotepadState(false); // 시작 시 메모장 닫힘 적용
-    }
+private void Awake() // 시작 전 참조 초기화
+{
+    saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // SaveStorage 자동 참조
+    currentFrontPageIndex = Mathf.Max(1, startFrontPageIndex); // 시작 페이지 보정
 
-    private void OnEnable() // 활성화 시 버튼 이벤트 등록
-    {
-        AddButtonEvents(); // 버튼 이벤트 연결
-    }
+    ApplyInputFieldLineBreakSetting(frontPageInputField); // 앞페이지 입력필드 줄바꿈 설정 적용
+    ApplyInputFieldLineBreakSetting(backPageInputField); // 뒤페이지 입력필드 줄바꿈 설정 적용
 
-    private void OnDisable() // 비활성화 시 버튼 이벤트 해제
-    {
-        SaveCurrentPageTexts(); // 비활성화 직전 현재 입력 내용 저장
-        RemoveButtonEvents(); // 버튼 이벤트 해제
-    }
+    ApplyNotepadState(false); // 시작 시 메모장 닫힘 적용
+}
+
+
+private void OnEnable() // 활성화 시 버튼 이벤트 등록
+{
+    AddButtonEvents(); // 버튼 이벤트 연결
+}
+
+private void OnDisable()
+{
+    SaveCurrentPageTexts();
+    RemoveButtonEvents();
+}
 
     private void AddButtonEvents() // 버튼 이벤트 등록
     {
@@ -221,4 +228,14 @@ public class NotepadSystem : MonoBehaviour
             }
         }
     }
+
+private void ApplyInputFieldLineBreakSetting(TMP_InputField targetInputField) // 입력필드가 엔터를 줄바꿈으로 처리하도록 설정
+{
+    if (targetInputField == null) return; // 입력필드가 없으면 종료
+
+    targetInputField.contentType = TMP_InputField.ContentType.Standard; // 일반 텍스트 입력 허용
+    targetInputField.lineType = TMP_InputField.LineType.MultiLineNewline; // 엔터를 줄바꿈으로 처리
+    targetInputField.richText = false; // 입력 텍스트를 일반 텍스트로 처리
+}
+    
 }

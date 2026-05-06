@@ -1,4 +1,20 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
+[System.Serializable]
+public class CharacterUIImageData
+{
+    [Header("표시 이미지")]
+    public Sprite displaySprite;
+
+    [Header("UI 위치")]
+    public Vector2 anchoredPosition;
+
+    [Header("UI 회전")]
+    public Vector3 localEulerAngles;
+}
+
 
 /// <summary>
 /// 캐릭터 전역 정의 ScriptableObject
@@ -22,6 +38,8 @@ public class GlobalCharacterDefinition : ScriptableObject
 
     [Header("관리창 캐릭터 슬롯 프리팹")]
     [SerializeField] private GameObject managementCharacterSlotPrefab; // 캐릭터 관리창 슬롯 프리팹
+
+public List<CharacterUIImageData> characterUIImageList = new List<CharacterUIImageData>();
 
 public GameObject ManagementCharacterSlotPrefab => managementCharacterSlotPrefab; // 캐릭터 관리창 슬롯 프리팹 반환
 

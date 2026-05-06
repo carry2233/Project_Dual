@@ -11,6 +11,8 @@ using System.Collections.Generic; // 리스트 사용
 /// </summary>
 public class CharacterManagementManager : MonoBehaviour
 {
+
+    
 [Header("UI 참조")]
 [SerializeField] private Button openButton; // 캐릭터 관리창 활성화 버튼
 [SerializeField] private Button closeButton; // 캐릭터 관리창 비활성화 버튼
@@ -32,6 +34,23 @@ public class CharacterManagementManager : MonoBehaviour
 [Header("스크롤뷰 Content 크기 조절")]
 [SerializeField] private RectTransform contentRectTransform; // 스크롤뷰 Content 오브젝트 RectTransform
 
+
+[Header("캐릭터 이미지 UI 부모")]
+public GameObject characterImageParentObject; // 이미지 부모 오브젝트
+
+[Header("캐릭터 이미지 UI")]
+public Image characterDisplayImage; // 표시할 UI 이미지
+
+[Header("이미지 위치/회전 적용 대상")]
+public RectTransform characterImageChildRect; // 위치/회전 적용 대상
+
+[Header("이미지 인덱스 버튼")]
+[SerializeField] private Button previousImageButton; // 이전 이미지 버튼
+[SerializeField] private Button nextImageButton; // 다음 이미지 버튼
+
+private GlobalCharacterDefinition currentSelectedCharacter; // 현재 선택 캐릭터
+private int currentImageIndex; // 현재 이미지 인덱스
+
 private GameObject currentDetailUIObject; // 현재 생성된 상세 UI 오브젝트
 
 private readonly List<GameObject> createdSlotObjectList = new List<GameObject>(); // 현재 생성된 관리창 슬롯 목록
@@ -51,6 +70,16 @@ private void Awake() // 시작 전 버튼 연결 및 참조 초기화
     {
         closeButton.onClick.AddListener(CloseCharacterManagementPanel); // 비활성화 버튼 클릭 시 관리창 닫기
     }
+
+    if (previousImageButton != null)
+{
+    previousImageButton.onClick.AddListener(PreviousCharacterImage); // 이전 이미지 버튼 이벤트 연결
+}
+
+if (nextImageButton != null)
+{
+    nextImageButton.onClick.AddListener(NextCharacterImage); // 다음 이미지 버튼 이벤트 연결
+}
 
     if (characterInfoManager == null)
     {
@@ -75,6 +104,10 @@ private void Awake() // 시작 전 버튼 연결 및 참조 초기화
     ApplyPanelState(false); // 시작 시 패널 닫힘 상태 적용
 }
 
+private void Start() // 시작 시 캐릭터 이미지 버튼 숨김
+{
+    SetImageButtonActive(false); // 캐릭터 선택 전 이미지 버튼 비활성화
+}
 private void OnDestroy() // 종료 시 버튼 이벤트 해제
 {
     if (openButton != null)
@@ -86,6 +119,16 @@ private void OnDestroy() // 종료 시 버튼 이벤트 해제
     {
         closeButton.onClick.RemoveListener(CloseCharacterManagementPanel); // 비활성화 버튼 이벤트 해제
     }
+
+    if (previousImageButton != null)
+{
+    previousImageButton.onClick.RemoveListener(PreviousCharacterImage); // 이전 이미지 버튼 이벤트 해제
+}
+
+if (nextImageButton != null)
+{
+    nextImageButton.onClick.RemoveListener(NextCharacterImage); // 다음 이미지 버튼 이벤트 해제
+}
 }
 
     public void OpenCharacterManagementPanel() // 캐릭터 관리창 패널 열기
@@ -232,10 +275,9 @@ private void ClearCharacterManagementSlots() // 생성된 관리창 슬롯 삭�
     }
 
     createdSlotObjectList.Clear(); // 생성 슬롯 목록 초기화
-    RefreshContentRightValue(); // 슬롯 삭제 후 Content 오른쪽값 초기화
+    RefreshContentRightValue(); // 슬롯 삭제 후 Content 너비값 초기화
     ClearCharacterDetailUI(); // 관리창 슬롯 삭제 시 상세 UI도 같이 삭제
-
-    
+    ClearCharacterImageUI(); // 선택 캐릭터 이미지 UI 초기화
 }
 
 public void OpenCharacterDetailUI(int firstRowID, int secondRowID, int individualID) // 선택 캐릭터 상세 UI 생성
@@ -329,4 +371,155 @@ private void RefreshContentRightValue() // 슬롯 수와 Grid Layout Group 셀 �
     contentRectTransform.sizeDelta = size; // 변경된 너비 적용
 }
 
+public void SelectCharacterByID(int firstRowID, int secondRowID) // ID 기준으로 선택 캐릭터 이미지 표시
+{
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = CharacterInfoManager.Instance; // 캐릭터 정보 매니저 재참조
+    }
+
+    if (characterInfoManager == null)
+    {
+        ClearCharacterImageUI(); // 참조 실패 시 이미지 UI 초기화
+        return;
+    }
+
+    GlobalCharacterDefinition definition = characterInfoManager.FindDefinitionByID(firstRowID, secondRowID); // ID에 맞는 캐릭터 정의 탐색
+
+    if (definition == null)
+    {
+        ClearCharacterImageUI(); // 캐릭터 정의가 없으면 이미지 UI 초기화
+        return;
+    }
+
+    currentSelectedCharacter = definition; // 현재 선택 캐릭터 저장
+    currentImageIndex = 0; // 이미지 인덱스 0으로 초기화
+
+    UpdateCharacterImage(); // 캐릭터 이미지 갱신
+}
+
+public void NextCharacterImage() // 다음 캐릭터 이미지 표시
+{
+    if (currentSelectedCharacter == null)
+    {
+        return;
+    }
+
+    List<CharacterUIImageData> imageList = currentSelectedCharacter.characterUIImageList; // 현재 캐릭터 이미지 리스트
+
+    if (imageList == null || imageList.Count == 0)
+    {
+        ClearCharacterImageUI(); // 이미지가 없으면 UI 초기화
+        return;
+    }
+
+    currentImageIndex++; // 다음 인덱스로 이동
+
+    if (currentImageIndex >= imageList.Count)
+    {
+        currentImageIndex = 0; // 마지막 다음은 0번으로 순환
+    }
+
+    UpdateCharacterImage(); // 캐릭터 이미지 갱신
+}
+
+public void PreviousCharacterImage() // 이전 캐릭터 이미지 표시
+{
+    if (currentSelectedCharacter == null)
+    {
+        return;
+    }
+
+    List<CharacterUIImageData> imageList = currentSelectedCharacter.characterUIImageList; // 현재 캐릭터 이미지 리스트
+
+    if (imageList == null || imageList.Count == 0)
+    {
+        ClearCharacterImageUI(); // 이미지가 없으면 UI 초기화
+        return;
+    }
+
+    currentImageIndex--; // 이전 인덱스로 이동
+
+    if (currentImageIndex < 0)
+    {
+        currentImageIndex = imageList.Count - 1; // 0번 이전은 마지막으로 순환
+    }
+
+    UpdateCharacterImage(); // 캐릭터 이미지 갱신
+}
+
+private void UpdateCharacterImage() // 현재 인덱스의 캐릭터 이미지 UI 갱신
+{
+    if (currentSelectedCharacter == null)
+    {
+        ClearCharacterImageUI(); // 선택 캐릭터가 없으면 UI 초기화
+        return;
+    }
+
+    List<CharacterUIImageData> imageList = currentSelectedCharacter.characterUIImageList; // 현재 캐릭터 이미지 리스트
+
+    if (imageList == null || imageList.Count == 0)
+    {
+        ClearCharacterImageUI(); // 이미지 리스트가 비었으면 UI 초기화
+        return;
+    }
+
+    if (currentImageIndex < 0 || currentImageIndex >= imageList.Count)
+    {
+        currentImageIndex = 0; // 잘못된 인덱스면 0으로 보정
+    }
+
+    CharacterUIImageData imageData = imageList[currentImageIndex]; // 현재 표시할 이미지 데이터
+
+    if (characterImageParentObject != null)
+    {
+        characterImageParentObject.SetActive(true); // 이미지 부모 오브젝트 활성화
+    }
+
+    if (characterDisplayImage != null)
+    {
+        characterDisplayImage.sprite = imageData.displaySprite; // UI Image에 Sprite 적용
+        characterDisplayImage.enabled = imageData.displaySprite != null; // 이미지가 있을 때만 표시
+    }
+
+    if (characterImageChildRect != null)
+    {
+        characterImageChildRect.anchoredPosition = imageData.anchoredPosition; // UI 위치 적용
+        characterImageChildRect.localEulerAngles = imageData.localEulerAngles; // UI 회전 적용
+    }
+
+    SetImageButtonActive(true); // 캐릭터 이미지가 표시되는 동안 버튼 활성화
+}
+
+private void ClearCharacterImageUI() // 캐릭터 이미지 UI 초기화
+{
+    currentSelectedCharacter = null; // 현재 선택 캐릭터 초기화
+    currentImageIndex = 0; // 이미지 인덱스 초기화
+
+    if (characterDisplayImage != null)
+    {
+        characterDisplayImage.sprite = null; // 표시 이미지 제거
+        characterDisplayImage.enabled = false; // 이미지 컴포넌트 숨김
+    }
+
+    if (characterImageParentObject != null)
+    {
+        characterImageParentObject.SetActive(false); // 이미지 부모 오브젝트 비활성화
+    }
+
+    SetImageButtonActive(false); // 이미지 버튼 비활성화
+}
+
+private void SetImageButtonActive(bool isActive) // 이미지 이전/다음 버튼 활성 상태 적용
+{
+    if (previousImageButton != null)
+    {
+        previousImageButton.gameObject.SetActive(isActive); // 이전 버튼 오브젝트 활성 상태 적용
+    }
+
+    if (nextImageButton != null)
+    {
+        nextImageButton.gameObject.SetActive(isActive); // 다음 버튼 오브젝트 활성 상태 적용
+    }
+}
 }

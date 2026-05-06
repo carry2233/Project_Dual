@@ -53,6 +53,9 @@ private void OnClickSlotButton() // 슬롯 버튼 클릭 처리
         return; // 매니저가 없으면 종료
     }
 
+    characterManagementManager.SelectCharacterByID(firstRowID, secondRowID); // 선택 캐릭터 이미지 표시 요청
+
     characterManagementManager.OpenCharacterDetailUI(firstRowID, secondRowID, individualID); // 상세 UI 생성 요청
 }
+
 }

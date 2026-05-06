@@ -17,3 +17,16 @@ MonoBehaviour:
   detailUIPrefab: {fileID: 2177999571878758286, guid: 2f605ecbc84772444b4aeb3a282c9eef, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 1c9d70606cdd44f43a1fc3a120a8edfb, type: 3}
+  characterUIImageList:
+  - displaySprite: {fileID: 21300000, guid: 2b2ff7c2e6d861c4a9581cfa0b88512b, type: 3}
+    anchoredPosition: {x: 10, y: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  - displaySprite: {fileID: 21300000, guid: 42d2d6425cc083c49b6a9a29e767ff1d, type: 3}
+    anchoredPosition: {x: 20, y: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  - displaySprite: {fileID: 21300000, guid: 5f88c77e30715e14482ee96c014d7834, type: 3}
+    anchoredPosition: {x: 30, y: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  - displaySprite: {fileID: 21300000, guid: 1d46cfe45803e6147904ea8a71d36e28, type: 3}
+    anchoredPosition: {x: 40, y: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
