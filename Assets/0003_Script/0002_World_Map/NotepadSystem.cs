@@ -12,6 +12,9 @@ public class NotepadSystem : MonoBehaviour
     [Header("메모장 UI 참조")]
     [SerializeField] private GameObject notepadObject; // 메모장 전체 UI 오브젝트
 
+    [Header("외부 참조")]
+    [SerializeField] private TileSelectionManager tileSelectionManager; // 메모장 상태 전달용 타일 선택 매니저
+
     [Header("메모장 활성화 버튼 목록")]
     [SerializeField] private List<Button> openButtonList = new List<Button>(); // 메모장 열기 버튼 목록
 
@@ -205,29 +208,34 @@ private void OnDisable()
         }
     }
 
-    private void ApplyNotepadState(bool isOpen) // 메모장 열림/닫힘 상태 적용
+private void ApplyNotepadState(bool isOpen) // 메모장 열림/닫힘 상태 적용
+{
+    if (notepadObject != null)
     {
-        if (notepadObject != null)
-        {
-            notepadObject.SetActive(isOpen); // 메모장 UI 활성 상태 적용
-        }
+        notepadObject.SetActive(isOpen); // 메모장 UI 활성 상태 적용
+    }
 
-        for (int i = 0; i < openButtonList.Count; i++)
-        {
-            if (openButtonList[i] != null)
-            {
-                openButtonList[i].gameObject.SetActive(!isOpen); // 열기 버튼은 메모장 닫힘일 때 표시
-            }
-        }
+    if (tileSelectionManager != null)
+    {
+        tileSelectionManager.SetNotepadUIOpen(isOpen); // 메모장 상태 전달
+    }
 
-        for (int i = 0; i < closeButtonList.Count; i++)
+    for (int i = 0; i < openButtonList.Count; i++)
+    {
+        if (openButtonList[i] != null)
         {
-            if (closeButtonList[i] != null)
-            {
-                closeButtonList[i].gameObject.SetActive(isOpen); // 닫기 버튼은 메모장 열림일 때 표시
-            }
+            openButtonList[i].gameObject.SetActive(!isOpen); // 열기 버튼은 메모장 닫힘일 때 표시
         }
     }
+
+    for (int i = 0; i < closeButtonList.Count; i++)
+    {
+        if (closeButtonList[i] != null)
+        {
+            closeButtonList[i].gameObject.SetActive(isOpen); // 닫기 버튼은 메모장 열림일 때 표시
+        }
+    }
+}
 
 private void ApplyInputFieldLineBreakSetting(TMP_InputField targetInputField) // 입력필드가 엔터를 줄바꿈으로 처리하도록 설정
 {

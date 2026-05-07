@@ -62,6 +62,8 @@ public class TileSelectionManager : MonoBehaviour
     private bool hasSavedCameraState = false; // 선택 직전 카메라 상태 저장 여부
     private bool isSelectionInputBlockedByUI = false; // 외부 UI 상태로 인한 타일 선택 차단 여부
 
+    private bool isNotepadUIOpen = false; // 메모장 활성 상태 여부
+
     public SelectionState CurrentState => currentState; // 현재 상태 외부 확인용
     public TilePrefab CurrentSelectedTile => currentSelectedTile; // 현재 선택 타일 외부 확인용
 
@@ -91,9 +93,9 @@ private void Awake() // 시작 전 기본 참조와 초기값 저장
 
 private void Update() // 매 프레임 클릭 입력 처리
 {
-    if (isSelectionInputBlockedByUI == true)
+    if (isSelectionInputBlockedByUI == true || isNotepadUIOpen == true)
     {
-        return; // 외부 UI가 열려 있으면 타일 선택 입력 차단
+        return; // 외부 UI 또는 메모장 활성 상태면 입력 차단
     }
 
     if (Mouse.current == null)
@@ -290,11 +292,12 @@ private void UpdateMovementLock() // 현재 상태에 따라 월드맵 이동 �
         return; // 참조가 없으면 종료
     }
 
-    bool shouldLock =
-        currentState == SelectionState.Selecting ||
-        currentState == SelectionState.Selected ||
-        currentState == SelectionState.Deselecting ||
-        isSelectionInputBlockedByUI == true; // 선택 관련 상태 또는 외부 UI 활성 상태면 잠금
+bool shouldLock =
+    currentState == SelectionState.Selecting ||
+    currentState == SelectionState.Selected ||
+    currentState == SelectionState.Deselecting ||
+    isSelectionInputBlockedByUI == true ||
+    isNotepadUIOpen == true; // 메모장 활성 중에도 이동 잠금
 
     worldMapCameraController.SetMovementLock(shouldLock); // 이동 잠금 적용
 }
@@ -335,5 +338,17 @@ public void SetCharacterManagementUIOpen(bool isOpen) // 캐릭터 관리창 열
 public bool IsSelectionInputBlockedByUI() // 외부 UI에 의한 선택 차단 상태 반환
 {
     return isSelectionInputBlockedByUI; // 현재 선택 차단 상태 반환
+}
+
+public void SetNotepadUIOpen(bool isOpen) // 메모장 UI 열림 상태 전달
+{
+    isNotepadUIOpen = isOpen; // 현재 메모장 상태 저장
+
+    if (isOpen == true)
+    {
+        ClearSelection(); // 메모장 열리면 현재 선택 해제
+    }
+
+    UpdateMovementLock(); // 월드맵 이동 잠금 갱신
 }
 }

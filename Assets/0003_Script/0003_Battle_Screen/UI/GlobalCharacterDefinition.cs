@@ -39,6 +39,11 @@ public class GlobalCharacterDefinition : ScriptableObject
     [Header("관리창 캐릭터 슬롯 프리팹")]
     [SerializeField] private GameObject managementCharacterSlotPrefab; // 캐릭터 관리창 슬롯 프리팹
 
+    [Header("인벤토리 캐릭터 슬롯 프리팹")]
+    [SerializeField] private CharacterInventorySlot characterInventorySlotPrefab; // 인벤토리 분포창 캐릭터 슬롯 프리팹
+
+public CharacterInventorySlot CharacterInventorySlotPrefab => characterInventorySlotPrefab; // 인벤토리 캐릭터 슬롯 프리팹 반환
+
 public List<CharacterUIImageData> characterUIImageList = new List<CharacterUIImageData>();
 
 public GameObject ManagementCharacterSlotPrefab => managementCharacterSlotPrefab; // 캐릭터 관리창 슬롯 프리팹 반환

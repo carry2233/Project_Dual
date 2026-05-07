@@ -185,7 +185,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &85058624
 MonoBehaviour:
@@ -200,15 +200,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.65900004, g: 0.65900004, b: 0.65900004, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -237,7 +237,6 @@ GameObject:
   - component: {fileID: 150175497}
   - component: {fileID: 150175496}
   - component: {fileID: 150175495}
-  - component: {fileID: 150175498}
   m_Layer: 5
   m_Name: campaignButton
   m_TagString: Untagged
@@ -329,8 +328,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -347,21 +346,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 150175493}
   m_CullTransparentMesh: 1
---- !u!114 &150175498
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 150175493}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 2, y: -1}
-  m_UseGraphicAlpha: 1
 --- !u!1 &151196731
 GameObject:
   m_ObjectHideFlags: 0
@@ -397,9 +381,9 @@ RectTransform:
   m_Father: {fileID: 1983375594}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &151196733
 MonoBehaviour:
@@ -434,8 +418,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -464,7 +448,6 @@ GameObject:
   - component: {fileID: 173170598}
   - component: {fileID: 173170597}
   - component: {fileID: 173170596}
-  - component: {fileID: 173170599}
   m_Layer: 5
   m_Name: exitSuggestButton
   m_TagString: Untagged
@@ -556,8 +539,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -574,21 +557,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 173170594}
   m_CullTransparentMesh: 1
---- !u!114 &173170599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 173170594}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 2, y: -1}
-  m_UseGraphicAlpha: 1
 --- !u!1 &201333358
 GameObject:
   m_ObjectHideFlags: 0
@@ -649,7 +617,7 @@ MonoBehaviour:
   m_text: "\uC0AD\uC81C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_sharedMaterial: {fileID: 2906029063069092093, guid: 84159c52737f6e14991f8a4cf46477c3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -863,54 +831,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &272495426
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 272495427}
-  - component: {fileID: 272495428}
-  m_Layer: 0
-  m_Name: ItemDefinitionList
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &272495427
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 272495426}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &272495428
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 272495426}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: feb7d158c9a558d4083abf26b60fcddc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinitionList
-  itemDefinitions:
-  - {fileID: 11400000, guid: f8e984b7cc467ad46a054544fcc87e57, type: 2}
-  - {fileID: 11400000, guid: 3dba8f87f311fba4f896010a8f6566a8, type: 2}
-  - {fileID: 11400000, guid: ddc9f45509725ef4ca01263e3f9d672c, type: 2}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1210,9 +1130,6 @@ MonoBehaviour:
   exitConfirmUI: {fileID: 1845931490}
   exitButton: {fileID: 902029704}
   exitCancelButton: {fileID: 2134594366}
-  exitConfirmBlockedButtonList:
-  - {fileID: 150175495}
-  - {fileID: 173170596}
   moveTargetList:
   - targetUI: {fileID: 981126152}
     initialLocalPosition: {x: 0, y: 0, z: 0}
@@ -1533,7 +1450,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_SizeDelta: {x: 20, y: -0.000015259}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &466864774
 MonoBehaviour:
@@ -1578,8 +1495,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 85058624}
   m_HandleRect: {fileID: 85058623}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 1
+  m_Value: 0
+  m_Size: 0.9999928
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1597,15 +1514,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.915, g: 0.915, b: 0.915, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1930,7 +1847,7 @@ MonoBehaviour:
   m_text: "\uCDE8\uC18C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_sharedMaterial: {fileID: 2906029063069092093, guid: 84159c52737f6e14991f8a4cf46477c3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2088,7 +2005,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &745506930
 GameObject:
@@ -2175,8 +2092,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -252.5, y: 124.99999}
-  m_SizeDelta: {x: 505, y: 250}
+  m_AnchoredPosition: {x: -254.8, y: 133.54767}
+  m_SizeDelta: {x: 500, y: 256.9075}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &770366915
 MonoBehaviour:
@@ -2198,7 +2115,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 504, y: 50}
+  m_CellSize: {x: 500, y: 50}
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
@@ -2263,7 +2180,6 @@ GameObject:
   - component: {fileID: 899796107}
   - component: {fileID: 899796106}
   - component: {fileID: 899796105}
-  - component: {fileID: 899796108}
   m_Layer: 5
   m_Name: saveNameInputField
   m_TagString: Untagged
@@ -2412,8 +2328,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -2430,21 +2346,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 899796103}
   m_CullTransparentMesh: 1
---- !u!114 &899796108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 899796103}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &902029702
 GameObject:
   m_ObjectHideFlags: 0
@@ -2457,7 +2358,6 @@ GameObject:
   - component: {fileID: 902029706}
   - component: {fileID: 902029705}
   - component: {fileID: 902029704}
-  - component: {fileID: 902029707}
   m_Layer: 5
   m_Name: exitButton
   m_TagString: Untagged
@@ -2549,8 +2449,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -2567,21 +2467,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 902029702}
   m_CullTransparentMesh: 1
---- !u!114 &902029707
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 902029702}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &959179571
 GameObject:
   m_ObjectHideFlags: 0
@@ -2642,7 +2527,7 @@ MonoBehaviour:
   m_text: "\uC885\uB8CC"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_sharedMaterial: {fileID: 2906029063069092093, guid: 84159c52737f6e14991f8a4cf46477c3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2708,7 +2593,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &959179574
@@ -2996,7 +2881,7 @@ MonoBehaviour:
   m_text: "\uC815\uB9D0 \uC0AD\uC81C\uD558\uC2DC\uACA0\uC2B5\uB2C8\uB2E4?"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_sharedMaterial: {fileID: 2906029063069092093, guid: 84159c52737f6e14991f8a4cf46477c3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3367,7 +3252,6 @@ GameObject:
   - component: {fileID: 1191263377}
   - component: {fileID: 1191263376}
   - component: {fileID: 1191263375}
-  - component: {fileID: 1191263378}
   m_Layer: 5
   m_Name: deleteCancelButton
   m_TagString: Untagged
@@ -3459,8 +3343,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3477,21 +3361,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1191263373}
   m_CullTransparentMesh: 1
---- !u!114 &1191263378
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1191263373}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &1217980977
 GameObject:
   m_ObjectHideFlags: 0
@@ -3552,7 +3421,7 @@ MonoBehaviour:
   m_text: "\uC815\uB9D0 \uC885\uB8CC \uD558\uC2DC\uACA0\uC2B5\uB2C8\uB2E4?"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_sharedMaterial: {fileID: 2906029063069092093, guid: 84159c52737f6e14991f8a4cf46477c3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3618,7 +3487,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1217980980
@@ -3718,7 +3587,6 @@ GameObject:
   - component: {fileID: 1359445058}
   - component: {fileID: 1359445057}
   - component: {fileID: 1359445056}
-  - component: {fileID: 1359445059}
   m_Layer: 5
   m_Name: deleteExecuteButton
   m_TagString: Untagged
@@ -3810,8 +3678,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3828,21 +3696,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1359445054}
   m_CullTransparentMesh: 1
---- !u!114 &1359445059
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1359445054}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &1420877356
 GameObject:
   m_ObjectHideFlags: 0
@@ -3855,7 +3708,6 @@ GameObject:
   - component: {fileID: 1420877360}
   - component: {fileID: 1420877359}
   - component: {fileID: 1420877358}
-  - component: {fileID: 1420877361}
   m_Layer: 5
   m_Name: backButton
   m_TagString: Untagged
@@ -3947,8 +3799,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3965,21 +3817,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1420877356}
   m_CullTransparentMesh: 1
---- !u!114 &1420877361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1420877356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &1431762918
 GameObject:
   m_ObjectHideFlags: 0
@@ -4129,7 +3966,6 @@ GameObject:
   - component: {fileID: 1451255550}
   - component: {fileID: 1451255549}
   - component: {fileID: 1451255548}
-  - component: {fileID: 1451255551}
   m_Layer: 5
   m_Name: createCancelButton
   m_TagString: Untagged
@@ -4221,8 +4057,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -4239,21 +4075,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1451255546}
   m_CullTransparentMesh: 1
---- !u!114 &1451255551
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1451255546}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &1514349317
 GameObject:
   m_ObjectHideFlags: 0
@@ -4684,7 +4505,7 @@ MonoBehaviour:
   m_text: "\uCDE8\uC18C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_sharedMaterial: {fileID: 2906029063069092093, guid: 84159c52737f6e14991f8a4cf46477c3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4750,7 +4571,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1668646443
@@ -5204,7 +5025,6 @@ GameObject:
   - component: {fileID: 1823580859}
   - component: {fileID: 1823580858}
   - component: {fileID: 1823580857}
-  - component: {fileID: 1823580860}
   m_Layer: 5
   m_Name: createSaveButton
   m_TagString: Untagged
@@ -5296,8 +5116,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -5314,21 +5134,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1823580855}
   m_CullTransparentMesh: 1
---- !u!114 &1823580860
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1823580855}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &1845931490
 GameObject:
   m_ObjectHideFlags: 0
@@ -5460,7 +5265,6 @@ MonoBehaviour:
     secondRowID: 0
     individualID: 0
   currentOwnedCharacterStatList: []
-  currentOwnedCharacterInventoryList: []
 --- !u!4 &1871097358
 Transform:
   m_ObjectHideFlags: 0
@@ -5644,27 +5448,6 @@ MonoBehaviour:
     maxStaggerAmount: 2222
     currentStaggerAmount: 0
     staggerResistancePercent: 50
-  startingOwnedCharacterInventoryList:
-  - firstRowID: 1
-    secondRowID: 1
-    individualID: 11
-    items:
-    - itemAID: 1
-      itemBID: 1
-      count: 30
-    - itemAID: 1
-      itemBID: 3
-      count: 6
-  - firstRowID: 1
-    secondRowID: 2
-    individualID: 22
-    items:
-    - itemAID: 1
-      itemBID: 2
-      count: 12
-    - itemAID: 1
-      itemBID: 3
-      count: 9
 --- !u!4 &1943530136
 Transform:
   m_ObjectHideFlags: 0
@@ -5935,7 +5718,6 @@ GameObject:
   - component: {fileID: 1983375597}
   - component: {fileID: 1983375596}
   - component: {fileID: 1983375595}
-  - component: {fileID: 1983375598}
   m_Layer: 5
   m_Name: Scroll View
   m_TagString: Untagged
@@ -5961,8 +5743,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 50}
-  m_SizeDelta: {x: 525, y: 250}
+  m_AnchoredPosition: {x: 0, y: 43}
+  m_SizeDelta: {x: 526.5925, y: 267.0932}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1983375595
 MonoBehaviour:
@@ -5980,7 +5762,7 @@ MonoBehaviour:
   m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
-  m_Elasticity: 0.01
+  m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
   m_ScrollSensitivity: 1
@@ -5988,9 +5770,9 @@ MonoBehaviour:
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 466864774}
   m_HorizontalScrollbarVisibility: 2
-  m_VerticalScrollbarVisibility: 0
+  m_VerticalScrollbarVisibility: 2
   m_HorizontalScrollbarSpacing: -3
-  m_VerticalScrollbarSpacing: 0
+  m_VerticalScrollbarSpacing: -3
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -6007,15 +5789,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.86, g: 0.86, b: 0.86, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -6032,21 +5814,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1983375593}
   m_CullTransparentMesh: 1
---- !u!114 &1983375598
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1983375593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 5, y: -5}
-  m_UseGraphicAlpha: 1
 --- !u!1 &2034068336
 GameObject:
   m_ObjectHideFlags: 0
@@ -6515,7 +6282,6 @@ GameObject:
   - component: {fileID: 2134594368}
   - component: {fileID: 2134594367}
   - component: {fileID: 2134594366}
-  - component: {fileID: 2134594369}
   m_Layer: 5
   m_Name: exitCancelButton
   m_TagString: Untagged
@@ -6607,8 +6373,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -6625,21 +6391,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2134594364}
   m_CullTransparentMesh: 1
---- !u!114 &2134594369
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2134594364}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1 &2136145139
 GameObject:
   m_ObjectHideFlags: 0
@@ -6652,7 +6403,6 @@ GameObject:
   - component: {fileID: 2136145143}
   - component: {fileID: 2136145142}
   - component: {fileID: 2136145141}
-  - component: {fileID: 2136145144}
   m_Layer: 5
   m_Name: ' createConfirmButton'
   m_TagString: Untagged
@@ -6744,8 +6494,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 93b736b1432cd6d47948097ef54e8d12, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -6762,21 +6512,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136145139}
   m_CullTransparentMesh: 1
---- !u!114 &2136145144
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2136145139}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -6791,7 +6526,6 @@ SceneRoots:
   - {fileID: 1943530136}
   - {fileID: 1871097358}
   - {fileID: 649652974}
-  - {fileID: 272495427}
   - {fileID: 36241235}
   - {fileID: 1157838091}
   - {fileID: 1140032134}

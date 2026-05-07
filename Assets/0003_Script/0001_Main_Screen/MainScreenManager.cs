@@ -31,6 +31,9 @@ public class MainScreenManager : MonoBehaviour
     [SerializeField] private Button exitButton; // 실제 종료버튼
     [SerializeField] private Button exitCancelButton; // 종료취소버튼
 
+    [Header("종료 확인 UI 활성 중 비활성화할 버튼 목록")]
+    [SerializeField] private List<Button> exitConfirmBlockedButtonList = new List<Button>(); // 종료 확인 UI가 열려 있을 때 클릭을 막을 버튼 목록
+
     [Header("이동 대상 UI 리스트")]
     [SerializeField] private List<UITargetMoveData> moveTargetList = new List<UITargetMoveData>(); // 이동시킬 UI 정보 리스트
 
@@ -74,15 +77,17 @@ public class MainScreenManager : MonoBehaviour
         }
     }
 
-    private void SetInitialUIState() // 시작 시 UI 상태 초기화
+private void SetInitialUIState() // 시작 시 UI 상태 초기화
+{
+    if (exitConfirmUI != null)
     {
-        if (exitConfirmUI != null)
-        {
-            exitConfirmUI.SetActive(false); // 종료 확인 UI 비활성화
-        }
-
-        isCampaignState = false; // 시작 상태는 기본 메인 상태
+        exitConfirmUI.SetActive(false); // 종료 확인 UI 비활성화
     }
+
+    SetExitConfirmBlockedButtonsInteractable(true); // 시작 시 차단 대상 버튼 클릭 가능 상태 적용
+
+    isCampaignState = false; // 시작 상태는 기본 메인 상태
+}
 
     private void AddButtonEvents() // 버튼 이벤트 연결
     {
@@ -140,17 +145,21 @@ public class MainScreenManager : MonoBehaviour
         }
     }
 
-    private void OpenExitConfirmUI() // 종료 확인 UI 열기
-    {
-        if (exitConfirmUI == null) return; // 참조가 없으면 종료
-        exitConfirmUI.SetActive(true); // 종료 확인 UI 활성화
-    }
+private void OpenExitConfirmUI() // 종료 확인 UI 열기
+{
+    if (exitConfirmUI == null) return; // 참조가 없으면 종료
 
-    private void CloseExitConfirmUI() // 종료 확인 UI 닫기
-    {
-        if (exitConfirmUI == null) return; // 참조가 없으면 종료
-        exitConfirmUI.SetActive(false); // 종료 확인 UI 비활성화
-    }
+    exitConfirmUI.SetActive(true); // 종료 확인 UI 활성화
+    SetExitConfirmBlockedButtonsInteractable(false); // 종료 확인 UI 활성 중 지정 버튼 클릭 차단
+}
+
+private void CloseExitConfirmUI() // 종료 확인 UI 닫기
+{
+    if (exitConfirmUI == null) return; // 참조가 없으면 종료
+
+    exitConfirmUI.SetActive(false); // 종료 확인 UI 비활성화
+    SetExitConfirmBlockedButtonsInteractable(true); // 종료 확인 UI 닫힘 상태에서 지정 버튼 클릭 허용
+}
 
     private void OnClickCampaignButton() // 캠페인버튼 클릭 처리
     {
@@ -267,6 +276,17 @@ public class MainScreenManager : MonoBehaviour
 
         return curve.Evaluate(time); // 커브 평가값 반환
     }
+
+    private void SetExitConfirmBlockedButtonsInteractable(bool isInteractable) // 종료 확인 UI 상태에 따른 버튼 클릭 가능 여부 적용
+{
+    for (int i = 0; i < exitConfirmBlockedButtonList.Count; i++)
+    {
+        Button targetButton = exitConfirmBlockedButtonList[i]; // 현재 차단 대상 버튼 참조
+        if (targetButton == null) continue; // 비어 있으면 건너뜀
+
+        targetButton.interactable = isInteractable; // 버튼 클릭 가능 여부 적용
+    }
+}
 
     private void QuitGame() // 게임 종료 처리
     {

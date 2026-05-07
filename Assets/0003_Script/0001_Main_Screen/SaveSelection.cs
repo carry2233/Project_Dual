@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 저장본 선택 화면에서 저장본 생성, 삭제, 선택,
-/// 시작 소유 캐릭터 목록과 시작 캐릭터 스탯정보 전달을 담당한다.
+/// 시작 소유 캐릭터 목록, 시작 캐릭터 스탯정보, 시작 캐릭터 인벤토리 전달을 담당한다.
 /// </summary>
 
 public class SaveSelection : MonoBehaviour
@@ -51,6 +51,8 @@ public class SaveSelection : MonoBehaviour
  [Header("시작 소유 캐릭터 스탯정보 목록")]
 [SerializeField] private List<SaveStorage.OwnedCharacterStatData> startingOwnedCharacterStatList = new List<SaveStorage.OwnedCharacterStatData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 스탯정보 목록
 
+[Header("시작 소유 캐릭터 인벤토리 목록")]
+[SerializeField] private List<SaveStorage.OwnedCharacterInventorySaveData> startingOwnedCharacterInventoryList = new List<SaveStorage.OwnedCharacterInventorySaveData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 인벤토리 목록
 private void Awake() // 시작 전 기본 UI 상태 초기화
 {
     if (saveStorage == null)
@@ -276,7 +278,12 @@ private void TryCreateSave() // 저장본 생성 시도
         return; // 생성 중단
     }
 
-    bool createResult = saveStorage.CreateSave(inputName, startingOwnedCharacterList, startingOwnedCharacterStatList); // 시작 캐릭터 목록과 스탯정보 포함 생성
+    bool createResult = saveStorage.CreateSave(
+        inputName,
+        startingOwnedCharacterList,
+        startingOwnedCharacterStatList,
+        startingOwnedCharacterInventoryList
+    ); // 시작 캐릭터 목록, 스탯정보, 인벤토리 포함 생성
 
     if (!createResult) return; // 생성 실패 시 종료
 

@@ -58,6 +58,7 @@
     <Compile Include="Assets\0005_External_Assets\NamuFX\_CommonAssets\Scripts\Viewer.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\GlobalCharacterManager.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\InventoryItemDistributionManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\TilePrefab.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAfterimageObject.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
@@ -70,14 +71,17 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\CharacterInfoManager.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\DistributionInventorySlot.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\EnemyAIController.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\NotepadSystem.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\CharacterInventorySlot.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\MoveCommandController.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\ParticleAnimationEvent.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\SlashDecal.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\IntroUISequence.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\ItemDefinitionList.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
@@ -86,6 +90,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleSoundEmitter.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\DuelSandbagTarget.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\CharacterInventory.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterDuelAI.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterStatusUI.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
@@ -134,6 +139,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationClipSO..cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\WorldMapCameraController.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\GlobalItemDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Hit_Effects_FREE\Matthew Guz\Hits Effects FREE\Scene Demo\Script\Prefab Manager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\ElementsShowCase.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterListSlot.cs" />

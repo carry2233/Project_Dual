@@ -5,7 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// 저장본 생성, 삭제, 불러오기, 현재 선택 저장본 ID 관리,
-/// 소유 캐릭터 목록과 캐릭터별 스탯정보 저장/복원을 담당한다.
+/// 소유 캐릭터 목록, 캐릭터별 스탯정보, 캐릭터별 인벤토리 저장/복원을 담당한다.
 /// </summary>
 public class SaveStorage : MonoBehaviour
 {
@@ -76,6 +76,23 @@ public class OwnedCharacterStatData
     public int staggerResistancePercent; // 와해 저항률
 }
 
+[Serializable]
+public class OwnedCharacterInventoryItemSaveData
+{
+    public int itemAID; // 아이템 A ID
+    public int itemBID; // 아이템 B ID
+    public int count; // 저장 개수
+}
+
+[Serializable]
+public class OwnedCharacterInventorySaveData
+{
+    public int firstRowID; // 담당 캐릭터 첫 번째 행 ID
+    public int secondRowID; // 담당 캐릭터 두 번째 행 ID
+    public int individualID; // 담당 캐릭터 개체별 고유 ID
+    public List<OwnedCharacterInventoryItemSaveData> items = new List<OwnedCharacterInventoryItemSaveData>(); // 캐릭터 인벤토리 아이템 목록
+}
+
 
 [Serializable]
 public class SaveEntry
@@ -85,6 +102,7 @@ public class SaveEntry
     public int saveNumber; // 화면 표시용 번호
     public List<OwnedCharacterData> ownedCharacterList = new List<OwnedCharacterData>(); // 이 저장본에 소속된 캐릭터 목록
     public List<OwnedCharacterStatData> ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 이 저장본에 소속된 캐릭터 스탯정보 목록
+    public List<OwnedCharacterInventorySaveData> ownedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 이 저장본에 소속된 캐릭터 인벤토리 목록
     public List<NotepadPageData> notepadPageList = new List<NotepadPageData>(); // 이 저장본에 소속된 메모장 페이지 목록
 }
 
@@ -94,6 +112,10 @@ public class SaveEntry
 [Header("현재 소유 캐릭터 스탯정보 목록")]
 [SerializeField] private List<OwnedCharacterStatData> currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 세이브 기준 캐릭터 스탯정보 목록
 
+[Header("현재 소유 캐릭터 인벤토리 목록")]
+[SerializeField] private List<OwnedCharacterInventorySaveData> currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 세이브 기준 캐릭터 인벤토리 목록
+
+public List<OwnedCharacterInventorySaveData> CurrentOwnedCharacterInventoryList => GetOwnedCharacterInventoryListCopy(currentOwnedCharacterInventoryList); // 현재 캐릭터 인벤토리 목록 복사 반환
 public List<OwnedCharacterStatData> CurrentOwnedCharacterStatList => GetOwnedCharacterStatListCopy(currentOwnedCharacterStatList); // 현재 캐릭터 스탯정보 목록 복사 반환
 
 
@@ -135,10 +157,12 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.ownedCharacterList = GetOwnedCharacterListCopy(source.ownedCharacterList); // 소유 캐릭터 목록 복사
         copy.ownedCharacterStatList = GetOwnedCharacterStatListCopy(source.ownedCharacterStatList); // 소유 캐릭터 스탯정보 목록 복사
         copy.notepadPageList = GetNotepadPageListCopy(source.notepadPageList); // 메모장 페이지 목록 복사
+        copy.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(source.ownedCharacterInventoryList); // 소유 캐릭터 인벤토리 목록 복사
 
         result.Add(copy); // 복사본 추가
     }
 
+    
     result.Sort((a, b) => a.saveNumber.CompareTo(b.saveNumber)); // 번호 기준 정렬
     return result; // 정렬된 리스트 반환
 }
@@ -148,7 +172,11 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         return currentSaveFileData.saveList.Count < maxSaveCount; // 최대 개수 미만이면 생성 가능
     }
 
-public bool CreateSave(string newSaveName, List<OwnedCharacterData> startOwnedCharacterList, List<OwnedCharacterStatData> startOwnedCharacterStatList) // 새 저장본 생성
+public bool CreateSave(
+    string newSaveName,
+    List<OwnedCharacterData> startOwnedCharacterList,
+    List<OwnedCharacterStatData> startOwnedCharacterStatList,
+    List<OwnedCharacterInventorySaveData> startOwnedCharacterInventoryList) // 새 저장본 생성
 {
     if (!CanCreateNewSave()) return false; // 최대 개수면 생성 불가
 
@@ -161,6 +189,7 @@ public bool CreateSave(string newSaveName, List<OwnedCharacterData> startOwnedCh
     newEntry.saveNumber = currentSaveFileData.saveList.Count + 1; // 표시용 번호 설정
     newEntry.ownedCharacterList = GetOwnedCharacterListCopy(startOwnedCharacterList); // 시작 캐릭터 목록 저장
     newEntry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(startOwnedCharacterStatList); // 시작 캐릭터 스탯정보 저장
+    newEntry.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(startOwnedCharacterInventoryList); // 시작 캐릭터 인벤토리 저장
     newEntry.notepadPageList = new List<NotepadPageData>(); // 새 세이브의 메모장 페이지 목록 초기화
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
@@ -168,6 +197,7 @@ public bool CreateSave(string newSaveName, List<OwnedCharacterData> startOwnedCh
 
     ApplyCurrentOwnedCharacterList(newEntry.ownedCharacterList); // 현재 소유 캐릭터 목록 적용
     ApplyCurrentOwnedCharacterStatList(newEntry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 적용
+    ApplyCurrentOwnedCharacterInventoryList(newEntry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 적용
 
     SortAndReindex(); // 번호 정렬 및 재정렬
     SaveToFile(); // 파일 저장
@@ -206,6 +236,7 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
         currentSaveFileData = new SaveFileData(); // 파일이 없으면 새 데이터 생성
         currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
         currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+        currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
         SaveToFile(); // 빈 파일 저장
         return; // 로드 종료
     }
@@ -217,6 +248,7 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
         currentSaveFileData = new SaveFileData(); // 비어 있으면 새 데이터 생성
         currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
         currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+        currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
         SaveToFile(); // 빈 파일 저장
         return; // 로드 종료
     }
@@ -228,6 +260,7 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
         currentSaveFileData = new SaveFileData(); // 실패 시 새 데이터 생성
         currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
         currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+        currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
         SaveToFile(); // 빈 파일 저장
         return; // 로드 종료
     }
@@ -256,6 +289,11 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
             currentSaveFileData.saveList[i].ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 캐릭터 스탯정보 목록 null 방지
         }
 
+        if (currentSaveFileData.saveList[i].ownedCharacterInventoryList == null)
+        {
+            currentSaveFileData.saveList[i].ownedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 캐릭터 인벤토리 목록 null 방지
+        }
+
         if (currentSaveFileData.saveList[i].notepadPageList == null)
         {
             currentSaveFileData.saveList[i].notepadPageList = new List<NotepadPageData>(); // 메모장 페이지 목록 null 방지
@@ -263,19 +301,16 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
 
         if (currentSaveFileData.saveList[i].saveId <= 0)
         {
-            currentSaveFileData.saveList[i].saveId = currentSaveFileData.nextSaveId; // 누락된 고유 ID 보정
+            currentSaveFileData.saveList[i].saveId = currentSaveFileData.nextSaveId; // 잘못된 ID 보정
             currentSaveFileData.nextSaveId++; // 다음 ID 증가
-        }
-        else
-        {
-            currentSaveFileData.nextSaveId = Mathf.Max(currentSaveFileData.nextSaveId, currentSaveFileData.saveList[i].saveId + 1); // 다음 ID 보정
         }
     }
 
     currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
-    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 소유 캐릭터 스탯정보 목록 초기화
-    SortAndReindex(); // 번호 정렬 및 재정렬
-    SaveToFile(); // 정리된 상태 다시 저장
+    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+    currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
+
+    SortAndReindex(); // 저장본 번호 정렬
 }
 
     public void SaveToFile() // 현재 저장 데이터 파일 저장
@@ -384,7 +419,7 @@ public void ApplyCurrentOwnedCharacterList(List<OwnedCharacterData> sourceList) 
     currentOwnedCharacterList = GetOwnedCharacterListCopy(sourceList); // 현재 목록을 복사 적용
 }
 
-public bool LoadOwnedCharacterListFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록과 스탯정보를 현재 목록으로 적용
+public bool LoadOwnedCharacterListFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록, 스탯정보, 인벤토리를 현재 목록으로 적용
 {
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
@@ -397,6 +432,8 @@ public bool LoadOwnedCharacterListFromSave(int targetSaveId) // 특정 저장본
 
         ApplyCurrentOwnedCharacterList(entry.ownedCharacterList); // 현재 소유 캐릭터 목록 적용
         ApplyCurrentOwnedCharacterStatList(entry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 적용
+        ApplyCurrentOwnedCharacterInventoryList(entry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 적용
+
         return true; // 적용 성공
     }
 
@@ -419,7 +456,7 @@ public List<OwnedCharacterData> GetOwnedCharacterListBySaveId(int targetSaveId) 
 }
 
 
-public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록과 스탯정보를 현재 데이터로 적용
+public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록, 스탯정보, 인벤토리를 현재 데이터로 적용
 {
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
@@ -432,6 +469,8 @@ public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본
 
         ApplyCurrentOwnedCharacterList(entry.ownedCharacterList); // 현재 소유 캐릭터 목록에 적용
         ApplyCurrentOwnedCharacterStatList(entry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 목록에 적용
+        ApplyCurrentOwnedCharacterInventoryList(entry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 목록에 적용
+
         return true; // 적용 성공
     }
 
@@ -634,7 +673,156 @@ private List<NotepadPageData> GetNotepadPageListCopy(List<NotepadPageData> sourc
     return copyList; // 복사 리스트 반환
 }
 
+private List<OwnedCharacterInventorySaveData> GetOwnedCharacterInventoryListCopy(List<OwnedCharacterInventorySaveData> sourceList) // 캐릭터 인벤토리 목록 깊은 복사 반환
+{
+    List<OwnedCharacterInventorySaveData> copyList = new List<OwnedCharacterInventorySaveData>(); // 복사용 리스트
 
+    if (sourceList == null)
+    {
+        return copyList; // 원본이 없으면 빈 리스트 반환
+    }
+
+    for (int i = 0; i < sourceList.Count; i++)
+    {
+        OwnedCharacterInventorySaveData source = sourceList[i]; // 원본 인벤토리 데이터 참조
+        if (source == null) continue; // 비어 있으면 건너뜀
+
+        OwnedCharacterInventorySaveData copy = new OwnedCharacterInventorySaveData(); // 복사 데이터 생성
+        copy.firstRowID = source.firstRowID; // 첫 번째 행 ID 복사
+        copy.secondRowID = source.secondRowID; // 두 번째 행 ID 복사
+        copy.individualID = source.individualID; // 개체별 고유 ID 복사
+        copy.items = GetOwnedCharacterInventoryItemListCopy(source.items); // 아이템 목록 복사
+
+        copyList.Add(copy); // 복사본 추가
+    }
+
+    return copyList; // 복사 리스트 반환
+}
+
+private List<OwnedCharacterInventoryItemSaveData> GetOwnedCharacterInventoryItemListCopy(List<OwnedCharacterInventoryItemSaveData> sourceList) // 인벤토리 아이템 목록 깊은 복사 반환
+{
+    List<OwnedCharacterInventoryItemSaveData> copyList = new List<OwnedCharacterInventoryItemSaveData>(); // 복사용 리스트
+
+    if (sourceList == null)
+    {
+        return copyList; // 원본이 없으면 빈 리스트 반환
+    }
+
+    for (int i = 0; i < sourceList.Count; i++)
+    {
+        OwnedCharacterInventoryItemSaveData source = sourceList[i]; // 원본 아이템 데이터 참조
+        if (source == null) continue; // 비어 있으면 건너뜀
+
+        OwnedCharacterInventoryItemSaveData copy = new OwnedCharacterInventoryItemSaveData(); // 복사 데이터 생성
+        copy.itemAID = source.itemAID; // 아이템 A ID 복사
+        copy.itemBID = source.itemBID; // 아이템 B ID 복사
+        copy.count = source.count; // 개수 복사
+
+        copyList.Add(copy); // 복사본 추가
+    }
+
+    return copyList; // 복사 리스트 반환
+}
+
+public void ApplyCurrentOwnedCharacterInventoryList(List<OwnedCharacterInventorySaveData> sourceList) // 현재 캐릭터 인벤토리 목록 적용
+{
+    currentOwnedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(sourceList); // 현재 목록을 복사 적용
+}
+
+public List<OwnedCharacterInventorySaveData> GetCurrentOwnedCharacterInventoryList() // 현재 캐릭터 인벤토리 목록 복사 반환
+{
+    return GetOwnedCharacterInventoryListCopy(currentOwnedCharacterInventoryList); // 현재 목록 복사 반환
+}
+
+public List<OwnedCharacterInventorySaveData> GetOwnedCharacterInventoryListBySaveId(int targetSaveId) // 특정 저장본의 캐릭터 인벤토리 목록 복사 반환
+{
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId == targetSaveId)
+        {
+            return GetOwnedCharacterInventoryListCopy(entry.ownedCharacterInventoryList); // 복사본 반환
+        }
+    }
+
+    return new List<OwnedCharacterInventorySaveData>(); // 없으면 빈 리스트 반환
+}
+
+public OwnedCharacterInventorySaveData FindCurrentOwnedCharacterInventoryData(int firstRowID, int secondRowID, int individualID) // 현재 캐릭터 인벤토리 데이터 탐색
+{
+    for (int i = 0; i < currentOwnedCharacterInventoryList.Count; i++)
+    {
+        OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[i]; // 현재 인벤토리 데이터 참조
+        if (inventoryData == null) continue; // 비어 있으면 건너뜀
+
+        bool isSameCharacter =
+            inventoryData.firstRowID == firstRowID &&
+            inventoryData.secondRowID == secondRowID &&
+            inventoryData.individualID == individualID; // 같은 캐릭터인지 확인
+
+        if (isSameCharacter)
+        {
+            List<OwnedCharacterInventorySaveData> copyList = GetOwnedCharacterInventoryListCopy(new List<OwnedCharacterInventorySaveData> { inventoryData }); // 단일 데이터 복사
+            return copyList.Count > 0 ? copyList[0] : null; // 복사본 반환
+        }
+    }
+
+    return null; // 찾지 못하면 null 반환
+}
+
+public void SetCurrentOwnedCharacterInventoryData(OwnedCharacterInventorySaveData targetInventoryData) // 현재 캐릭터 인벤토리 데이터 갱신
+{
+    if (targetInventoryData == null)
+    {
+        return; // 대상이 없으면 종료
+    }
+
+    for (int i = 0; i < currentOwnedCharacterInventoryList.Count; i++)
+    {
+        OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[i]; // 현재 인벤토리 데이터 참조
+        if (inventoryData == null) continue; // 비어 있으면 건너뜀
+
+        bool isSameCharacter =
+            inventoryData.firstRowID == targetInventoryData.firstRowID &&
+            inventoryData.secondRowID == targetInventoryData.secondRowID &&
+            inventoryData.individualID == targetInventoryData.individualID; // 같은 캐릭터인지 확인
+
+        if (isSameCharacter)
+        {
+            currentOwnedCharacterInventoryList[i] = GetOwnedCharacterInventoryListCopy(new List<OwnedCharacterInventorySaveData> { targetInventoryData })[0]; // 기존 데이터 교체
+            SaveCurrentOwnedCharacterInventoryListToSelectedSave(); // 현재 선택 저장본에 반영
+            return; // 갱신 종료
+        }
+    }
+
+    currentOwnedCharacterInventoryList.Add(GetOwnedCharacterInventoryListCopy(new List<OwnedCharacterInventorySaveData> { targetInventoryData })[0]); // 새 데이터 추가
+    SaveCurrentOwnedCharacterInventoryListToSelectedSave(); // 현재 선택 저장본에 반영
+}
+
+public bool SaveCurrentOwnedCharacterInventoryListToSelectedSave() // 현재 캐릭터 인벤토리 목록을 선택 저장본에 저장
+{
+    if (currentSelectedSaveId < 0)
+    {
+        return false; // 선택된 저장본이 없으면 실패
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        entry.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(currentOwnedCharacterInventoryList); // 현재 인벤토리 목록 저장본에 반영
+        SaveToFile(); // 파일 저장
+        return true; // 저장 성공
+    }
+
+    return false; // 대상 저장본 없음
+}
 
 
 
