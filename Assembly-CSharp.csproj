@@ -61,6 +61,7 @@
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\InventoryItemDistributionManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\TilePrefab.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAfterimageObject.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\FriendlyCharacterDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\SaveSelection.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
@@ -85,6 +86,8 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\GlobalCharacterDefinition.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\FriendlyCharacterInfoManager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\MainScreenManager.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleSoundEmitter.cs" />
@@ -134,7 +137,6 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationPlayer.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
-    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\GlobalCharacterDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationClipSO..cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\WorldMapCameraController.cs" />

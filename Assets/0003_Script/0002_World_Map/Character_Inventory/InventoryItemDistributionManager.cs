@@ -41,6 +41,27 @@ public class InventoryItemDistributionManager : MonoBehaviour
     public Button nextPageButton; // 다음 페이지 버튼
     public TMP_Text pageIndexText; // 현재 페이지 / 총 페이지 텍스트
 
+    [Header("드래그용 슬롯 UI")]
+public GameObject dragSlotObject; // 드래그 중 표시할 슬롯 오브젝트
+public RectTransform dragSlotRectTransform; // 드래그 슬롯 위치 제어용 RectTransform
+public Image dragItemImage; // 드래그 아이템 이미지
+public TMP_Text dragCountText; // 드래그 아이템 개수 텍스트
+
+[Header("아군 정보 참조")]
+public FriendlyCharacterInfoManager friendlyCharacterInfoManager; // 아군 정보 매니저 참조
+
+[Header("무게 표시 UI")]
+public TMP_Text weightInfoText; // 적정 무게 / 총 무게 표시 텍스트
+public Color properWeightTextColor = Color.white; // 적정 무게 이하일 때 텍스트 색
+public Color overweightTextColor = Color.red; // 적정 무게 초과일 때 텍스트 색
+public int weightPerOverStack = 10; // 초과 중첩 1개당 필요한 무게값
+
+private DistributionInventorySlot draggingSourceSlot; // 드래그를 시작한 원본 슬롯
+private GlobalItemDefinition draggingItemDefinition; // 드래그 중인 아이템 정의
+private int draggingItemCount; // 드래그 중인 아이템 개수
+private bool isDraggingItem; // 현재 아이템 드래그 중인지 여부
+private bool isDragDropped; // 정상 드롭 완료 여부
+
     private readonly List<CharacterInventory> characterInventories = new List<CharacterInventory>(); // 생성된 캐릭터 인벤토리 목록
     private readonly List<CharacterInventorySlot> characterSlots = new List<CharacterInventorySlot>(); // 생성된 캐릭터 슬롯 목록
     private readonly List<DistributionInventorySlot> inventorySlots = new List<DistributionInventorySlot>(); // 생성된 아이템 슬롯 목록
@@ -72,6 +93,9 @@ private void FindReferences() // 필요한 매니저 참조 찾기
 
     if (characterInfoManager == null)
         characterInfoManager = FindObjectOfType<CharacterInfoManager>();
+
+    if (friendlyCharacterInfoManager == null)
+        friendlyCharacterInfoManager = FindObjectOfType<FriendlyCharacterInfoManager>();
 
     if (tileSelectionManager == null)
         tileSelectionManager = FindObjectOfType<TileSelectionManager>();
@@ -109,6 +133,9 @@ private void InitializePanelState() // 패널 초기 상태 설정
     if (distributionInventoryPanel != null)
         distributionInventoryPanel.SetActive(false);
 
+    if (dragSlotObject != null) // 드래그 슬롯 시작 시 비활성화
+        dragSlotObject.SetActive(false);
+
     SetWorldInputLocked(false);
     RefreshPanelButtons();
 }
@@ -124,38 +151,40 @@ private void InitializePanelState() // 패널 초기 상태 설정
         for (int i = 0; i < slotCountPerPage; i++)
         {
             DistributionInventorySlot newSlot = Instantiate(distributionInventorySlotPrefab, inventorySlotParent);
+            newSlot.Initialize(this); // 드래그 처리를 위한 매니저 연결
             newSlot.ClearSlot();
             inventorySlots.Add(newSlot);
         }
     }
 
-    private void CreateCharacterInventoriesFromSave() // 세이브 데이터 기준 캐릭터 인벤토리 생성
+private void CreateCharacterInventoriesFromSave() // 세이브 데이터 기준 캐릭터 인벤토리 생성
+{
+    ClearChildren(characterInventoryPrefabParent);
+    characterInventories.Clear();
+
+    if (saveStorage == null || characterInventoryPrefab == null || characterInventoryPrefabParent == null)
+        return;
+
+    List<SaveStorage.OwnedCharacterInventorySaveData> saveInventoryList = saveStorage.GetCurrentOwnedCharacterInventoryList();
+
+    for (int i = 0; i < saveInventoryList.Count; i++)
     {
-        ClearChildren(characterInventoryPrefabParent);
-        characterInventories.Clear();
+        SaveStorage.OwnedCharacterInventorySaveData saveInventoryData = saveInventoryList[i];
 
-        if (saveStorage == null || characterInventoryPrefab == null || characterInventoryPrefabParent == null)
-            return;
+        CharacterInventory newInventory = Instantiate(characterInventoryPrefab, characterInventoryPrefabParent);
+        newInventory.SetCharacterID(
+            saveInventoryData.firstRowID,
+            saveInventoryData.secondRowID,
+            saveInventoryData.individualID
+        );
 
-        List<SaveStorage.OwnedCharacterInventorySaveData> saveInventoryList = saveStorage.GetCurrentOwnedCharacterInventoryList();
+        List<CharacterInventoryItemData> convertedItems = ConvertSaveItemsToInventoryItems(saveInventoryData.items);
+        newInventory.SetItems(convertedItems);
+        RefreshCharacterWeightState(newInventory);
 
-        for (int i = 0; i < saveInventoryList.Count; i++)
-        {
-            SaveStorage.OwnedCharacterInventorySaveData saveInventoryData = saveInventoryList[i];
-
-            CharacterInventory newInventory = Instantiate(characterInventoryPrefab, characterInventoryPrefabParent);
-            newInventory.SetCharacterID(
-                saveInventoryData.firstRowID,
-                saveInventoryData.secondRowID,
-                saveInventoryData.individualID
-            );
-
-            List<CharacterInventoryItemData> convertedItems = ConvertSaveItemsToInventoryItems(saveInventoryData.items);
-            newInventory.SetItems(convertedItems);
-
-            characterInventories.Add(newInventory);
-        }
+        characterInventories.Add(newInventory);
     }
+}
 
     private List<CharacterInventoryItemData> ConvertSaveItemsToInventoryItems(List<SaveStorage.OwnedCharacterInventoryItemSaveData> saveItems) // 저장 아이템을 런타임 아이템으로 변환
     {
@@ -219,40 +248,46 @@ private void CreateCharacterSlots() // 캐릭터 인벤토리 슬롯 UI 생성
 
 private int GetCharacterDisplayPriority(CharacterInventory inventory) // 캐릭터 나열 우선순위 가져오기
 {
-    if (inventory == null || characterInfoManager == null)
+    if (inventory == null || friendlyCharacterInfoManager == null)
         return int.MaxValue;
 
-    GlobalCharacterDefinition characterDefinition = characterInfoManager.FindDefinitionByID(
+    FriendlyCharacterDefinition friendlyDefinition = friendlyCharacterInfoManager.FindDefinitionByID(
         inventory.firstRowID,
         inventory.secondRowID
     );
 
-    if (characterDefinition == null || characterDefinition.CharacterInventorySlotPrefab == null)
+    if (friendlyDefinition == null)
         return int.MaxValue;
 
-    return characterDefinition.CharacterInventorySlotPrefab.DisplayPriority;
+    return friendlyDefinition.slotDisplayPriority;
 }
 
-    private void SelectFirstCharacterInventory() // 첫 번째 캐릭터 인벤토리 선택
+private void SelectFirstCharacterInventory() // 우선순위가 가장 낮은 캐릭터 인벤토리 선택
+{
+    if (characterInventories.Count <= 0)
     {
-        if (characterInventories.Count <= 0)
-        {
-            ClearInventorySlots();
-            RefreshPageUI();
-            return;
-        }
-
-        SelectCharacterInventory(characterInventories[0]);
+        ClearInventorySlots();
+        RefreshPageUI();
+        RefreshSelectedCharacterWeightInfo();
+        return;
     }
 
-    public void SelectCharacterInventory(CharacterInventory characterInventory) // 캐릭터 인벤토리 선택
-    {
-        selectedCharacterInventory = characterInventory;
-        currentPageIndex = 0;
+    CharacterInventory firstPriorityInventory = characterInventories
+        .OrderBy(inventory => GetCharacterDisplayPriority(inventory))
+        .FirstOrDefault();
 
-        RefreshCurrentSortedItems();
-        RefreshInventorySlots();
-    }
+    SelectCharacterInventory(firstPriorityInventory);
+}
+
+public void SelectCharacterInventory(CharacterInventory characterInventory) // 캐릭터 인벤토리 선택
+{
+    selectedCharacterInventory = characterInventory;
+    currentPageIndex = 0;
+
+    RefreshCurrentSortedItems();
+    RefreshInventorySlots();
+    RefreshSelectedCharacterWeightInfo();
+}
 
 private void RefreshCurrentSortedItems() // 현재 선택 캐릭터 아이템을 슬롯 단위로 분할 정렬
 {
@@ -413,4 +448,225 @@ private void SetWorldInputLocked(bool isLocked) // 인벤토리창 상태에 따
 
     tileSelectionManager.SetCharacterManagementUIOpen(isLocked);
 }
+
+public bool IsDraggingItem() // 아이템 드래그 중인지 반환
+{
+    return isDraggingItem;
+}
+
+public void BeginItemDrag(DistributionInventorySlot sourceSlot, GlobalItemDefinition itemDefinition, int itemCount) // 아이템 드래그 시작
+{
+    if (sourceSlot == null || itemDefinition == null || itemCount <= 0)
+        return;
+
+    draggingSourceSlot = sourceSlot;
+    draggingItemDefinition = itemDefinition;
+    draggingItemCount = itemCount;
+    isDraggingItem = true;
+    isDragDropped = false;
+
+    sourceSlot.HideItemVisualOnly();
+
+    if (dragSlotObject != null)
+        dragSlotObject.SetActive(true);
+
+    if (dragItemImage != null)
+    {
+        dragItemImage.sprite = itemDefinition.itemImage;
+        dragItemImage.enabled = itemDefinition.itemImage != null;
+    }
+
+    if (dragCountText != null)
+        dragCountText.text = itemCount > 1 ? itemCount.ToString() : "";
+}
+
+public void UpdateDragSlotPosition(Vector2 screenPosition) // 드래그 슬롯 위치 갱신
+{
+    if (!isDraggingItem || dragSlotRectTransform == null)
+        return;
+
+    dragSlotRectTransform.position = screenPosition;
+}
+
+public void DropDraggedItemToCharacterSlot(CharacterInventorySlot targetSlot) // 캐릭터 슬롯에 아이템 드롭
+{
+    if (!isDraggingItem || targetSlot == null)
+        return;
+
+    CharacterInventory targetInventory = targetSlot.TargetInventory;
+
+    if (selectedCharacterInventory == null || targetInventory == null)
+    {
+        CancelDrag();
+        return;
+    }
+
+    if (selectedCharacterInventory == targetInventory)
+    {
+        CancelDrag();
+        return;
+    }
+
+    bool removed = selectedCharacterInventory.RemoveItem(draggingItemDefinition, draggingItemCount);
+
+    if (!removed)
+    {
+        CancelDrag();
+        return;
+    }
+
+    targetInventory.AddOrMergeItem(draggingItemDefinition, draggingItemCount);
+
+    RefreshCharacterWeightState(selectedCharacterInventory);
+    RefreshCharacterWeightState(targetInventory);
+
+    SaveCharacterInventory(selectedCharacterInventory);
+    SaveCharacterInventory(targetInventory);
+
+    isDragDropped = true;
+
+    RefreshCurrentSortedItems();
+    RefreshInventorySlots();
+    RefreshSelectedCharacterWeightInfo();
+    EndDragState();
+}
+
+public void CancelDragIfNotDropped() // 캐릭터 슬롯이 아닌 곳에 놓았을 때 드래그 취소
+{
+    if (!isDraggingItem)
+        return;
+
+    if (isDragDropped)
+        return;
+
+    CancelDrag();
+}
+
+private void CancelDrag() // 드래그 취소 및 원본 슬롯 복구
+{
+    if (draggingSourceSlot != null)
+        draggingSourceSlot.RestoreItemVisualOnly();
+
+    EndDragState();
+}
+
+private void EndDragState() // 드래그 상태 초기화
+{
+    if (dragSlotObject != null)
+        dragSlotObject.SetActive(false);
+
+    if (dragItemImage != null)
+    {
+        dragItemImage.sprite = null;
+        dragItemImage.enabled = false;
+    }
+
+    if (dragCountText != null)
+        dragCountText.text = "";
+
+    draggingSourceSlot = null;
+    draggingItemDefinition = null;
+    draggingItemCount = 0;
+    isDraggingItem = false;
+    isDragDropped = false;
+}
+
+private void SaveCharacterInventory(CharacterInventory characterInventory) // 캐릭터 인벤토리 세이브 갱신
+{
+    if (saveStorage == null || characterInventory == null)
+        return;
+
+    SaveStorage.OwnedCharacterInventorySaveData saveData = new SaveStorage.OwnedCharacterInventorySaveData
+    {
+        firstRowID = characterInventory.firstRowID,
+        secondRowID = characterInventory.secondRowID,
+        individualID = characterInventory.individualID,
+        items = new List<SaveStorage.OwnedCharacterInventoryItemSaveData>()
+    };
+
+    for (int i = 0; i < characterInventory.storedItems.Count; i++)
+    {
+        CharacterInventoryItemData itemData = characterInventory.storedItems[i];
+
+        if (itemData == null || itemData.itemDefinition == null || itemData.totalCount <= 0)
+            continue;
+
+        SaveStorage.OwnedCharacterInventoryItemSaveData itemSaveData = new SaveStorage.OwnedCharacterInventoryItemSaveData
+        {
+            itemAID = itemData.itemDefinition.itemAID,
+            itemBID = itemData.itemDefinition.itemBID,
+            count = itemData.totalCount
+        };
+
+        saveData.items.Add(itemSaveData);
+    }
+
+    saveStorage.SetCurrentOwnedCharacterInventoryData(saveData);
+}
+
+
+
+private void RefreshCharacterWeightState(CharacterInventory characterInventory) // 캐릭터 인벤토리의 초과 무게 상태 갱신
+{
+    if (characterInventory == null)
+        return;
+
+    FriendlyCharacterDefinition friendlyDefinition = GetFriendlyDefinition(characterInventory);
+
+    if (friendlyDefinition == null)
+    {
+        characterInventory.RefreshTotalWeight();
+        characterInventory.SetOverweightState(characterInventory.totalWeightKg, weightPerOverStack);
+        return;
+    }
+
+    characterInventory.SetOverweightState(friendlyDefinition.properWeightKg, weightPerOverStack);
+}
+
+private void RefreshSelectedCharacterWeightInfo() // 선택된 캐릭터의 무게 표시 갱신
+{
+    if (weightInfoText == null)
+        return;
+
+    if (selectedCharacterInventory == null)
+    {
+        weightInfoText.text = "";
+        return;
+    }
+
+    FriendlyCharacterDefinition friendlyDefinition = GetFriendlyDefinition(selectedCharacterInventory);
+
+    if (friendlyDefinition == null)
+    {
+        selectedCharacterInventory.RefreshTotalWeight();
+        weightInfoText.text = $"0 / {selectedCharacterInventory.totalWeightKg:0.##}";
+        weightInfoText.color = overweightTextColor;
+        return;
+    }
+
+    selectedCharacterInventory.SetOverweightState(friendlyDefinition.properWeightKg, weightPerOverStack);
+
+    float properWeight = friendlyDefinition.properWeightKg;
+    float totalWeight = selectedCharacterInventory.totalWeightKg;
+
+    weightInfoText.text = $"{properWeight:0.##} / {totalWeight:0.##}";
+
+    if (properWeight >= totalWeight)
+        weightInfoText.color = properWeightTextColor;
+    else
+        weightInfoText.color = overweightTextColor;
+}
+
+private FriendlyCharacterDefinition GetFriendlyDefinition(CharacterInventory characterInventory) // 캐릭터 인벤토리 기준 아군 정의 찾기
+{
+    if (characterInventory == null || friendlyCharacterInfoManager == null)
+        return null;
+
+    return friendlyCharacterInfoManager.FindDefinitionByID(
+        characterInventory.firstRowID,
+        characterInventory.secondRowID
+    );
+}
+
+
 }

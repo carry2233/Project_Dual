@@ -18,6 +18,10 @@ public class CharacterInventory : MonoBehaviour
     [Header("총 무게")]
     public float totalWeightKg; // 모든 아이템의 총 무게
 
+    [Header("무게 초과 정보")]
+public float overweightKg; // 적정 무게를 초과한 무게값
+public int overweightStackCount; // 초과 무게에 따른 중첩 수
+
     public void SetCharacterID(int newFirstRowID, int newSecondRowID, int newIndividualID) // 담당 캐릭터 ID 설정
     {
         firstRowID = newFirstRowID;
@@ -57,6 +61,90 @@ public class CharacterInventory : MonoBehaviour
             && secondRowID == targetSecondRowID
             && individualID == targetIndividualID;
     }
+
+    public bool RemoveItem(GlobalItemDefinition itemDefinition, int removeCount) // 아이템 제거
+{
+    if (itemDefinition == null || removeCount <= 0)
+        return false;
+
+    for (int i = 0; i < storedItems.Count; i++)
+    {
+        CharacterInventoryItemData itemData = storedItems[i];
+
+        if (itemData == null || itemData.itemDefinition == null)
+            continue;
+
+        bool isSameItem =
+            itemData.itemDefinition.itemAID == itemDefinition.itemAID &&
+            itemData.itemDefinition.itemBID == itemDefinition.itemBID;
+
+        if (!isSameItem)
+            continue;
+
+        if (itemData.totalCount < removeCount)
+            return false;
+
+        itemData.totalCount -= removeCount;
+
+        if (itemData.totalCount <= 0)
+            storedItems.RemoveAt(i);
+
+        RefreshTotalWeight();
+        return true;
+    }
+
+    return false;
+}
+
+public void AddOrMergeItem(GlobalItemDefinition itemDefinition, int addCount) // 같은 ID 아이템에 합치거나 새로 추가
+{
+    if (itemDefinition == null || addCount <= 0)
+        return;
+
+    for (int i = 0; i < storedItems.Count; i++)
+    {
+        CharacterInventoryItemData itemData = storedItems[i];
+
+        if (itemData == null || itemData.itemDefinition == null)
+            continue;
+
+        bool isSameItem =
+            itemData.itemDefinition.itemAID == itemDefinition.itemAID &&
+            itemData.itemDefinition.itemBID == itemDefinition.itemBID;
+
+        if (!isSameItem)
+            continue;
+
+        itemData.totalCount += addCount;
+        RefreshTotalWeight();
+        return;
+    }
+
+    CharacterInventoryItemData newItemData = new CharacterInventoryItemData
+    {
+        itemDefinition = itemDefinition,
+        totalCount = addCount,
+        totalWeightKg = itemDefinition.weightPerItemKg * addCount
+    };
+
+    storedItems.Add(newItemData);
+    RefreshTotalWeight();
+}
+
+public void SetOverweightState(float properWeightKg, int weightPerStack) // 초과 무게와 중첩 수 갱신
+{
+    RefreshTotalWeight();
+
+    overweightKg = Mathf.Max(0f, totalWeightKg - properWeightKg);
+
+    if (weightPerStack <= 0)
+    {
+        overweightStackCount = 0;
+        return;
+    }
+
+    overweightStackCount = Mathf.FloorToInt(overweightKg / weightPerStack);
+}
 }
 
 [Serializable]
