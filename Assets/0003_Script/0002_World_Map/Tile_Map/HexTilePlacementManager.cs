@@ -1137,6 +1137,68 @@ private bool HasPlacementSaveFile() // 현재 저장본 ID의 타일 저장본 �
     return File.Exists(GetSaveFilePath()); // 현재 저장 경로 기준 파일 존재 여부 반환
 }
 
+public TilePrefab GetTileByTileNumber(int targetTileNumber) // 타일 번호로 배치된 타일 찾기
+{
+    foreach (KeyValuePair<Vector3Int, GameObject> pair in placedObjectMap)
+    {
+        if (pair.Value == null)
+        {
+            continue; // 비어 있는 오브젝트는 제외
+        }
+
+        TilePrefab tilePrefab = pair.Value.GetComponent<TilePrefab>(); // 타일 정보 가져오기
+
+        if (tilePrefab == null)
+        {
+            continue; // 타일 정보가 없으면 제외
+        }
+
+        if (tilePrefab.TileNumber == targetTileNumber)
+        {
+            return tilePrefab; // 번호가 일치하는 타일 반환
+        }
+    }
+
+    return null; // 찾지 못하면 null 반환
+}
+
+public List<TilePrefab> GetNeighborTilePrefabs(TilePrefab centerTile) // 기준 타일 주변 1칸 타일 목록 반환
+{
+    List<TilePrefab> result = new List<TilePrefab>(); // 반환할 주변 타일 목록
+
+    if (centerTile == null || targetTilemap == null)
+    {
+        return result; // 기준 타일 또는 타일맵이 없으면 빈 목록 반환
+    }
+
+    Vector3Int centerCell = targetTilemap.WorldToCell(centerTile.transform.position); // 기준 타일의 셀 좌표 계산
+    List<Vector3Int> neighborCells = GetNeighborCells(centerCell); // 주변 6칸 셀 좌표 가져오기
+
+    for (int i = 0; i < neighborCells.Count; i++)
+    {
+        Vector3Int neighborCell = neighborCells[i]; // 현재 검사할 주변 셀
+
+        if (placedObjectMap.TryGetValue(neighborCell, out GameObject neighborObject) == false)
+        {
+            continue; // 배치된 타일이 없으면 제외
+        }
+
+        if (neighborObject == null)
+        {
+            continue; // 오브젝트가 없으면 제외
+        }
+
+        TilePrefab neighborTile = neighborObject.GetComponent<TilePrefab>(); // 주변 타일 정보 가져오기
+
+        if (neighborTile != null)
+        {
+            result.Add(neighborTile); // 주변 타일 목록에 추가
+        }
+    }
+
+    return result; // 주변 1칸 타일 목록 반환
+}
+
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected() // 선택 시 원점 셀 중심 위치를 기즈모로 표시
     {

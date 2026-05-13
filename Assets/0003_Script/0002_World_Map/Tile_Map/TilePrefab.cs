@@ -13,6 +13,11 @@ public class TilePrefab : MonoBehaviour
     [Header("배치된 타일 정보")]
     [SerializeField] private int tileNumber = -1; // 실제 배치 시 부여되는 타일 번호
 
+    [Header("타일 레이캐스트 콜라이더")]
+[SerializeField] private Collider tileRaycastCollider; // 마우스 레이캐스트 감지에 사용할 3D 콜라이더
+
+public Collider TileRaycastCollider => tileRaycastCollider; // 타일 레이캐스트 콜라이더 반환
+
     public int TilePrefabNumber => tilePrefabNumber; // 프리팹 종류 번호 반환
     public int TileNumber => tileNumber; // 현재 타일 번호 반환
 
@@ -20,4 +25,32 @@ public class TilePrefab : MonoBehaviour
     {
         tileNumber = newTileNumber; // 타일 번호 저장
     }
+
+    private void Awake() // 시작 전 콜라이더 자동 참조
+{
+    if (tileRaycastCollider == null)
+    {
+        tileRaycastCollider = GetComponent<Collider>(); // 같은 오브젝트의 3D 콜라이더 자동 참조
+    }
+
+    if (tileRaycastCollider == null)
+    {
+        tileRaycastCollider = GetComponentInChildren<Collider>(); // 자식 오브젝트의 3D 콜라이더 자동 참조
+    }
+}
+
+public bool IsTileRaycastCollider(Collider targetCollider) // 지정 콜라이더가 이 타일의 감지 콜라이더인지 확인
+{
+    if (targetCollider == null)
+    {
+        return false; // 대상 콜라이더가 없으면 실패
+    }
+
+    if (tileRaycastCollider == null)
+    {
+        return targetCollider.GetComponentInParent<TilePrefab>() == this; // 참조가 없으면 부모 기준으로 검사
+    }
+
+    return targetCollider == tileRaycastCollider; // 등록된 콜라이더와 일치하는지 반환
+}
 }

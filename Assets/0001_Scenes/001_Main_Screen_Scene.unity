@@ -1284,6 +1284,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &430116774
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 430116776}
+  - component: {fileID: 430116775}
+  m_Layer: 0
+  m_Name: TileInfoManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &430116775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430116774}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60d9a735edc06b74ba5608b1959a6731, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileInfoManager
+  tileInfoDefinitionList:
+  - {fileID: 11400000, guid: 2df2bafbf15f40248b041e297b9f8727, type: 2}
+  - {fileID: 11400000, guid: 3942352f32266ab49a8dd8d49b3c8159, type: 2}
+  - {fileID: 11400000, guid: 503b237fcc8045f41b4bafd5051dcd20, type: 2}
+  - {fileID: 11400000, guid: 8cbfaa9d2d97f444b865209e8daa6609, type: 2}
+--- !u!4 &430116776
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430116774}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &432573573
 GameObject:
   m_ObjectHideFlags: 0
@@ -1578,8 +1627,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 85058624}
   m_HandleRect: {fileID: 85058623}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 0.99999994
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6840,6 +6889,7 @@ SceneRoots:
   - {fileID: 649652974}
   - {fileID: 2092943272}
   - {fileID: 272495427}
+  - {fileID: 430116776}
   - {fileID: 36241235}
   - {fileID: 1157838091}
   - {fileID: 1140032134}

@@ -67,6 +67,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\ScriptEffect.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\TileInfoDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\AttackerController.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\CameraOrbit.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\GlobalCharacterDefinition.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\FriendlyCharacterInfoManager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\TileActionManager.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\MainScreenManager.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleSoundEmitter.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleCameraController.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\CharacterActionSound.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\TileInfoManager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\DuelSkillDefinitionSO.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />

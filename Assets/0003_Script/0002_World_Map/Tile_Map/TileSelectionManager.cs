@@ -67,6 +67,15 @@ public class TileSelectionManager : MonoBehaviour
     public SelectionState CurrentState => currentState; // 현재 상태 외부 확인용
     public TilePrefab CurrentSelectedTile => currentSelectedTile; // 현재 선택 타일 외부 확인용
 
+    private bool useCustomSelectionView = false; // 이번 선택에서 커스텀 선택 위치값 사용 여부
+private bool showDeselectButtonAfterSelection = true; // 선택 연출 완료 후 선택해제 버튼 표시 여부
+
+private Vector3 customSelectedRigWorldOffset; // 커스텀 선택 루트 오프셋
+private Vector3 customSelectedCameraLocalPosition; // 커스텀 선택 카메라 로컬 위치
+private Vector3 customSelectedCameraLocalEuler; // 커스텀 선택 카메라 로컬 회전
+
+    private bool isTileActionUIOpen = false; // 타일 행동 UI 활성 상태 여부
+
 private void Awake() // 시작 전 기본 참조와 초기값 저장
 {
     if (inputCamera == null)
@@ -93,9 +102,9 @@ private void Awake() // 시작 전 기본 참조와 초기값 저장
 
 private void Update() // 매 프레임 클릭 입력 처리
 {
-    if (isSelectionInputBlockedByUI == true || isNotepadUIOpen == true)
+    if (isSelectionInputBlockedByUI == true || isNotepadUIOpen == true || isTileActionUIOpen == true)
     {
-        return; // 외부 UI 또는 메모장 활성 상태면 입력 차단
+        return; // 외부 UI, 메모장, 타일 행동 UI 활성 상태면 입력 차단
     }
 
     if (Mouse.current == null)
@@ -157,9 +166,17 @@ private void TrySelectTileFromMousePosition() // 마우스 위치에서 타일 �
 
 public void SelectTile(TilePrefab tile) // 외부 또는 내부에서 타일 선택 실행
 {
-    if (tile == null)
+    useCustomSelectionView = false; // 일반 타일 선택은 기본 선택 위치값 사용
+    showDeselectButtonAfterSelection = true; // 일반 선택은 연출 완료 후 선택해제 버튼 표시
+
+    BeginSelectTile(tile); // 공통 선택 처리 실행
+}
+
+public void ClearSelection() // 현재 선택 해제 실행
+{
+    if (currentState == SelectionState.None)
     {
-        return; // 타일이 없으면 종료
+        return; // 이미 해제 상태면 종료
     }
 
     if (cameraRigRoot == null || cinemachineCameraTransform == null)
@@ -168,26 +185,9 @@ public void SelectTile(TilePrefab tile) // 외부 또는 내부에서 타일 선
         return;
     }
 
-    SaveCurrentCameraStateBeforeSelection(); // 선택 직전 카메라 상태 저장
-    currentSelectedTile = tile; // 현재 선택 타일 저장
-    PlaySelectionAnimation(true); // 선택 연출 재생
+    SetDeselectButtonVisible(false); // 선택해제 시작 시 버튼 비활성화
+    PlaySelectionAnimation(false); // 해제 연출 재생
 }
-
-    public void ClearSelection() // 현재 선택 해제 실행
-    {
-        if (currentState == SelectionState.None)
-        {
-            return; // 이미 해제 상태면 종료
-        }
-
-        if (cameraRigRoot == null || cinemachineCameraTransform == null)
-        {
-            Debug.LogWarning("[TileSelectionManager] 카메라 루트 또는 시네머신 카메라 Transform 참조가 비어 있습니다.", this); // 참조 누락 경고
-            return;
-        }
-
-        PlaySelectionAnimation(false); // 해제 연출 재생
-    }
 
     private void PlaySelectionAnimation(bool isSelecting) // 선택/해제 연출 시작
     {
@@ -199,18 +199,34 @@ public void SelectTile(TilePrefab tile) // 외부 또는 내부에서 타일 선
         selectionCoroutine = StartCoroutine(AnimateSelectionRoutine(isSelecting)); // 새 연출 시작
     }
 
-private IEnumerator AnimateSelectionRoutine(bool isSelecting) // 선택/해제 연출 코루틴
+private IEnumerator AnimateSelectionRoutine(bool isSelecting) // 선택 또는 해제 연출 실행
 {
-    currentState = isSelecting ? SelectionState.Selecting : SelectionState.Deselecting; // 현재 연출 상태 설정
-    UpdateMovementLock(); // 연출 시작 시 이동 잠금 반영
+    currentState = isSelecting
+        ? SelectionState.Selecting
+        : SelectionState.Deselecting; // 현재 연출 상태 적용
 
-    Vector3 startRigWorldPosition = cameraRigRoot.position; // 시작 루트 위치
-    Quaternion startRigWorldRotation = cameraRigRoot.rotation; // 시작 루트 회전
-    Vector3 startCameraLocalPosition = cinemachineCameraTransform.localPosition; // 시작 카메라 로컬 위치
-    Quaternion startCameraLocalRotation = cinemachineCameraTransform.localRotation; // 시작 카메라 로컬 회전
+    UpdateMovementLock(); // 연출 시작 시 이동 잠금 갱신
+
+    Vector3 startRigWorldPosition = cameraRigRoot.position; // 시작 루트 위치 저장
+    Quaternion startRigWorldRotation = cameraRigRoot.rotation; // 시작 루트 회전 저장
+
+    Vector3 startCameraLocalPosition = cinemachineCameraTransform.localPosition; // 시작 카메라 로컬 위치 저장
+    Quaternion startCameraLocalRotation = cinemachineCameraTransform.localRotation; // 시작 카메라 로컬 회전 저장
+
+    Vector3 activeSelectedRigWorldOffset = useCustomSelectionView
+        ? customSelectedRigWorldOffset
+        : selectedRigWorldOffset; // 현재 선택에 사용할 루트 오프셋
+
+    Vector3 activeSelectedCameraLocalPosition = useCustomSelectionView
+        ? customSelectedCameraLocalPosition
+        : selectedCameraLocalPosition; // 현재 선택에 사용할 카메라 로컬 위치
+
+    Vector3 activeSelectedCameraLocalEuler = useCustomSelectionView
+        ? customSelectedCameraLocalEuler
+        : selectedCameraLocalEuler; // 현재 선택에 사용할 카메라 로컬 회전
 
     Vector3 targetRigWorldPosition = isSelecting && currentSelectedTile != null
-        ? currentSelectedTile.transform.position + selectedRigWorldOffset
+        ? currentSelectedTile.transform.position + activeSelectedRigWorldOffset
         : (hasSavedCameraState ? savedRigWorldPosition : cameraRigRoot.position); // 목표 루트 위치
 
     Quaternion targetRigWorldRotation = isSelecting
@@ -218,63 +234,54 @@ private IEnumerator AnimateSelectionRoutine(bool isSelecting) // 선택/해제 �
         : (hasSavedCameraState ? savedRigWorldRotation : cameraRigRoot.rotation); // 목표 루트 회전
 
     Vector3 targetCameraLocalPosition = isSelecting
-        ? selectedCameraLocalPosition
+        ? activeSelectedCameraLocalPosition
         : (hasSavedCameraState ? savedCameraLocalPosition : cinemachineCameraTransform.localPosition); // 목표 카메라 로컬 위치
 
     Quaternion targetCameraLocalRotation = isSelecting
-        ? Quaternion.Euler(selectedCameraLocalEuler)
+        ? Quaternion.Euler(activeSelectedCameraLocalEuler)
         : (hasSavedCameraState ? savedCameraLocalRotation : cinemachineCameraTransform.localRotation); // 목표 카메라 로컬 회전
 
-    float duration = isSelecting ? selectDuration : deselectDuration; // 현재 연출 시간
+    float duration = isSelecting ? selectDuration : deselectDuration; // 선택/해제에 맞는 연출 시간 선택
+    float elapsed = 0f; // 경과 시간 초기화
 
-    if (duration <= 0f)
+    while (elapsed < duration)
     {
-        cameraRigRoot.position = targetRigWorldPosition; // 루트 위치 즉시 적용
-        cameraRigRoot.rotation = targetRigWorldRotation; // 루트 회전 즉시 적용
-        cinemachineCameraTransform.localPosition = targetCameraLocalPosition; // 카메라 로컬 위치 즉시 적용
-        cinemachineCameraTransform.localRotation = targetCameraLocalRotation; // 카메라 로컬 회전 즉시 적용
+        elapsed += Time.deltaTime; // 경과 시간 증가
+
+        float normalized = Mathf.Clamp01(elapsed / duration); // 0~1 보간값 계산
+        float rigEased = rigMoveCurve.Evaluate(normalized); // 루트 이동 커브 적용
+        float cameraMoveEased = cameraMoveCurve.Evaluate(normalized); // 카메라 이동 커브 적용
+        float cameraRotateEased = cameraRotateCurve.Evaluate(normalized); // 카메라 회전 커브 적용
+
+        cameraRigRoot.position = Vector3.Lerp(startRigWorldPosition, targetRigWorldPosition, rigEased); // 루트 위치 보간
+        cameraRigRoot.rotation = Quaternion.Slerp(startRigWorldRotation, targetRigWorldRotation, rigEased); // 루트 회전 보간
+
+        cinemachineCameraTransform.localPosition = Vector3.Lerp(startCameraLocalPosition, targetCameraLocalPosition, cameraMoveEased); // 카메라 위치 보간
+        cinemachineCameraTransform.localRotation = Quaternion.Slerp(startCameraLocalRotation, targetCameraLocalRotation, cameraRotateEased); // 카메라 회전 보간
+
+        yield return null; // 다음 프레임까지 대기
     }
-    else
-    {
-        float elapsed = 0f; // 경과 시간
 
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime; // 시간 누적
-            float time01 = Mathf.Clamp01(elapsed / duration); // 0~1 진행률
-
-            float rigT = rigMoveCurve != null ? rigMoveCurve.Evaluate(time01) : time01; // 루트 이동 커브 적용값
-            float cameraMoveT = cameraMoveCurve != null ? cameraMoveCurve.Evaluate(time01) : time01; // 카메라 위치 커브 적용값
-            float cameraRotateT = cameraRotateCurve != null ? cameraRotateCurve.Evaluate(time01) : time01; // 카메라 회전 커브 적용값
-
-            cameraRigRoot.position = Vector3.Lerp(startRigWorldPosition, targetRigWorldPosition, rigT); // 루트 위치 보간
-            cameraRigRoot.rotation = Quaternion.Slerp(startRigWorldRotation, targetRigWorldRotation, rigT); // 루트 회전 보간
-            cinemachineCameraTransform.localPosition = Vector3.Lerp(startCameraLocalPosition, targetCameraLocalPosition, cameraMoveT); // 카메라 로컬 위치 보간
-            cinemachineCameraTransform.localRotation = Quaternion.Slerp(startCameraLocalRotation, targetCameraLocalRotation, cameraRotateT); // 카메라 로컬 회전 보간
-
-            yield return null; // 다음 프레임까지 대기
-        }
-
-        cameraRigRoot.position = targetRigWorldPosition; // 마지막 위치 보정
-        cameraRigRoot.rotation = targetRigWorldRotation; // 마지막 회전 보정
-        cinemachineCameraTransform.localPosition = targetCameraLocalPosition; // 마지막 로컬 위치 보정
-        cinemachineCameraTransform.localRotation = targetCameraLocalRotation; // 마지막 로컬 회전 보정
-    }
+    cameraRigRoot.position = targetRigWorldPosition; // 최종 루트 위치 보정
+    cameraRigRoot.rotation = targetRigWorldRotation; // 최종 루트 회전 보정
+    cinemachineCameraTransform.localPosition = targetCameraLocalPosition; // 최종 카메라 위치 보정
+    cinemachineCameraTransform.localRotation = targetCameraLocalRotation; // 최종 카메라 회전 보정
 
     if (isSelecting == true)
     {
         currentState = SelectionState.Selected; // 선택 완료 상태로 변경
-        SetDeselectButtonVisible(true); // 버튼 활성화
+        SetDeselectButtonVisible(showDeselectButtonAfterSelection); // 선택 완료 후 버튼 표시 여부 적용
     }
     else
     {
-        currentState = SelectionState.None; // 해제 완료 상태로 변경
+        currentState = SelectionState.None; // 선택 해제 상태로 변경
         currentSelectedTile = null; // 선택 타일 초기화
-        SetDeselectButtonVisible(false); // 버튼 비활성화
+        SetDeselectButtonVisible(false); // 선택해제 버튼 비활성화
     }
 
-    UpdateMovementLock(); // 연출 종료 후 이동 잠금 반영
-    selectionCoroutine = null; // 코루틴 참조 초기화
+    useCustomSelectionView = false; // 커스텀 선택값 사용 해제
+    selectionCoroutine = null; // 현재 코루틴 참조 초기화
+    UpdateMovementLock(); // 최종 이동 잠금 상태 갱신
 }
 
     private void SetDeselectButtonVisible(bool isVisible) // 선택 해제 버튼 표시 여부 적용
@@ -292,12 +299,13 @@ private void UpdateMovementLock() // 현재 상태에 따라 월드맵 이동 �
         return; // 참조가 없으면 종료
     }
 
-bool shouldLock =
-    currentState == SelectionState.Selecting ||
-    currentState == SelectionState.Selected ||
-    currentState == SelectionState.Deselecting ||
-    isSelectionInputBlockedByUI == true ||
-    isNotepadUIOpen == true; // 메모장 활성 중에도 이동 잠금
+    bool shouldLock =
+        currentState == SelectionState.Selecting ||
+        currentState == SelectionState.Selected ||
+        currentState == SelectionState.Deselecting ||
+        isSelectionInputBlockedByUI == true ||
+        isNotepadUIOpen == true ||
+        isTileActionUIOpen == true; // 타일 행동 UI 활성 중에도 이동 잠금
 
     worldMapCameraController.SetMovementLock(shouldLock); // 이동 잠금 적용
 }
@@ -350,5 +358,59 @@ public void SetNotepadUIOpen(bool isOpen) // 메모장 UI 열림 상태 전달
     }
 
     UpdateMovementLock(); // 월드맵 이동 잠금 갱신
+}
+
+public void SetTileActionUIOpen(bool isOpen) // 타일 행동 UI 열림 상태 전달
+{
+    isTileActionUIOpen = isOpen; // 타일 행동 UI 상태 저장
+
+    if (isOpen == true)
+    {
+        ClearSelection(); // 타일 행동 UI가 열리면 현재 타일 선택 해제
+    }
+
+    UpdateMovementLock(); // 월드맵 이동 잠금 갱신
+}
+
+public void SelectTileWithCustomView(
+    TilePrefab tile,
+    Vector3 customSelectedRigWorldOffset,
+    Vector3 customSelectedCameraLocalPosition,
+    Vector3 customSelectedCameraLocalEuler,
+    bool showDeselectButton
+) // 외부 지정 위치값으로 타일 선택 실행
+{
+    if (tile == null)
+    {
+        return; // 타일이 없으면 종료
+    }
+
+    useCustomSelectionView = true; // 이번 선택은 커스텀 위치값 사용
+    showDeselectButtonAfterSelection = showDeselectButton; // 선택 완료 후 버튼 표시 여부 저장
+
+    this.customSelectedRigWorldOffset = customSelectedRigWorldOffset; // 커스텀 루트 오프셋 저장
+    this.customSelectedCameraLocalPosition = customSelectedCameraLocalPosition; // 커스텀 카메라 위치 저장
+    this.customSelectedCameraLocalEuler = customSelectedCameraLocalEuler; // 커스텀 카메라 회전 저장
+
+    BeginSelectTile(tile); // 공통 선택 처리 실행
+}
+
+private void BeginSelectTile(TilePrefab tile) // 실제 타일 선택 공통 처리
+{
+    if (tile == null)
+    {
+        return; // 타일이 없으면 종료
+    }
+
+    if (cameraRigRoot == null || cinemachineCameraTransform == null)
+    {
+        Debug.LogWarning("[TileSelectionManager] 카메라 루트 또는 시네머신 카메라 Transform 참조가 비어 있습니다.", this); // 참조 누락 경고
+        return;
+    }
+
+    SaveCurrentCameraStateBeforeSelection(); // 선택 직전 카메라 상태 저장
+    currentSelectedTile = tile; // 현재 선택 타일 저장
+    SetDeselectButtonVisible(false); // 선택 연출 중에는 선택해제 버튼 숨김
+    PlaySelectionAnimation(true); // 선택 연출 재생
 }
 }
