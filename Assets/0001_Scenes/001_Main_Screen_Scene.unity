@@ -4303,6 +4303,52 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
   m_UseGraphicAlpha: 1
+--- !u!1 &1459788287
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1459788289}
+  - component: {fileID: 1459788288}
+  m_Layer: 0
+  m_Name: EventInfoManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1459788288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459788287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd8f471dbabbfa34c9da8f055958b516, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EventInfoManager
+  eventInfoDefinitionList:
+  - {fileID: 11400000, guid: 3738c7193f1d12244871dc2a1e32b8c7, type: 2}
+--- !u!4 &1459788289
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459788287}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1514349317
 GameObject:
   m_ObjectHideFlags: 0
@@ -6443,7 +6489,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uCEA0\uD398\uC778"
+  m_text: "\uC2DC\uC791"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
   m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
@@ -6890,6 +6936,7 @@ SceneRoots:
   - {fileID: 2092943272}
   - {fileID: 272495427}
   - {fileID: 430116776}
+  - {fileID: 1459788289}
   - {fileID: 36241235}
   - {fileID: 1157838091}
   - {fileID: 1140032134}

@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\HexTilePlacementManager.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\ItemRewardEvent.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\ClickMoveSystemManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Management\CharacterManagementSlot.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
@@ -66,7 +67,9 @@
     <Compile Include="Assets\0003_Script\0001_Main_Screen\SaveSelection.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventInfoDefinition.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\ScriptEffect.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventSlot.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\TileInfoDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\AttackerController.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\CameraOrbit.cs" />
@@ -85,6 +88,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\ItemDefinitionList.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\BaseEventPanel.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\GlobalCharacterDefinition.cs" />
@@ -109,6 +113,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\AudioSourcePool.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterEffectInstance.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\PerObjectTextureOverride.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventInfoManager.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterUI.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\Projectile.cs" />

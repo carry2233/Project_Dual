@@ -30,6 +30,9 @@ public class GlobalCharacterDefinition : ScriptableObject
     [SerializeField] private int firstRowID; // 캐릭터 1열 ID
     [SerializeField] private int secondRowID; // 캐릭터 2열 ID
 
+    [Header("아군 인벤토리 지급 순서")]
+    public int displayPriority; // 아이템 지급 대상 나열 우선순위값
+
     [Header("상세 UI 프리팹")]
     [SerializeField] private GameObject detailUIPrefab; // 선택 캐릭터 상세 UI 프리팹
 

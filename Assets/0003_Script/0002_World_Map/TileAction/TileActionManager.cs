@@ -80,6 +80,13 @@ public class TileActionManager : MonoBehaviour
 [SerializeField] private GameObject tileMoveExecuteUI; // 타일 이동 실행 UI
 [SerializeField] private Button tileMoveButton; // 최종 타일 이동 버튼
 
+
+[Header("=======================================================")]
+
+
+[Header("이벤트 패널 참조")]
+[SerializeField] private BaseEventPanel baseEventPanel; // 탐색 종료 후 이벤트 발생 처리를 담당할 이벤트 패널
+
 private bool isMoveSelectionMode = false; // 현재 이동 타일 선택 모드 여부
 private TilePrefab currentMoveBaseTile; // 이동 기준이 되는 현재 소속 타일
 private TilePrefab hoveredMoveTile; // 현재 마우스가 올려진 이동 가능 타일
@@ -114,16 +121,19 @@ private readonly HashSet<TilePrefab> movableTileSet = new HashSet<TilePrefab>();
             tileMoveButton.onClick.AddListener(ExecuteTileMove); // 최종 타일 이동 버튼 이벤트 연결
     }
 
-    private void Start() // 씬 시작 시 초기화
-    {
-        if (tileInfoManager == null)
-            tileInfoManager = TileInfoManager.Instance; // 씬에 존재하는 타일 정보 관리자 참조
+private void Start() // 씬 시작 시 초기화
+{
+    if (tileInfoManager == null)
+        tileInfoManager = TileInfoManager.Instance; // 씬에 존재하는 타일 정보 관리자 참조
 
-        SetInitialUIState(); // 초기 UI 상태 설정
-        RefreshPanelPosition(); // 플레이어 현재 타일 위치로 UI 이동
-        RefreshTileSearchInfo(true); // 현재 타일 탐색 정보 반영
-        UpdateSearchGauge(); // 탐색 게이지 갱신
-        UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+    if (baseEventPanel == null)
+        baseEventPanel = FindFirstObjectByType<BaseEventPanel>(); // 이벤트 패널 자동 참조
+
+    SetInitialUIState(); // 초기 UI 상태 설정
+    RefreshPanelPosition(); // 플레이어 현재 타일 위치로 UI 이동
+    RefreshTileSearchInfo(true); // 현재 타일 탐색 정보 반영
+    UpdateSearchGauge(); // 탐색 게이지 갱신
+    UpdateMoveButtonState(); // 이동 버튼 상태 갱신
 
     if (worldCanvas1 != null)
     {
@@ -139,7 +149,7 @@ private readonly HashSet<TilePrefab> movableTileSet = new HashSet<TilePrefab>();
     {
         tileMoveExecuteUI.SetActive(false); // 이동 실행 UI 비활성화
     }
-    }
+}
 
     private void OnDestroy() // 오브젝트 제거 시 버튼 이벤트 해제
     {
@@ -315,16 +325,19 @@ private void CloseSearchUI() // 탐색 UI 닫기
     ApplySearchUILock(false); // 탐색 UI 닫힘 상태로 외부 입력 잠금 해제
 }
 
-    private void StartSearch() // 탐색 시작
-    {
-        if (searchCoroutine != null)
-            return; // 이미 탐색 중이면 중복 실행 방지
+private void StartSearch() // 탐색 시작
+{
+    if (searchCoroutine != null)
+        return; // 이미 탐색 중이면 중복 실행 방지
 
-        if (maxSearchValue <= 0)
-            return; // 최대 탐색 충족도가 없으면 실행하지 않음
+    if (maxSearchValue <= 0)
+        return; // 최대 탐색 충족도가 없으면 실행하지 않음
 
-        searchCoroutine = StartCoroutine(SearchRoutine()); // 탐색 코루틴 시작
-    }
+    if (baseEventPanel != null)
+        baseEventPanel.HideEventUI(); // 탐색 시작 시 이전 이벤트 UI 비활성화
+
+    searchCoroutine = StartCoroutine(SearchRoutine()); // 탐색 코루틴 시작
+}
 
 private IEnumerator SearchRoutine() // 탐색 진행 코루틴
 {
@@ -363,8 +376,11 @@ private IEnumerator SearchRoutine() // 탐색 진행 코루틴
     if (searchUICloseButton != null)
         searchUICloseButton.interactable = true; // 탐색 종료 후 닫기 버튼 활성화
 
-    UpdateSearchGauge(); // 현재 탐색 게이지 갱신
-    UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+        UpdateSearchGauge(); // 현재 탐색 게이지 갱신
+        UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+
+        if (baseEventPanel != null)
+            baseEventPanel.TryTriggerRandomEvent(); // 탐색 종료 시 이벤트 발생 시도
 
     searchCoroutine = null; // 탐색 코루틴 참조 초기화
 }
