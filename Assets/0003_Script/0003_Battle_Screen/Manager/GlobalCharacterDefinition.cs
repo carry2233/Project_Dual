@@ -30,6 +30,9 @@ public class GlobalCharacterDefinition : ScriptableObject
     [SerializeField] private int firstRowID; // 캐릭터 1열 ID
     [SerializeField] private int secondRowID; // 캐릭터 2열 ID
 
+    [Header("인게임 캐릭터 프리팹")]
+    [SerializeField] private GameObject inGameCharacterPrefab; // 전투씬에서 실제 생성할 캐릭터 프리팹
+
     [Header("아군 인벤토리 지급 순서")]
     public int displayPriority; // 아이템 지급 대상 나열 우선순위값
 
@@ -50,6 +53,8 @@ public CharacterInventorySlot CharacterInventorySlotPrefab => characterInventory
 public List<CharacterUIImageData> characterUIImageList = new List<CharacterUIImageData>();
 
 public GameObject ManagementCharacterSlotPrefab => managementCharacterSlotPrefab; // 캐릭터 관리창 슬롯 프리팹 반환
+
+public GameObject InGameCharacterPrefab => inGameCharacterPrefab; // 인게임 캐릭터 프리팹 반환
 
     public int FirstRowID => firstRowID; // 캐릭터 1열 ID 반환
     public int SecondRowID => secondRowID; // 캐릭터 2열 ID 반환

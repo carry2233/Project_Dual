@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e80df51f8439c92428c3cd14a79ec0d6, type: 3}
+  m_Name: 2EventInfoDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::EventInfoDefinition
+  eventID: 1
+  eventType: 1
+  eventWeight: 1
+  eventVisualPrefab: {fileID: 3823506397000569358, guid: 7ce74fd9bbd7ff44ba89024aa418373d, type: 3}

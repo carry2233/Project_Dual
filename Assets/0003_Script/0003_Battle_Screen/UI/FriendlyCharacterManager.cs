@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System; // 이벤트 Action 사용
-
+using Random = UnityEngine.Random;
 public class FriendlyCharacterManager : MonoBehaviour
 {
     [System.Serializable]
@@ -62,6 +62,22 @@ public class FriendlyCharacterManager : MonoBehaviour
     [SerializeField] private GameObject currentSpawnedDetailUIObject; // 현재 생성된 상세 UI 오브젝트
     [SerializeField] private CharacterDuelAI currentDetailUIOwnerCharacter; // 현재 상세 UI를 소유한 캐릭터
 
+    [Header("전투씬 아군 생성 설정")]
+[SerializeField] private SaveStorage saveStorage; // 저장 데이터 참조
+[SerializeField] private GlobalCharacterManager globalCharacterManager; // 전역 캐릭터 관리자 참조
+[SerializeField] private Transform friendlySpawnCenter; // 아군 생성 기준 위치
+[SerializeField] private float friendlySpawnRadius = 3f; // 아군 생성 반지름
+
+[Header("아군 평균 레벨")]
+[SerializeField] private int friendlyAverageLevel = 1; // 현재 아군 평균 레벨
+
+[Header("전투 아군 준비 상태")]
+[SerializeField] private bool isFriendlyBattleSetupCompleted; // 아군 생성, 목록 구성, 평균 레벨 계산 완료 여부
+
+public bool IsFriendlyBattleSetupCompleted => isFriendlyBattleSetupCompleted; // 전투 아군 준비 완료 여부 반환
+
+public int FriendlyAverageLevel => friendlyAverageLevel; // 아군 평균 레벨 반환
+
     public event Action OnFriendlyCharacterListRebuilt; // 아군 목록 재구성 완료 알림 이벤트
 
     public IReadOnlyList<FriendlyCharacterEntry> FriendlyCharacterEntryList => friendlyCharacterEntryList; // 아군 목록 반환
@@ -89,11 +105,38 @@ private void Awake() // 시작 시 참조 자동 연결
     {
         detailUIParent = transform; // 부모가 없으면 자기 자신 사용
     }
+    
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance; // 저장소 전역 인스턴스 참조
+    }
+
+    if (globalCharacterManager == null)
+    {
+        globalCharacterManager = GlobalCharacterManager.Instance; // 글로벌 캐릭터 매니저 참조
+    }
 }
 
-private void Start() // 시작 시 아군 목록 구성
+private void Start() // 시작 시 아군 생성 및 목록 구성
 {
+    isFriendlyBattleSetupCompleted = false; // 아군 전투 준비 시작 상태로 설정
+
+    SpawnFriendlyCharactersFromSaveStorage(); // 저장된 소유 캐릭터 기반으로 아군 생성
+
+    if (globalCharacterManager == null)
+    {
+        globalCharacterManager = GlobalCharacterManager.Instance; // 글로벌 캐릭터 매니저 재참조
+    }
+
+    if (globalCharacterManager != null)
+    {
+        globalCharacterManager.RebuildCharacterList(); // 씬 캐릭터 전체 등록
+    }
+
     RebuildFriendlyCharacterList(); // 아군 목록 재구성
+    RefreshFriendlyAverageLevel(); // 아군 평균 레벨 계산
+
+    isFriendlyBattleSetupCompleted = true; // 아군 생성, 목록 구성, 평균 레벨 계산 완료
 }
 
     private void Update() // 매 프레임 숫자키 선택 및 상세 UI 토글 처리
@@ -443,4 +486,158 @@ public void AssignStatusUIToSlot(FriendlyCharacterListSlot targetSlot) // 슬롯
     CharacterStatSystem targetStatSystem = targetCharacter.GetComponent<CharacterStatSystem>(); // 대상 캐릭터의 스탯 시스템 탐색
     targetSlot.BindStatusUI(targetStatSystem); // 슬롯의 상태 UI에 스탯 시스템 배정
 }
+
+private void SpawnFriendlyCharactersFromSaveStorage() // 저장된 소유 캐릭터 목록 기반 아군 생성
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance; // 저장소 재참조
+    }
+
+    if (saveStorage == null)
+    {
+        return; // 저장소가 없으면 종료
+    }
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = CharacterInfoManager.Instance; // 캐릭터 정보 매니저 재참조
+    }
+
+    if (characterInfoManager == null)
+    {
+        return; // 캐릭터 정보 매니저가 없으면 종료
+    }
+
+    IReadOnlyList<SaveStorage.OwnedCharacterData> ownedCharacterList = saveStorage.CurrentOwnedCharacterList; // 현재 소유 캐릭터 목록
+
+    for (int i = 0; i < ownedCharacterList.Count; i++)
+    {
+        SaveStorage.OwnedCharacterData ownedCharacter = ownedCharacterList[i]; // 현재 소유 캐릭터 데이터
+
+        if (ownedCharacter == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        GlobalCharacterDefinition definition = characterInfoManager.FindDefinitionByID(
+            ownedCharacter.firstRowID,
+            ownedCharacter.secondRowID); // 캐릭터 정의 탐색
+
+        if (definition == null || definition.InGameCharacterPrefab == null)
+        {
+            continue; // 정의 또는 프리팹이 없으면 건너뜀
+        }
+
+        Vector3 spawnPosition = GetRandomFriendlySpawnPosition(); // 랜덤 생성 위치 계산
+
+        GameObject spawnedObject = Instantiate(
+            definition.InGameCharacterPrefab,
+            spawnPosition,
+            Quaternion.identity); // 아군 캐릭터 생성
+
+        CharacterDuelAI duelAI = spawnedObject.GetComponent<CharacterDuelAI>(); // 결투 AI 참조
+
+        if (duelAI != null)
+        {
+            duelAI.SetCharacterIDs(
+                ownedCharacter.firstRowID,
+                ownedCharacter.secondRowID,
+                ownedCharacter.individualID); // 저장된 식별 ID 적용
+        }
+
+        ApplySavedLevelToFriendlyCharacter(spawnedObject, ownedCharacter); // 저장된 레벨 적용
+    }
+}
+
+private Vector3 GetRandomFriendlySpawnPosition() // 아군 생성 랜덤 위치 계산
+{
+    Vector3 centerPosition = friendlySpawnCenter != null ? friendlySpawnCenter.position : transform.position; // 기준 위치
+    Vector2 randomCircle = Random.insideUnitCircle * Mathf.Max(0f, friendlySpawnRadius); // 원형 범위 랜덤값
+
+    return centerPosition + new Vector3(randomCircle.x, randomCircle.y, 0f); // XY 평면 기준 위치 반환
+}
+
+private void ApplySavedLevelToFriendlyCharacter(GameObject characterObject, SaveStorage.OwnedCharacterData ownedCharacter) // 저장 레벨 적용
+{
+    if (characterObject == null || ownedCharacter == null)
+    {
+        return; // 대상이 없으면 종료
+    }
+
+    CharacterStatSystem statSystem = characterObject.GetComponent<CharacterStatSystem>(); // 스탯 시스템 참조
+
+    if (statSystem == null)
+    {
+        return; // 스탯 시스템이 없으면 종료
+    }
+
+    IReadOnlyList<SaveStorage.OwnedCharacterStatData> statList = saveStorage.CurrentOwnedCharacterStatList; // 저장된 스탯 목록
+
+    for (int i = 0; i < statList.Count; i++)
+    {
+        SaveStorage.OwnedCharacterStatData statData = statList[i]; // 현재 스탯 데이터
+
+        if (statData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (statData.firstRowID != ownedCharacter.firstRowID)
+        {
+            continue; // 1열 ID가 다르면 건너뜀
+        }
+
+        if (statData.secondRowID != ownedCharacter.secondRowID)
+        {
+            continue; // 2열 ID가 다르면 건너뜀
+        }
+
+        if (statData.individualID != ownedCharacter.individualID)
+        {
+            continue; // 개체별 ID가 다르면 건너뜀
+        }
+
+        statSystem.SetLevelStats(statData.levelstats); // 저장된 레벨 적용
+        return; // 적용 완료 후 종료
+    }
+}
+
+
+
+public void RefreshFriendlyAverageLevel() // 아군 평균 레벨 계산
+{
+    int totalLevel = 0; // 레벨 합계
+    int validCount = 0; // 유효 캐릭터 수
+
+    for (int i = 0; i < friendlyCharacterEntryList.Count; i++)
+    {
+        FriendlyCharacterEntry entry = friendlyCharacterEntryList[i]; // 현재 아군 정보
+
+        if (entry == null || entry.CharacterDuelAI == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        CharacterStatSystem statSystem = entry.CharacterDuelAI.GetComponent<CharacterStatSystem>(); // 스탯 참조
+
+        if (statSystem == null)
+        {
+            continue; // 스탯이 없으면 건너뜀
+        }
+
+        totalLevel += statSystem.LevelStats; // 레벨 합산
+        validCount++; // 유효 수 증가
+    }
+
+    friendlyAverageLevel = validCount > 0 ? Mathf.Max(1, totalLevel / validCount) : 1; // 평균 레벨 저장
+}
+
+
+
+
+
+
+
+
 }

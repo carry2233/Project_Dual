@@ -2088,6 +2088,7 @@ MonoBehaviour:
   globalCharacterDefinitionList:
   - {fileID: 11400000, guid: a19548db7d5a79a4bbaab1fe0bb9295c, type: 2}
   - {fileID: 11400000, guid: c85f6b5735a122a4e82c79ab78b4c183, type: 2}
+  - {fileID: 11400000, guid: 1dc7bb4d8bab03a4ab6115ba69895fc3, type: 2}
 --- !u!4 &649652974
 Transform:
   m_ObjectHideFlags: 0
@@ -4334,6 +4335,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EventInfoManager
   eventInfoDefinitionList:
   - {fileID: 11400000, guid: 3738c7193f1d12244871dc2a1e32b8c7, type: 2}
+  - {fileID: 11400000, guid: 2db4af62cd2d41f4986c13fdbb9b3b3b, type: 2}
 --- !u!4 &1459788289
 Transform:
   m_ObjectHideFlags: 0
@@ -5556,6 +5558,14 @@ MonoBehaviour:
     individualID: 0
   currentOwnedCharacterStatList: []
   currentOwnedCharacterInventoryList: []
+  currentBattleEventRuntimeData:
+    eventID: 0
+    minEnemySpawnCount: 0
+    maxEnemySpawnCount: 0
+    enemyLevelCorrectionValue: 0
+    minEnemySpawnDelay: 0
+    maxEnemySpawnDelay: 0
+    spawnableEnemyList: []
 --- !u!4 &1871097358
 Transform:
   m_ObjectHideFlags: 0

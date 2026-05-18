@@ -121,4 +121,102 @@ public class GlobalCharacterManager : MonoBehaviour
 
         return candidateID; // 사용 가능한 ID 반환
     }
+
+    public void RegisterCharacter(CharacterDuelAI targetCharacter) // 단일 캐릭터 등록
+{
+    if (targetCharacter == null)
+    {
+        return; // 대상이 없으면 종료
+    }
+
+    int currentIndividualID = targetCharacter.GetIndividualID(); // 현재 개체별 ID 확인
+
+    if (currentIndividualID <= 0 || IsIndividualIDAlreadyRegistered(currentIndividualID))
+    {
+        currentIndividualID = GetNextRuntimeIndividualID(); // 사용 가능한 새 ID 계산
+        targetCharacter.SetIndividualID(currentIndividualID); // 캐릭터에 새 ID 적용
+    }
+
+    CharacterEntry newEntry = new CharacterEntry(
+        targetCharacter, // 캐릭터 AI 저장
+        targetCharacter.GetFirstRowID(), // 1열 ID 저장
+        targetCharacter.GetSecondRowID(), // 2열 ID 저장
+        currentIndividualID); // 개체별 ID 저장
+
+    characterEntryList.Add(newEntry); // 등록 목록에 추가
+}
+
+public CharacterDuelAI FindCharacterByID(int firstRowID, int secondRowID, int individualID) // ID 기준 캐릭터 탐색
+{
+    for (int i = 0; i < characterEntryList.Count; i++)
+    {
+        CharacterEntry entry = characterEntryList[i]; // 현재 등록 정보
+
+        if (entry == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (entry.FirstRowID != firstRowID)
+        {
+            continue; // 1열 ID가 다르면 건너뜀
+        }
+
+        if (entry.SecondRowID != secondRowID)
+        {
+            continue; // 2열 ID가 다르면 건너뜀
+        }
+
+        if (entry.IndividualID != individualID)
+        {
+            continue; // 개체별 ID가 다르면 건너뜀
+        }
+
+        return entry.CharacterDuelAI; // 일치 캐릭터 반환
+    }
+
+    return null; // 찾지 못하면 null 반환
+}
+
+private bool IsIndividualIDAlreadyRegistered(int targetIndividualID) // 개체별 ID 중복 여부 확인
+{
+    for (int i = 0; i < characterEntryList.Count; i++)
+    {
+        CharacterEntry entry = characterEntryList[i]; // 현재 등록 정보
+
+        if (entry == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (entry.IndividualID == targetIndividualID)
+        {
+            return true; // 이미 사용 중이면 true
+        }
+    }
+
+    return false; // 중복 없음
+}
+
+private int GetNextRuntimeIndividualID() // 런타임용 다음 개체별 ID 계산
+{
+    HashSet<int> usedIDSet = new HashSet<int>(); // 사용 중 ID 저장
+
+    for (int i = 0; i < characterEntryList.Count; i++)
+    {
+        CharacterEntry entry = characterEntryList[i]; // 현재 등록 정보
+
+        if (entry == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (entry.IndividualID > 0)
+        {
+            usedIDSet.Add(entry.IndividualID); // 유효 ID 등록
+        }
+    }
+
+    return GetNextAvailableIndividualID(usedIDSet, 1); // 사용 가능한 ID 반환
+}
 }

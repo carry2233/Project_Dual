@@ -49,27 +49,27 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\SpriteDataProviders\SpriteCustomDataProvider.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\AssetCreation.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\SpriteEditorModuleModeBase.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\SpriteDataProviders\SpriteCustomDataProvider.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\AssetCreation.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\SpriteEditorModuleModeBase.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.aseprite@809e3a168ff7\Editor\Common\InternalBridge\ModelPreviewer.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.aseprite@809e3a168ff7\Editor\Common\InternalBridge\TexturePlatformSettingsHelper.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\Deprecated\SpriteEditorModuleModeBase_Deprecated.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\AssemblyInfo.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\SpriteEditorWindowBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\InternalEditorBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\OverlayPopupWindow.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\Deprecated\SpriteEditorModuleModeBase_Deprecated.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\AssemblyInfo.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\SpriteEditorWindowBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\InternalEditorBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\OverlayPopupWindow.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.aseprite@809e3a168ff7\Editor\Common\InternalBridge\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.aseprite@809e3a168ff7\Editor\Common\InternalBridge\TexturePlatformSettings.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\TexturePlatformSettings\TexturePlatformSettings.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\SpriteFrameModeToolStripBase.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\TexturePlatformSettings\TexturePlatformSettings.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\SpriteFrameModeToolStripBase.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.aseprite@809e3a168ff7\Editor\Common\InternalBridge\InternalEditorBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\SpriteAtlasBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\SpriteAtlasBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.aseprite@809e3a168ff7\Editor\Common\InternalBridge\AnimatorControllerHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.2d.aseprite@809e3a168ff7\Editor\Common\InternalBridge\InternalBridgeRef.asmref" />
-    <None Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InternalBridge\InternalBridgeDef.asmdef" />
+    <None Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InternalBridge\InternalBridgeDef.asmdef" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

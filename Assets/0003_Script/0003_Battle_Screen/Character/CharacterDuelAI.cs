@@ -290,6 +290,14 @@ private void Awake() // 초기 참조 자동 연결
     }
 }
 
+private void Start() // 시작 시 필요한 매니저 자동 참조
+{
+    if (globalGameRuleManager == null)
+    {
+        globalGameRuleManager = FindFirstObjectByType<GlobalGameRuleManager>(); // 씬에서 전역 게임 룰 매니저 탐색
+    }
+}
+
 private void Update() // 매 프레임 결투 상태 처리
 {
     UpdateDuelTargetCollisionIgnoreTimer(); // 결투 상대와의 물리 접촉 무시 타이머 갱신
@@ -1866,4 +1874,10 @@ private void ApplyResolvedNumericalDamage(
     }
 }
 
+public void SetCharacterIDs(int newFirstRowID, int newSecondRowID, int newIndividualID) // 캐릭터 식별 ID 전체 설정
+{
+    firstRowID = newFirstRowID; // 1열 ID 저장
+    secondRowID = newSecondRowID; // 2열 ID 저장
+    individualID = newIndividualID; // 개체별 ID 저장
+}
 }

@@ -88,6 +88,11 @@ public int ApplyHealthDamage(int rawDamage) // 방어력 퍼센트를 반영한 
     return finalDamage; // 실제 적용된 최종 피해 반환
 }
 
+public void SetLevelStats(int newLevelStats) // 레벨 수치 설정
+{
+    levelstats = Mathf.Max(1, newLevelStats); // 최소 레벨 1 보장
+    NotifyStatusValueChanged(); // UI 갱신 알림
+}
 public int ApplyStaggerDamage(int rawStaggerDamage) // 저지율 퍼센트를 반영한 최종 와해피해 적용
 {
     int safeRawStaggerDamage = Mathf.Max(0, rawStaggerDamage); // 음수 와해피해 방지
@@ -104,4 +109,7 @@ public int ApplyStaggerDamage(int rawStaggerDamage) // 저지율 퍼센트를 �
 
     return finalStaggerDamage; // 실제 적용된 최종 와해피해 반환
 }
+
+
+
 }

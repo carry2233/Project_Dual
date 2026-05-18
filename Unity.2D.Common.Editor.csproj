@@ -49,19 +49,19 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\TextureGenerator\TextureGeneratorHelper.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\ImagePacker\ImagePackNode.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\VisualElementExtensions.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\ImagePacker\ImagePacker.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\DebugTools\PlayerLoopInspector.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\AssemblyInfo.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\InspectorUtils.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\ImagePacker\Jobs\FindTightRectJob.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\ImagePacker\ImagePackerDebugEditor.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\SettingsWindowUtils.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\TextureGenerator\TextureGeneratorHelper.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\ImagePacker\ImagePackNode.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\VisualElementExtensions.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\ImagePacker\ImagePacker.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\DebugTools\PlayerLoopInspector.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\AssemblyInfo.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\InspectorUtils.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\ImagePacker\Jobs\FindTightRectJob.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\ImagePacker\ImagePackerDebugEditor.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\SettingsWindowUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Editor\Unity.2D.Common.Editor.asmdef" />
+    <None Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Editor\Unity.2D.Common.Editor.asmdef" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

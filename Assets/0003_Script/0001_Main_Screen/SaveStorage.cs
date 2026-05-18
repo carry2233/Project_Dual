@@ -10,6 +10,18 @@ using UnityEngine;
 public class SaveStorage : MonoBehaviour
 {
 
+    [Serializable]
+public class BattleEventRuntimeData
+{
+    public int eventID; // 전투 이벤트 ID
+    public int minEnemySpawnCount; // 최소 적 생성 수
+    public int maxEnemySpawnCount; // 최대 적 생성 수
+    public int enemyLevelCorrectionValue; // 적 레벨 보정값
+    public float minEnemySpawnDelay; // 최소 적 생성 딜레이
+    public float maxEnemySpawnDelay; // 최대 적 생성 딜레이
+    public List<GlobalCharacterDefinition> spawnableEnemyList = new List<GlobalCharacterDefinition>(); // 생성 가능한 적 목록
+}
+
 [Serializable]
 private class SaveFileData
 {
@@ -114,6 +126,11 @@ public class SaveEntry
 
 [Header("현재 소유 캐릭터 인벤토리 목록")]
 [SerializeField] private List<OwnedCharacterInventorySaveData> currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 세이브 기준 캐릭터 인벤토리 목록
+
+[Header("현재 전투 이벤트 런타임 데이터")]
+[SerializeField] private BattleEventRuntimeData currentBattleEventRuntimeData; // 씬 이동용 전투 이벤트 임시 데이터
+
+public bool HasBattleEventRuntimeData => currentBattleEventRuntimeData != null; // 전투 이벤트 데이터 존재 여부
 
 public List<OwnedCharacterInventorySaveData> CurrentOwnedCharacterInventoryList => GetOwnedCharacterInventoryListCopy(currentOwnedCharacterInventoryList); // 현재 캐릭터 인벤토리 목록 복사 반환
 public List<OwnedCharacterStatData> CurrentOwnedCharacterStatList => GetOwnedCharacterStatListCopy(currentOwnedCharacterStatList); // 현재 캐릭터 스탯정보 목록 복사 반환
@@ -824,7 +841,43 @@ public bool SaveCurrentOwnedCharacterInventoryListToSelectedSave() // 현재 캐
     return false; // 대상 저장본 없음
 }
 
+public void StoreBattleEventRuntimeData(BattleOccurrenceEvent battleEvent) // 전투 이벤트 데이터 저장
+{
+    if (battleEvent == null)
+    {
+        return; // 이벤트가 없으면 종료
+    }
 
+    currentBattleEventRuntimeData = new BattleEventRuntimeData(); // 새 런타임 데이터 생성
+    currentBattleEventRuntimeData.eventID = battleEvent.EventID; // 이벤트 ID 저장
+    currentBattleEventRuntimeData.minEnemySpawnCount = battleEvent.MinEnemySpawnCount; // 최소 생성 수 저장
+    currentBattleEventRuntimeData.maxEnemySpawnCount = battleEvent.MaxEnemySpawnCount; // 최대 생성 수 저장
+    currentBattleEventRuntimeData.enemyLevelCorrectionValue = battleEvent.EnemyLevelCorrectionValue; // 레벨 보정값 저장
+    currentBattleEventRuntimeData.minEnemySpawnDelay = battleEvent.MinEnemySpawnDelay; // 최소 딜레이 저장
+    currentBattleEventRuntimeData.maxEnemySpawnDelay = battleEvent.MaxEnemySpawnDelay; // 최대 딜레이 저장
+    currentBattleEventRuntimeData.spawnableEnemyList = new List<GlobalCharacterDefinition>(battleEvent.SpawnableEnemyList); // 적 목록 복사
+}
+
+public void SendBattleEventRuntimeDataToEnemySpawnManager(EnemySpawnManager enemySpawnManager) // 적 생성 관리자에게 전투 데이터 전달
+{
+    if (enemySpawnManager == null)
+    {
+        return; // 대상이 없으면 종료
+    }
+
+    if (currentBattleEventRuntimeData == null)
+    {
+        return; // 저장된 전투 데이터가 없으면 종료
+    }
+
+    enemySpawnManager.ReceiveBattleEventData(currentBattleEventRuntimeData); // 전투 데이터 전달
+    ClearBattleEventRuntimeData(); // 전달 후 초기화
+}
+
+public void ClearBattleEventRuntimeData() // 전투 이벤트 임시 데이터 초기화
+{
+    currentBattleEventRuntimeData = null; // 전투 데이터 제거
+}
 
 
 

@@ -148,4 +148,10 @@ public void RefreshFinalMoveSpeed() // 최종 이동속도를 계산하고 이�
 
     NotifyStatusValueChanged(); // UI 갱신 알림
 }
+
+public void SetLevelStats(int newLevelStats) // 레벨 수치 설정
+{
+    levelstats = Mathf.Max(1, newLevelStats); // 최소 1 이상으로 보정
+    NotifyStatusValueChanged(); // UI 갱신 알림
+}
 }

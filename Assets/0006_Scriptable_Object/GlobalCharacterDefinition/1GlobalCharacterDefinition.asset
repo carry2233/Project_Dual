@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GlobalCharacterDefinition
   firstRowID: 1
   secondRowID: 1
+  inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 2b7ec501f4eecec4eadc38edc3c27ec5, type: 3}
+  displayPriority: 0
   detailUIPrefab: {fileID: 2177999571878758286, guid: 2f605ecbc84772444b4aeb3a282c9eef, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 1c9d70606cdd44f43a1fc3a120a8edfb, type: 3}

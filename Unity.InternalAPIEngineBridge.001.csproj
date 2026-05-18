@@ -49,12 +49,12 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Runtime\InternalBridge\AssemblyInfo.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Runtime\InternalBridge\IAnimationPreviewable.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Runtime\InternalBridge\InternalEngineBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Runtime\InternalBridge\AssemblyInfo.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Runtime\InternalBridge\IAnimationPreviewable.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Runtime\InternalBridge\InternalEngineBridge.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Library\PackageCache\com.unity.2d.common@800085e896ad\Runtime\InternalBridge\InternalBridgeDef.asmdef" />
+    <None Include="Library\PackageCache\com.unity.2d.common@2af7c9b44b5c\Runtime\InternalBridge\InternalBridgeDef.asmdef" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

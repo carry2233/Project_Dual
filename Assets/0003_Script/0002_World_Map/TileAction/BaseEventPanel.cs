@@ -2,6 +2,7 @@ using System.Collections.Generic; // List 사용
 using System.Linq; // 정렬 사용
 using UnityEngine; // Unity 기본 기능 사용
 using UnityEngine.UI; // Button 사용
+using UnityEngine.SceneManagement; // 씬 이동 사용
 
 /// <summary>
 /// 이벤트 발생 판정, 이벤트 UI 표시, 비주얼 생성, 공용 버튼 제어를 담당하는 패널입니다.
@@ -34,12 +35,22 @@ public class BaseEventPanel : MonoBehaviour
     [Header("이벤트 기능 스크립트")]
     [SerializeField] private List<ItemRewardEvent> itemRewardEventList = new List<ItemRewardEvent>(); // 아이템 획득 이벤트 리스트
 
+    [Header("전투 이벤트 설정")]
+[SerializeField] private List<BattleOccurrenceEvent> battleOccurrenceEventList = new List<BattleOccurrenceEvent>(); // 전투 발생 이벤트 리스트
+[SerializeField] private string battleSceneName; // 전투 이벤트 버튼 클릭 시 이동할 씬 이름
+[SerializeField] private SaveStorage saveStorage; // 전투 데이터 전달용 저장소
+
     private GameObject currentEventVisualInstance; // 현재 생성된 이벤트 비주얼 인스턴스
 
     private void Start() // 시작 시 참조 보정
     {
         if (eventInfoManager == null)
             eventInfoManager = EventInfoManager.Instance; // 전역 이벤트 매니저 참조
+
+        if (saveStorage == null)
+        {
+            saveStorage = SaveStorage.Instance; // 저장소 전역 인스턴스 참조
+        }
     }
 
     public void HideEventUI() // 이벤트 UI 비활성화
@@ -117,6 +128,13 @@ public class BaseEventPanel : MonoBehaviour
         {
             rewardEvent.ExecuteRewardEvent(this, selectedEvent); // 아이템 획득 이벤트 실행
         }
+
+        BattleOccurrenceEvent battleEvent = FindBattleOccurrenceEvent(selectedEvent.eventID); // 전투 발생 이벤트 탐색
+
+        if (battleEvent != null)
+        {
+            CreateBattleEventSlot(battleEvent); // 전투 이벤트 슬롯 생성
+        }
     }
 
     private void SpawnEventVisual(EventInfoDefinition selectedEvent) // 이벤트 비주얼 생성
@@ -143,34 +161,40 @@ public class BaseEventPanel : MonoBehaviour
         return null;
     }
 
-    public void CreateRewardSlots(List<ItemRewardEvent.RewardItemResult> rewardResults) // 획득 아이템 슬롯 생성
+public void CreateRewardSlots(List<ItemRewardEvent.RewardItemResult> rewardResults) // 획득 아이템 슬롯 생성
+{
+    if (rewardSlotContent == null || rewardResults == null)
+        return;
+
+    ClearRewardSlots(); // 기존 슬롯 제거
+
+    List<ItemRewardEvent.RewardItemResult> sortedResults = rewardResults
+        .Where(result => result != null && result.itemDefinition != null && result.itemCount > 0)
+        .OrderBy(result => result.itemDefinition.displayPriority)
+        .ToList();
+
+    int createdSlotCount = 0; // 실제 생성된 슬롯 수
+
+    for (int i = 0; i < sortedResults.Count; i++)
     {
-        if (rewardSlotContent == null || rewardResults == null)
-            return;
+        ItemRewardEvent.RewardItemResult result = sortedResults[i]; // 현재 보상 결과
 
-        ClearRewardSlots(); // 기존 슬롯 제거
+        if (result.itemDefinition.rewardItemDisplaySlotPrefab == null)
+            continue;
 
-        List<ItemRewardEvent.RewardItemResult> sortedResults = rewardResults
-            .Where(result => result != null && result.itemDefinition != null && result.itemCount > 0)
-            .OrderBy(result => result.itemDefinition.displayPriority)
-            .ToList();
+        GameObject slotObject = Instantiate(result.itemDefinition.rewardItemDisplaySlotPrefab, rewardSlotContent); // 슬롯 프리팹 생성
+        EventSlot eventSlot = slotObject.GetComponent<EventSlot>(); // 이벤트 슬롯 컴포넌트 참조
 
-        for (int i = 0; i < sortedResults.Count; i++)
+        if (eventSlot != null)
         {
-            ItemRewardEvent.RewardItemResult result = sortedResults[i];
-
-            if (result.itemDefinition.rewardItemDisplaySlotPrefab == null)
-                continue;
-
-            GameObject slotObject = Instantiate(result.itemDefinition.rewardItemDisplaySlotPrefab, rewardSlotContent); // 슬롯 프리팹 생성
-            EventSlot eventSlot = slotObject.GetComponent<EventSlot>(); // 이벤트 슬롯 컴포넌트 참조
-
-            if (eventSlot != null)
-            {
-                eventSlot.SetSlot(result.itemDefinition, result.itemCount); // 슬롯 표시 갱신
-            }
+            eventSlot.SetSlot(result.itemDefinition, result.itemCount); // 슬롯 표시 갱신
         }
+
+        createdSlotCount++; // 실제 생성된 슬롯 수 증가
     }
+
+    RefreshRewardSlotContentHeight(createdSlotCount); // 생성된 슬롯 수 기준으로 Content 높이 갱신
+}
 
     public void SetButtonInteractable(int buttonID, bool isInteractable) // 버튼 상호작용 상태 변경
     {
@@ -198,14 +222,117 @@ public class BaseEventPanel : MonoBehaviour
         currentEventVisualInstance = null; // 참조 초기화
     }
 
-    private void ClearRewardSlots() // 획득 아이템 슬롯 전체 제거
-    {
-        if (rewardSlotContent == null)
-            return;
+private void ClearRewardSlots() // 획득 아이템 슬롯 전체 제거
+{
+    if (rewardSlotContent == null)
+        return;
 
-        for (int i = rewardSlotContent.childCount - 1; i >= 0; i--)
+    for (int i = rewardSlotContent.childCount - 1; i >= 0; i--)
+    {
+        Destroy(rewardSlotContent.GetChild(i).gameObject); // 자식 슬롯 제거
+    }
+
+    RefreshRewardSlotContentHeight(0); // 슬롯 제거 후 Content 높이 초기화
+}
+
+    private void RefreshRewardSlotContentHeight(int createdSlotCount) // 보상 슬롯 Content 높이 갱신
+{
+    if (rewardSlotContent == null)
+        return;
+
+    RectTransform contentRectTransform = rewardSlotContent as RectTransform; // Content RectTransform 참조
+
+    if (contentRectTransform == null)
+        return;
+
+    GridLayoutGroup gridLayoutGroup = rewardSlotContent.GetComponent<GridLayoutGroup>(); // Grid Layout Group 참조
+
+    if (gridLayoutGroup == null)
+        return;
+
+    int slotCount = Mathf.Max(0, createdSlotCount); // 음수 방지
+    float cellHeight = gridLayoutGroup.cellSize.y; // 셀 Y 크기
+    float spacingY = gridLayoutGroup.spacing.y; // Y축 간격
+
+    float contentHeight = 0f; // 최종 Content 높이
+
+    if (slotCount > 0)
+    {
+        contentHeight = (slotCount * cellHeight) + (spacingY * (slotCount - 1)); // 슬롯 수 기준 높이 계산
+    }
+
+    Vector2 sizeDelta = contentRectTransform.sizeDelta; // 현재 Content 크기
+    sizeDelta.y = contentHeight; // 계산된 높이 적용
+    contentRectTransform.sizeDelta = sizeDelta; // Content 크기 반영
+}
+
+private BattleOccurrenceEvent FindBattleOccurrenceEvent(int eventID) // 이벤트 ID에 맞는 전투 이벤트 찾기
+{
+    for (int i = 0; i < battleOccurrenceEventList.Count; i++)
+    {
+        BattleOccurrenceEvent battleEvent = battleOccurrenceEventList[i]; // 현재 전투 이벤트
+
+        if (battleEvent == null)
         {
-            Destroy(rewardSlotContent.GetChild(i).gameObject); // 자식 슬롯 제거
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (battleEvent.CanHandleEvent(eventID))
+        {
+            return battleEvent; // 처리 가능한 전투 이벤트 반환
         }
     }
+
+    return null; // 찾지 못하면 null 반환
+}
+
+private void CreateBattleEventSlot(BattleOccurrenceEvent battleEvent) // 전투 이벤트 슬롯 생성
+{
+    if (battleEvent == null || battleEvent.EventSlotPrefab == null || rewardSlotContent == null)
+    {
+        return; // 필수값이 없으면 종료
+    }
+
+    ClearRewardSlots(); // 기존 슬롯 제거
+
+    EventSlot eventSlot = Instantiate(battleEvent.EventSlotPrefab, rewardSlotContent); // 슬롯 프리팹 그대로 생성
+
+    Button slotButton = eventSlot.GetComponentInChildren<Button>(); // 슬롯 내부 버튼 탐색
+
+    if (slotButton != null)
+    {
+        slotButton.onClick.RemoveAllListeners(); // 기존 클릭 이벤트 제거
+        slotButton.onClick.AddListener(() => OnBattleEventSlotClicked(battleEvent)); // 전투 이벤트 클릭 연결
+    }
+
+    RefreshRewardSlotContentHeight(1); // 슬롯 1개 기준 높이 갱신
+}
+
+private void OnBattleEventSlotClicked(BattleOccurrenceEvent battleEvent) // 전투 이벤트 슬롯 클릭 처리
+{
+    if (battleEvent == null)
+    {
+        return; // 이벤트가 없으면 종료
+    }
+
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance; // 저장소 재참조
+    }
+
+    if (saveStorage != null)
+    {
+        saveStorage.StoreBattleEventRuntimeData(battleEvent); // 전투 이벤트 데이터 저장
+    }
+
+    if (!string.IsNullOrEmpty(battleSceneName))
+    {
+        SceneManager.LoadScene(battleSceneName); // 전투 씬 이동
+    }
+}
+
+
+
+
+
 }
