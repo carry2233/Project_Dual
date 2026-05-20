@@ -15,3 +15,5 @@ MonoBehaviour:
   tileId: 3
   targetTilePrefab: {fileID: 3059695088941957945, guid: b4fc0641230cd5f4bae069e4e4929e4a, type: 3}
   requiredSearchValue: 30
+  minSearchRequiredMinute: 20
+  maxSearchRequiredMinute: 22

@@ -150,6 +150,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationClipSO..cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\TimeSystemManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\WorldMapCameraController.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\GlobalItemDefinition.cs" />

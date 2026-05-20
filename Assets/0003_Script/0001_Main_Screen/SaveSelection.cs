@@ -53,6 +53,10 @@ public class SaveSelection : MonoBehaviour
 
 [Header("시작 소유 캐릭터 인벤토리 목록")]
 [SerializeField] private List<SaveStorage.OwnedCharacterInventorySaveData> startingOwnedCharacterInventoryList = new List<SaveStorage.OwnedCharacterInventorySaveData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 인벤토리 목록
+
+[Header("시작 시간 설정")]
+[SerializeField, Range(0, 23)] private int startHour = 0; // 새 세이브 시작 시간
+[SerializeField, Range(0, 59)] private int startMinute = 0; // 새 세이브 시작 분
 private void Awake() // 시작 전 기본 UI 상태 초기화
 {
     if (saveStorage == null)
@@ -282,8 +286,11 @@ private void TryCreateSave() // 저장본 생성 시도
         inputName,
         startingOwnedCharacterList,
         startingOwnedCharacterStatList,
-        startingOwnedCharacterInventoryList
-    ); // 시작 캐릭터 목록, 스탯정보, 인벤토리 포함 생성
+        startingOwnedCharacterInventoryList,
+        startHour,
+        startMinute,
+        0
+    ); // 시작 시간/분/0일차 포함 생성
 
     if (!createResult) return; // 생성 실패 시 종료
 
@@ -294,8 +301,7 @@ private void TryCreateSave() // 저장본 생성 시도
 
     RefreshSaveSlotList(); // 저장본 버튼 목록 갱신
     UpdateBlockedButtonsState(); // 모달 UI 닫힘 상태 반영
-}
-    private void ShowEmptyNameWarningUI() // 빈 입력 경고 UI 표시
+}    private void ShowEmptyNameWarningUI() // 빈 입력 경고 UI 표시
     {
         if (emptyNameWarningUI == null) return; // 참조 없으면 종료
 

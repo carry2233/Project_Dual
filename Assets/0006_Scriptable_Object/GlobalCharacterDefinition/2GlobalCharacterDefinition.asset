@@ -16,7 +16,7 @@ MonoBehaviour:
   secondRowID: 2
   inGameCharacterPrefab: {fileID: 8797095827369585324, guid: d5a385b0545018742b16f0f541060688, type: 3}
   displayPriority: 0
-  detailUIPrefab: {fileID: 2177999571878758286, guid: 50919dd1888185f43b2cecf0af621040, type: 3}
+  detailUIPrefab: {fileID: 2177999571878758286, guid: 31cedc5b583c6534faaa73d40ba1b25a, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 6573314813019425848, guid: dec19dd9c3cf68f4aa7c2b132a6045e0, type: 3}
   characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: fc57d870e08194246b89abb89e745009, type: 3}

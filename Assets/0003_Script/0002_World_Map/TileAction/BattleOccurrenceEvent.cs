@@ -35,6 +35,13 @@ public class BattleOccurrenceEvent : MonoBehaviour
 [SerializeField] private bool executeItemRewardAfterBattle; // 전투 후 아이템 획득 이벤트 실행 여부
 [SerializeField] private ItemRewardEvent postBattleItemRewardEvent; // 전투 후 실행할 아이템 획득 이벤트
 
+[Header("전투 소요 시간 설정")]
+[SerializeField] private int minBattleRequiredMinute = 30; // 최소 전투 소요 시간
+[SerializeField] private int maxBattleRequiredMinute = 90; // 최대 전투 소요 시간
+
+public int MinBattleRequiredMinute => minBattleRequiredMinute; // 최소 전투 소요 시간 반환
+public int MaxBattleRequiredMinute => maxBattleRequiredMinute; // 최대 전투 소요 시간 반환
+
 public bool ExecuteItemRewardAfterBattle => executeItemRewardAfterBattle; // 전투 후 아이템 획득 실행 여부 반환
 public ItemRewardEvent PostBattleItemRewardEvent => postBattleItemRewardEvent; // 전투 후 아이템 획득 이벤트 반환
 

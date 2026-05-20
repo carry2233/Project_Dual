@@ -18,6 +18,9 @@ public class CharacterDetailInfoWindow : MonoBehaviour
     [Header("토글 UI 목록")]
     [SerializeField] private List<ToggleUIElement> toggleUIElements = new List<ToggleUIElement>(); // 토글 버튼/대상/스크롤바 목록
 
+    [Header("캐릭터 기본 정보")]
+    [SerializeField] private TMP_Text characterNameText; // 캐릭터 이름 표시 텍스트
+
     [Header("레벨 표시 UI")]
     [SerializeField] private TMP_Text levelText; // 레벨 값을 표시할 텍스트
 
@@ -31,8 +34,8 @@ public class CharacterDetailInfoWindow : MonoBehaviour
 [Header("전투 스탯")]
 [SerializeField] private TMP_Text attackPowerText; // 공격력 표시 텍스트
 [SerializeField] private TMP_Text defenseValueText; // 방어력 표시 텍스트
-[SerializeField] private TMP_Text maxHealthText; // 최대 체력 표시 텍스트
-[SerializeField] private TMP_Text currentHealthText; // 현재 체력 표시 텍스트
+[SerializeField] private TMP_Text healthText; // 최대체력 / 현재체력 표시 텍스트
+
 
 [Header("체급")]
 [SerializeField] private TMP_Text bodySizeText; // 체급 표시 텍스트
@@ -44,6 +47,13 @@ public class CharacterDetailInfoWindow : MonoBehaviour
 [SerializeField] private TMP_Text maxStaggerAmountText; // 최대 와해량 표시 텍스트
 [SerializeField] private TMP_Text staggerResistancePercentText; // 와해 저항률 표시 텍스트
 
+[Header("허기 표시 UI")]
+[SerializeField] private TMP_Text hungerText; // 최대허기 / 현재허기 표시 텍스트
+
+[Header("상태 게이지")]
+[SerializeField] private Slider healthSlider; // 현재 체력 게이지
+[SerializeField] private Slider hungerSlider; // 현재 허기 게이지
+
 private SaveStorage.OwnedCharacterStatData targetStatData; // 상세 UI가 참조할 저장 스탯정보
 
     private CharacterStatSystem targetStatSystem; // 상세 UI가 참조할 캐릭터 스탯 시스템
@@ -51,13 +61,15 @@ private SaveStorage.OwnedCharacterStatData targetStatData; // 상세 UI가 참�
     /// <summary>
     /// 토글 버튼, 토글 대상 UI, 초기화할 Scrollbar를 묶어서 관리하는 데이터입니다.
     /// </summary>
-    [System.Serializable]
-    public class ToggleUIElement
-    {
-        public Button toggleButton; // 활성화/비활성화 토글용 버튼
-        public GameObject targetUIObject; // 토글 대상 UI 오브젝트
-        public Scrollbar targetScrollbar; // 비활성화 시 값이 0으로 초기화될 Scrollbar
-    }
+[System.Serializable]
+public class ToggleUIElement
+{
+    public Button toggleButton; // 활성화/비활성화 토글용 버튼
+    public GameObject targetUIObject; // 토글 대상 UI 오브젝트
+    public Scrollbar targetScrollbar; // 비활성화 시 값이 초기화될 Scrollbar
+    public ScrollRect targetScrollRect; // Content 위치를 강제로 조정할 ScrollRect
+    [Range(0f, 1f)] public float resetScrollbarValue = 0f; // 비활성화 시 적용할 스크롤 값
+}
 
     public void Initialize(SaveStorage.OwnedCharacterStatData newTargetStatData) // 저장 스탯정보 기준으로 상세 UI를 초기화합니다.
 {
@@ -149,25 +161,25 @@ private void ToggleTargetUI(int index) // 선택한 토글 UI를 활성화하고
     /// <summary>
     /// 지정된 인덱스의 UI 활성 상태를 설정하고, 비활성화 시 Scrollbar 값을 0으로 초기화합니다.
     /// </summary>
-    private void SetTargetUIActive(int index, bool isActive)
+private void SetTargetUIActive(int index, bool isActive) // 지정된 인덱스의 UI 활성 상태를 설정합니다.
+{
+    if (IsInvalidIndex(index))
     {
-        if (IsInvalidIndex(index))
-        {
-            return;
-        }
-
-        ToggleUIElement toggleElement = toggleUIElements[index];
-
-        if (toggleElement.targetUIObject != null)
-        {
-            toggleElement.targetUIObject.SetActive(isActive);
-        }
-
-        if (isActive == false && toggleElement.targetScrollbar != null)
-        {
-            toggleElement.targetScrollbar.value = 0f;
-        }
+        return; // 잘못된 인덱스면 종료
     }
+
+    ToggleUIElement toggleElement = toggleUIElements[index]; // 토글 요소 참조
+
+    if (toggleElement.targetUIObject != null)
+    {
+        toggleElement.targetUIObject.SetActive(isActive); // 대상 UI 활성 상태 적용
+    }
+
+    if (isActive == false)
+    {
+        ApplyScrollReset(toggleElement); // 비활성화 시 스크롤 위치 초기화
+    }
+}
 
     /// <summary>
     /// 리스트 인덱스가 유효한지 검사합니다.
@@ -228,41 +240,49 @@ private void RefreshLevelText(CharacterStatSystem statSystem) // 현재 레벨 �
     levelText.text = "LV." + statSystem.LevelStats; // 레벨 표시
 }
 
-private void RefreshSavedStatTexts() // 저장된 캐릭터 스탯을 텍스트에 표시합니다.
+private void RefreshSavedStatTexts() // 저장된 캐릭터 스탯을 텍스트와 게이지에 표시합니다.
 {
     if (targetStatData == null)
     {
+        SetText(characterNameText, "이름: -");
         SetText(levelText, "LV.-");
         SetText(baseMoveSpeedText, "기본 이동속도: -");
         SetText(moveSpeedPercentText, "이동속도율: -");
         SetText(finalMoveSpeedText, "이동속도: -");
         SetText(attackPowerText, "공격력: -");
         SetText(defenseValueText, "방어율: -");
-        SetText(maxHealthText, "최대 체력: -");
-        SetText(currentHealthText, "현재 체력: -");
+        SetText(healthText, "- / -");
+        SetText(hungerText, "- / -");
         SetText(bodySizeText, "체급: -");
         SetText(speedStatText, "속도: -");
         SetText(powerRatePercentText, "위력률: -");
         SetText(maxStaggerAmountText, "최대 와해량: -");
         SetText(staggerResistancePercentText, "와해 저항률: -");
+
+        SetSliderValue(healthSlider, 0, 0);
+        SetSliderValue(hungerSlider, 0, 0);
         return;
     }
 
+    SetText(characterNameText, "이름: " + targetStatData.characterName);
     SetText(levelText, "LV." + targetStatData.levelstats);
     SetText(baseMoveSpeedText, "기본 이동속도: " + targetStatData.baseMoveSpeed);
-    SetText(moveSpeedPercentText, "이동속도율: " + targetStatData.moveSpeedPercent +"%");
+    SetText(moveSpeedPercentText, "이동속도율: " + targetStatData.moveSpeedPercent + "%");
     SetText(finalMoveSpeedText, "이동속도: " + targetStatData.finalMoveSpeed);
 
     SetText(attackPowerText, "공격력: " + targetStatData.attackPower);
-    SetText(defenseValueText, "방어율: " + targetStatData.defenseValue +"%");
-    SetText(maxHealthText, "최대 체력: " + targetStatData.maxHealth);
-    SetText(currentHealthText, "현재 체력: " + targetStatData.currentHealth);
+    SetText(defenseValueText, "방어율: " + targetStatData.defenseValue + "%");
+    SetText(healthText, "체력: " + targetStatData.maxHealth + " / " + targetStatData.currentHealth);
+    SetText(hungerText, "허기: " + targetStatData.maxHunger + " / " + targetStatData.currentHunger);
 
     SetText(bodySizeText, "체급: " + targetStatData.bodySize);
     SetText(speedStatText, "속도: " + targetStatData.speedStat);
-    SetText(powerRatePercentText, "위력률: " + targetStatData.powerRatePercent +"%");
+    SetText(powerRatePercentText, "위력률: " + targetStatData.powerRatePercent + "%");
     SetText(maxStaggerAmountText, "최대 와해량: " + targetStatData.maxStaggerAmount);
-    SetText(staggerResistancePercentText, "와해 저항률: " + targetStatData.staggerResistancePercent +"%");
+    SetText(staggerResistancePercentText, "와해 저항률: " + targetStatData.staggerResistancePercent + "%");
+
+    SetSliderValue(healthSlider, targetStatData.currentHealth, targetStatData.maxHealth);
+    SetSliderValue(hungerSlider, targetStatData.currentHunger, targetStatData.maxHunger);
 }
 
 private void SetText(TMP_Text targetText, string value) // TMP 텍스트 값을 안전하게 설정합니다.
@@ -274,4 +294,51 @@ private void SetText(TMP_Text targetText, string value) // TMP 텍스트 값을 
 
     targetText.text = value; // 텍스트 표시
 }
+
+private void ApplyScrollReset(ToggleUIElement toggleElement) // 스크롤바와 Content 위치를 설정값으로 초기화합니다.
+{
+    if (toggleElement == null)
+    {
+        return; // 대상 없으면 종료
+    }
+
+    float resetValue = Mathf.Clamp01(toggleElement.resetScrollbarValue); // 0~1 범위 보정
+
+    Canvas.ForceUpdateCanvases(); // UI 레이아웃 즉시 갱신
+
+    if (toggleElement.targetScrollbar != null)
+    {
+        toggleElement.targetScrollbar.value = resetValue; // 스크롤바 값 초기화
+    }
+
+    if (toggleElement.targetScrollRect != null)
+    {
+        toggleElement.targetScrollRect.verticalNormalizedPosition = resetValue; // Content 세로 위치 초기화
+        toggleElement.targetScrollRect.horizontalNormalizedPosition = resetValue; // Content 가로 위치 초기화
+    }
+
+    Canvas.ForceUpdateCanvases(); // 변경된 위치 즉시 반영
+}
+
+private void SetSliderValue(Slider targetSlider, int currentValue, int maxValue) // 현재/최대값 기준으로 슬라이더를 갱신합니다.
+{
+    if (targetSlider == null)
+    {
+        return; // 슬라이더가 없으면 종료
+    }
+
+    targetSlider.minValue = 0f; // 최소값 설정
+    targetSlider.maxValue = 1f; // 최대값 설정
+    targetSlider.value = maxValue <= 0 ? 0f : Mathf.Clamp01((float)currentValue / maxValue); // 비율 적용
+}
+
+
+
+
+
+
+
+
+
+
 }

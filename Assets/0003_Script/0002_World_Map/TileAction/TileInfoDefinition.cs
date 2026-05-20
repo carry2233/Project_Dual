@@ -18,6 +18,12 @@ public class TileInfoDefinition : ScriptableObject
     [Header("탐색 정보")]
     [SerializeField] private int requiredSearchValue = 1; // 이동 가능까지 필요한 탐색 충족도
 
+    [Header("탐색 소요 시간 설정")]
+    [SerializeField] private int minSearchRequiredMinute = 10; // 최소 탐색 소요 시간
+    [SerializeField] private int maxSearchRequiredMinute = 30; // 최대 탐색 소요 시간
+
+    public int MinSearchRequiredMinute => minSearchRequiredMinute; // 최소 탐색 소요 시간 반환
+    public int MaxSearchRequiredMinute => maxSearchRequiredMinute; // 최대 탐색 소요 시간 반환  
     public int TileId => tileId; // 타일 종류 ID 반환
     public TilePrefab TargetTilePrefab => targetTilePrefab; // 담당 타일 프리팹 반환
     public int RequiredSearchValue => requiredSearchValue; // 필요 탐색 충족도 반환

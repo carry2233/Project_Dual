@@ -5556,27 +5556,7 @@ MonoBehaviour:
   - firstRowID: 0
     secondRowID: 0
     individualID: 0
-  currentOwnedCharacterStatList:
-  - characterName: 
-    firstRowID: 0
-    secondRowID: 0
-    individualID: 0
-    levelstats: 0
-    baseMoveSpeed: 0
-    moveSpeedPercent: 0
-    finalMoveSpeed: 0
-    attackPower: 0
-    defenseValue: 0
-    maxHealth: 0
-    currentHealth: 0
-    bodySize: 0
-    speedStat: 0
-    powerRatePercent: 0
-    maxStaggerAmount: 0
-    currentStaggerAmount: 0
-    staggerResistancePercent: 0
-    maxHunger: 0
-    currentHunger: 0
+  currentOwnedCharacterStatList: []
   currentOwnedCharacterInventoryList: []
   currentBattleEventRuntimeData:
     eventID: 0
@@ -5739,8 +5719,7 @@ MonoBehaviour:
     secondRowID: 2
     individualID: 22
   startingOwnedCharacterStatList:
-  - characterName: "\uC554\uBBF8"
-    firstRowID: 1
+  - firstRowID: 1
     secondRowID: 1
     individualID: 11
     levelstats: 55
@@ -5749,18 +5728,15 @@ MonoBehaviour:
     finalMoveSpeed: 0
     attackPower: 0
     defenseValue: 0
-    maxHealth: 100
-    currentHealth: 78
+    maxHealth: 0
+    currentHealth: 0
     bodySize: 0
     speedStat: 111
-    powerRatePercent: 120
+    powerRatePercent: 0
     maxStaggerAmount: 1111
     currentStaggerAmount: 0
     staggerResistancePercent: 10
-    maxHunger: 80
-    currentHunger: 24
-  - characterName: "\uBE59 \uADF8\uB798\uADF8\uB798"
-    firstRowID: 1
+  - firstRowID: 1
     secondRowID: 2
     individualID: 22
     levelstats: 66
@@ -5769,16 +5745,14 @@ MonoBehaviour:
     finalMoveSpeed: 0
     attackPower: 0
     defenseValue: 0
-    maxHealth: 350
-    currentHealth: 144
+    maxHealth: 0
+    currentHealth: 0
     bodySize: 0
     speedStat: 222
-    powerRatePercent: 100
+    powerRatePercent: 0
     maxStaggerAmount: 2222
     currentStaggerAmount: 0
     staggerResistancePercent: 50
-    maxHunger: 120
-    currentHunger: 85
   startingOwnedCharacterInventoryList:
   - firstRowID: 1
     secondRowID: 1

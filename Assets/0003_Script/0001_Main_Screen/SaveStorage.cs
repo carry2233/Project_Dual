@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Random = UnityEngine.Random;
+
 
 /// <summary>
 /// 저장본 생성, 삭제, 불러오기, 현재 선택 저장본 ID 관리,
@@ -20,6 +22,9 @@ public class BattleEventRuntimeData
     public float minEnemySpawnDelay; // 최소 적 생성 딜레이
     public float maxEnemySpawnDelay; // 최대 적 생성 딜레이
     public List<GlobalCharacterDefinition> spawnableEnemyList = new List<GlobalCharacterDefinition>(); // 생성 가능한 적 목록
+
+    public int minBattleRequiredMinute; // 최소 전투 소요 시간
+    public int maxBattleRequiredMinute; // 최대 전투 소요 시간
 }
 
 [Serializable]
@@ -54,6 +59,9 @@ public class OwnedCharacterData
 [Serializable] 
 public class OwnedCharacterStatData
 {
+    [Header("캐릭터 이름")]
+    public string characterName; // 캐릭터 이름
+
     [Header("캐릭터 ID")]
     public int firstRowID; // 캐릭터 첫 번째 행 ID
     public int secondRowID; // 캐릭터 두 번째 행 ID
@@ -86,6 +94,10 @@ public class OwnedCharacterStatData
     public int maxStaggerAmount; // 최대 와해량
     public int currentStaggerAmount; // 현재 와해량
     public int staggerResistancePercent; // 와해 저항률
+
+    [Header("허기 스탯")]
+    public int maxHunger; // 최대 허기
+    public int currentHunger; // 현재 허기
 }
 
 [Serializable]
@@ -116,9 +128,13 @@ public class SaveEntry
     public List<OwnedCharacterStatData> ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 이 저장본에 소속된 캐릭터 스탯정보 목록
     public List<OwnedCharacterInventorySaveData> ownedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 이 저장본에 소속된 캐릭터 인벤토리 목록
     public List<NotepadPageData> notepadPageList = new List<NotepadPageData>(); // 이 저장본에 소속된 메모장 페이지 목록
+
+    public int currentDay; // 현재 일차
+    public int currentHour; // 현재 시간
+    public int currentMinute; // 현재 분
 }
 
-[Header("현재 소유 캐릭터 목록")]
+[Header("현재 소유 캐릭터 목록")] 
 [SerializeField] private List<OwnedCharacterData> currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 세이브 기준으로 사용 중인 소유 캐릭터 목록
 
 [Header("현재 소유 캐릭터 스탯정보 목록")]
@@ -182,6 +198,9 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.ownedCharacterStatList = GetOwnedCharacterStatListCopy(source.ownedCharacterStatList); // 소유 캐릭터 스탯정보 목록 복사
         copy.notepadPageList = GetNotepadPageListCopy(source.notepadPageList); // 메모장 페이지 목록 복사
         copy.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(source.ownedCharacterInventoryList); // 소유 캐릭터 인벤토리 목록 복사
+        copy.currentDay = source.currentDay; // 현재 일차 복사
+        copy.currentHour = source.currentHour; // 현재 시간 복사
+        copy.currentMinute = source.currentMinute; // 현재 분 복사
 
         result.Add(copy); // 복사본 추가
     }
@@ -200,7 +219,10 @@ public bool CreateSave(
     string newSaveName,
     List<OwnedCharacterData> startOwnedCharacterList,
     List<OwnedCharacterStatData> startOwnedCharacterStatList,
-    List<OwnedCharacterInventorySaveData> startOwnedCharacterInventoryList) // 새 저장본 생성
+    List<OwnedCharacterInventorySaveData> startOwnedCharacterInventoryList,
+    int startHour,
+    int startMinute,
+    int startDay) // 새 저장본 생성
 {
     if (!CanCreateNewSave()) return false; // 최대 개수면 생성 불가
 
@@ -215,6 +237,9 @@ public bool CreateSave(
     newEntry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(startOwnedCharacterStatList); // 시작 캐릭터 스탯정보 저장
     newEntry.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(startOwnedCharacterInventoryList); // 시작 캐릭터 인벤토리 저장
     newEntry.notepadPageList = new List<NotepadPageData>(); // 새 세이브의 메모장 페이지 목록 초기화
+    newEntry.currentDay = Mathf.Max(0, startDay); // 시작 일차 저장
+    newEntry.currentHour = Mathf.Clamp(startHour, 0, 23); // 시작 시간 저장
+    newEntry.currentMinute = Mathf.Clamp(startMinute, 0, 59); // 시작 분 저장
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
     currentSaveFileData.saveList.Add(newEntry); // 목록에 저장본 추가
@@ -328,7 +353,12 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
             currentSaveFileData.saveList[i].saveId = currentSaveFileData.nextSaveId; // 잘못된 ID 보정
             currentSaveFileData.nextSaveId++; // 다음 ID 증가
         }
+
+        currentSaveFileData.saveList[i].currentDay = Mathf.Max(0, currentSaveFileData.saveList[i].currentDay); // 일차 음수 방지
+        currentSaveFileData.saveList[i].currentHour = Mathf.Clamp(currentSaveFileData.saveList[i].currentHour, 0, 23); // 시간 범위 보정
+        currentSaveFileData.saveList[i].currentMinute = Mathf.Clamp(currentSaveFileData.saveList[i].currentMinute, 0, 59); // 분 범위 보정
     }
+    
 
     currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
     currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
@@ -549,6 +579,10 @@ private List<OwnedCharacterStatData> GetOwnedCharacterStatListCopy(List<OwnedCha
         copy.maxStaggerAmount = source.maxStaggerAmount; // 최대 와해량 복사
         copy.currentStaggerAmount = source.currentStaggerAmount; // 현재 와해량 복사
         copy.staggerResistancePercent = source.staggerResistancePercent; // 와해 저항률 복사
+
+        copy.characterName = source.characterName; // 캐릭터 이름 복사
+        copy.maxHunger = source.maxHunger; // 최대 허기 복사
+        copy.currentHunger = source.currentHunger; // 현재 허기 복사
 
         copyList.Add(copy); // 복사본 추가
     }
@@ -864,6 +898,8 @@ public void StoreBattleEventRuntimeData(BattleOccurrenceEvent battleEvent) // �
     currentBattleEventRuntimeData.enemyLevelCorrectionValue = battleEvent.EnemyLevelCorrectionValue; // 레벨 보정값 저장
     currentBattleEventRuntimeData.minEnemySpawnDelay = battleEvent.MinEnemySpawnDelay; // 최소 딜레이 저장
     currentBattleEventRuntimeData.maxEnemySpawnDelay = battleEvent.MaxEnemySpawnDelay; // 최대 딜레이 저장
+    currentBattleEventRuntimeData.minBattleRequiredMinute = battleEvent.MinBattleRequiredMinute; // 최소 전투 소요 시간 저장
+    currentBattleEventRuntimeData.maxBattleRequiredMinute = battleEvent.MaxBattleRequiredMinute; // 최대 전투 소요 시간 저장
     currentBattleEventRuntimeData.spawnableEnemyList = new List<GlobalCharacterDefinition>(battleEvent.SpawnableEnemyList); // 적 목록 복사
 }
 
@@ -877,6 +913,18 @@ public void SendBattleEventRuntimeDataToEnemySpawnManager(EnemySpawnManager enem
     if (currentBattleEventRuntimeData == null)
     {
         return; // 저장된 전투 데이터가 없으면 종료
+    }
+
+    int minMinute = Mathf.Min(currentBattleEventRuntimeData.minBattleRequiredMinute, currentBattleEventRuntimeData.maxBattleRequiredMinute); // 최소값 보정
+    int maxMinute = Mathf.Max(currentBattleEventRuntimeData.minBattleRequiredMinute, currentBattleEventRuntimeData.maxBattleRequiredMinute); // 최대값 보정
+    int battleRequiredMinute = Random.Range(minMinute, maxMinute + 1); // 전투 소요 시간 랜덤 결정
+
+    AddMinutesToCurrentSelectedTime(battleRequiredMinute); // 전투 소요 시간만큼 현재 시간 증가
+
+    TimeSystemManager timeSystemManager = FindFirstObjectByType<TimeSystemManager>(); // 시간 UI 관리자 탐색
+    if (timeSystemManager != null)
+    {
+        timeSystemManager.RefreshTimeUI(); // 시간 UI 갱신
     }
 
     enemySpawnManager.ReceiveBattleEventData(currentBattleEventRuntimeData); // 전투 데이터 전달
@@ -895,9 +943,90 @@ public void ClearBattleReturnState() // 전투 복귀 처리 상태 초기화
     lastExecutedEventID = -1; // 직전 실행 이벤트 ID 초기화
 }
 
+public bool SetCurrentSelectedTime(int day, int hour, int minute) // 현재 선택 저장본 시간 직접 설정
+{
+    if (currentSelectedSaveId <= 0) return false; // 선택 저장본 없으면 실패
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        entry.currentDay = Mathf.Max(0, day); // 일차 적용
+        entry.currentHour = Mathf.Clamp(hour, 0, 23); // 시간 적용
+        entry.currentMinute = Mathf.Clamp(minute, 0, 59); // 분 적용
+
+        SaveToFile(); // 파일 저장
+        return true; // 성공 반환
+    }
+
+    return false; // 대상 저장본 없음
+}
 
 
+public bool TryGetCurrentSelectedTime(out int day, out int hour, out int minute) // 현재 선택 저장본 시간 반환
+{
+    day = 0; // 기본 일차
+    hour = 0; // 기본 시간
+    minute = 0; // 기본 분
 
+    if (currentSelectedSaveId <= 0) return false; // 선택 저장본 없으면 실패
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        day = entry.currentDay; // 일차 반환
+        hour = entry.currentHour; // 시간 반환
+        minute = entry.currentMinute; // 분 반환
+        return true; // 성공 반환
+    }
+
+    return false; // 대상 저장본 없음
+}
+
+public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저장본 시간에 분 추가
+{
+    if (currentSelectedSaveId <= 0) return false; // 선택 저장본 없으면 실패
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        int totalMinute = entry.currentHour * 60 + entry.currentMinute + addMinute; // 전체 분 계산
+        int passedDay = Mathf.FloorToInt(totalMinute / 1440f); // 지난 일차 계산
+        int remainMinute = totalMinute % 1440; // 하루 기준 남은 분 계산
+
+        if (remainMinute < 0)
+        {
+            remainMinute += 1440; // 음수 분 보정
+            passedDay--; // 일차 보정
+        }
+
+        entry.currentDay = Mathf.Max(0, entry.currentDay + passedDay); // 일차 갱신
+        entry.currentHour = remainMinute / 60; // 시간 갱신
+        entry.currentMinute = remainMinute % 60; // 분 갱신
+
+        SaveToFile(); // 파일 저장
+        return true; // 성공 반환
+    }
+
+    return false; // 대상 저장본 없음
+}
 
 
 

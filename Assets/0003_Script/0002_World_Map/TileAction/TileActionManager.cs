@@ -25,6 +25,9 @@ public class TileActionManager : MonoBehaviour
     [Header("타일 정보 관리자 참조")]
     [SerializeField] private TileInfoManager tileInfoManager; // 타일 정보 관리자 참조
 
+    [Header("시간 시스템 참조")]
+    [SerializeField] private TimeSystemManager timeSystemManager; // 시간 표시 및 시간 증가 관리자
+
     [Header("월드 공간 UI 위치 설정")]
     [SerializeField] private Transform parentPanel; // 월드 공간 캔버스 또는 부모 패널 Transform
     [SerializeField] private Vector3 panelWorldOffset = Vector3.zero; // 타일 위치 기준 UI 위치 보정값
@@ -388,6 +391,8 @@ private IEnumerator SearchRoutine() // 탐색 진행 코루틴
         yield return null;
     }
 
+    AddCurrentTileSearchRequiredTime(); // 탐색 소요 시간만큼 게임 시간 증가
+
     currentSearchValue += searchIncreaseValue; // 탐색 완료 시 현재 탐색 충족도 증가
     currentSearchValue = Mathf.Clamp(currentSearchValue, 0, maxSearchValue); // 최대값 초과 방지
 
@@ -400,11 +405,11 @@ private IEnumerator SearchRoutine() // 탐색 진행 코루틴
     if (searchUICloseButton != null)
         searchUICloseButton.interactable = true; // 탐색 종료 후 닫기 버튼 활성화
 
-        UpdateSearchGauge(); // 현재 탐색 게이지 갱신
-        UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+    UpdateSearchGauge(); // 현재 탐색 게이지 갱신
+    UpdateMoveButtonState(); // 이동 버튼 상태 갱신
 
-        if (baseEventPanel != null)
-            baseEventPanel.TryTriggerRandomEvent(); // 탐색 종료 시 이벤트 발생 시도
+    if (baseEventPanel != null)
+        baseEventPanel.TryTriggerRandomEvent(); // 탐색 종료 시 이벤트 발생 시도
 
     searchCoroutine = null; // 탐색 코루틴 참조 초기화
 }
@@ -717,7 +722,47 @@ private IEnumerator DelayedSurpriseBattleRoutine(BattleOccurrenceEvent selectedB
     baseEventPanel.StartBattleEventDirectly(selectedBattleEvent); // 선택된 전투 이벤트 실행
 }
 
+private void AddCurrentTileSearchRequiredTime() // 현재 타일 탐색 소요 시간만큼 시간 증가
+{
+    if (playerTileMembership == null)
+    {
+        return; // 플레이어 타일 정보가 없으면 종료
+    }
 
+    if (tileInfoManager == null)
+    {
+        tileInfoManager = TileInfoManager.Instance; // 타일 정보 관리자 보정
+    }
+
+    if (tileInfoManager == null)
+    {
+        return; // 타일 정보 관리자가 없으면 종료
+    }
+
+    TileInfoDefinition tileInfoDefinition =
+        tileInfoManager.GetTileInfoDefinition(playerTileMembership.CurrentTilePrefabNumber); // 현재 타일 정보 가져오기
+
+    if (tileInfoDefinition == null)
+    {
+        return; // 타일 정보가 없으면 종료
+    }
+
+    int minMinute = Mathf.Min(tileInfoDefinition.MinSearchRequiredMinute, tileInfoDefinition.MaxSearchRequiredMinute); // 최소값 보정
+    int maxMinute = Mathf.Max(tileInfoDefinition.MinSearchRequiredMinute, tileInfoDefinition.MaxSearchRequiredMinute); // 최대값 보정
+    int searchRequiredMinute = Random.Range(minMinute, maxMinute + 1); // 탐색 소요 시간 랜덤 결정
+
+    if (timeSystemManager == null)
+    {
+        timeSystemManager = FindFirstObjectByType<TimeSystemManager>(); // 시간 시스템 관리자 보정
+    }
+
+    if (timeSystemManager == null)
+    {
+        return; // 시간 시스템 관리자가 없으면 종료
+    }
+
+    timeSystemManager.AddMinute(searchRequiredMinute); // 탐색 소요 시간만큼 시간 증가
+}
 
 
 
