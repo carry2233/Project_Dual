@@ -87,6 +87,20 @@ public class TileActionManager : MonoBehaviour
 [Header("이벤트 패널 참조")]
 [SerializeField] private BaseEventPanel baseEventPanel; // 탐색 종료 후 이벤트 발생 처리를 담당할 이벤트 패널
 
+
+[Header("=======================================================")]
+
+[Header("기습 전투 설정")]
+[Range(0f, 100f)]
+[SerializeField] private float surpriseBattleChancePercent = 0f; // 타일 이동 시 기습 전투 발생 확률
+[SerializeField] private List<BattleOccurrenceEvent> surpriseBattleEventList = new List<BattleOccurrenceEvent>(); // 기습 전투 후보 목록
+[SerializeField] private EventInfoManager eventInfoManager; // 이벤트 정보 관리자 참조
+
+[SerializeField] private float surpriseBattleDelayAfterCameraReturn = 1f; // 카메라 위치 복귀 실행 후 기습 전투까지 대기 시간
+
+private Coroutine surpriseBattleDelayCoroutine; // 기습 전투 지연 실행 코루틴
+
+
 private bool isMoveSelectionMode = false; // 현재 이동 타일 선택 모드 여부
 private TilePrefab currentMoveBaseTile; // 이동 기준이 되는 현재 소속 타일
 private TilePrefab hoveredMoveTile; // 현재 마우스가 올려진 이동 가능 타일
@@ -148,6 +162,11 @@ private void Start() // 씬 시작 시 초기화
     if (tileMoveExecuteUI != null)
     {
         tileMoveExecuteUI.SetActive(false); // 이동 실행 UI 비활성화
+    }
+
+    if (eventInfoManager == null)
+    {
+    eventInfoManager = EventInfoManager.Instance; // 씬 시작 시 이벤트 정보 관리자 참조
     }
 }
 
@@ -312,6 +331,11 @@ private void OpenSearchUI() // 탐색 UI 열기
 
     UpdateSearchGauge(); // 탐색 게이지 갱신
     UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+
+    if (baseEventPanel != null)
+    {
+        baseEventPanel.TryShowReturnedBattleEventResult(); // 전투 복귀 결과 이벤트 UI 표시 시도
+    }
 }
 
 private void CloseSearchUI() // 탐색 UI 닫기
@@ -620,5 +644,84 @@ private void ExecuteTileMove() // 확정된 타일로 플레이어 이동 실행
     RefreshTileSearchInfo(true); // 새 타일 기준 탐색 정보 갱신
     UpdateSearchGauge(); // 탐색 게이지 갱신
     UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+    TryStartDelayedSurpriseBattle(); // 카메라 위치 복귀 실행 후 지연 기습 전투 시도
 }
+
+private void TryStartDelayedSurpriseBattle() // 지연 기습 전투 발생 시도
+{
+    if (baseEventPanel == null)
+        baseEventPanel = FindFirstObjectByType<BaseEventPanel>(); // 이벤트 패널 재참조
+
+    if (baseEventPanel == null)
+        return; // 이벤트 패널이 없으면 종료
+
+    if (surpriseBattleEventList == null || surpriseBattleEventList.Count <= 0)
+        return; // 기습 전투 후보가 없으면 종료
+
+    float randomValue = Random.Range(0f, 100f); // 기습 전투 확률 판정값
+
+    if (randomValue > surpriseBattleChancePercent)
+        return; // 확률 실패 시 종료
+
+    BattleOccurrenceEvent selectedBattleEvent = GetRandomSurpriseBattleEvent(); // 기습 전투 이벤트 랜덤 선택
+
+    if (selectedBattleEvent == null)
+        return; // 선택 실패 시 종료
+
+    if (surpriseBattleDelayCoroutine != null)
+        StopCoroutine(surpriseBattleDelayCoroutine); // 기존 지연 실행 중이면 중단
+
+    surpriseBattleDelayCoroutine = StartCoroutine(
+        DelayedSurpriseBattleRoutine(selectedBattleEvent)); // 지연 후 기습 전투 실행
+}
+
+private BattleOccurrenceEvent GetRandomSurpriseBattleEvent() // 기습 전투 후보 중 랜덤 선택
+{
+    List<BattleOccurrenceEvent> validBattleEvents = new List<BattleOccurrenceEvent>(); // 유효한 전투 이벤트 목록
+
+    for (int i = 0; i < surpriseBattleEventList.Count; i++)
+    {
+        BattleOccurrenceEvent battleEvent = surpriseBattleEventList[i]; // 현재 후보 이벤트
+
+        if (battleEvent == null)
+            continue; // 비어 있으면 건너뜀
+
+        validBattleEvents.Add(battleEvent); // 유효 후보 추가
+    }
+
+    if (validBattleEvents.Count <= 0)
+        return null; // 유효 후보가 없으면 null 반환
+
+    int randomIndex = Random.Range(0, validBattleEvents.Count); // 랜덤 인덱스 선택
+    return validBattleEvents[randomIndex]; // 선택된 전투 이벤트 반환
+}
+
+private IEnumerator DelayedSurpriseBattleRoutine(BattleOccurrenceEvent selectedBattleEvent) // 설정 시간 후 기습 전투 실행
+{
+    if (surpriseBattleDelayAfterCameraReturn > 0f)
+    {
+        yield return new WaitForSeconds(surpriseBattleDelayAfterCameraReturn); // 카메라 복귀 실행 후 대기
+    }
+
+    surpriseBattleDelayCoroutine = null; // 코루틴 참조 초기화
+
+    if (selectedBattleEvent == null)
+        yield break; // 선택된 전투 이벤트가 없으면 종료
+
+    if (baseEventPanel == null)
+        baseEventPanel = FindFirstObjectByType<BaseEventPanel>(); // 이벤트 패널 재참조
+
+    if (baseEventPanel == null)
+        yield break; // 이벤트 패널이 없으면 종료
+
+    baseEventPanel.StartBattleEventDirectly(selectedBattleEvent); // 선택된 전투 이벤트 실행
+}
+
+
+
+
+
+
+
+
 }

@@ -5243,7 +5243,7 @@ Transform:
   m_GameObject: {fileID: 477646264}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.45, y: 0, z: -0.64}
+  m_LocalPosition: {x: 0, y: 0, z: -0.64}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7802,7 +7802,7 @@ GameObject:
   - component: {fileID: 870986695}
   - component: {fileID: 870986696}
   m_Layer: 0
-  m_Name: BattleOccurrenceEvent
+  m_Name: 1BattleOccurrenceEvent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7843,7 +7843,10 @@ MonoBehaviour:
   maxEnemySpawnDelay: 8
   spawnableEnemyList:
   - {fileID: 11400000, guid: 1dc7bb4d8bab03a4ab6115ba69895fc3, type: 2}
+  executeItemRewardAfterBattle: 1
+  postBattleItemRewardEvent: {fileID: 284533135}
   eventSlotPrefab: {fileID: 8611879191922770680, guid: b91ffb1c16ab68543a12379d98b17fb3, type: 3}
+  afterBattleEventVisualPrefab: {fileID: 3823506397000569358, guid: cdbf15f9169de924b9a6971616173e8f, type: 3}
 --- !u!1 &946522228
 GameObject:
   m_ObjectHideFlags: 0
@@ -16084,6 +16087,11 @@ MonoBehaviour:
   tileMoveExecuteUI: {fileID: 1155711655}
   tileMoveButton: {fileID: 297256242}
   baseEventPanel: {fileID: 5434375}
+  surpriseBattleChancePercent: 80
+  surpriseBattleEventList:
+  - {fileID: 870986696}
+  eventInfoManager: {fileID: 0}
+  surpriseBattleDelayAfterCameraReturn: 0.3
 --- !u!1 &1932993058
 GameObject:
   m_ObjectHideFlags: 0

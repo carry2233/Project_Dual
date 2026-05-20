@@ -288,12 +288,23 @@ private BattleOccurrenceEvent FindBattleOccurrenceEvent(int eventID) // 이벤�
 
 private void CreateBattleEventSlot(BattleOccurrenceEvent battleEvent) // 전투 이벤트 슬롯 생성
 {
+    CreateBattleEventSlot(battleEvent, true, true); // 기본 전투 이벤트 슬롯 생성
+}
+
+private void CreateBattleEventSlot(
+    BattleOccurrenceEvent battleEvent,
+    bool clearBeforeCreate,
+    bool isInteractable) // 전투 이벤트 슬롯 생성
+{
     if (battleEvent == null || battleEvent.EventSlotPrefab == null || rewardSlotContent == null)
     {
         return; // 필수값이 없으면 종료
     }
 
-    ClearRewardSlots(); // 기존 슬롯 제거
+    if (clearBeforeCreate == true)
+    {
+        ClearRewardSlots(); // 필요할 때만 기존 슬롯 제거
+    }
 
     EventSlot eventSlot = Instantiate(battleEvent.EventSlotPrefab, rewardSlotContent); // 슬롯 프리팹 그대로 생성
 
@@ -302,10 +313,15 @@ private void CreateBattleEventSlot(BattleOccurrenceEvent battleEvent) // 전투 
     if (slotButton != null)
     {
         slotButton.onClick.RemoveAllListeners(); // 기존 클릭 이벤트 제거
-        slotButton.onClick.AddListener(() => OnBattleEventSlotClicked(battleEvent)); // 전투 이벤트 클릭 연결
+        slotButton.interactable = isInteractable; // 버튼 상호작용 여부 설정
+
+        if (isInteractable == true)
+        {
+            slotButton.onClick.AddListener(() => OnBattleEventSlotClicked(battleEvent)); // 전투 이벤트 클릭 연결
+        }
     }
 
-    RefreshRewardSlotContentHeight(1); // 슬롯 1개 기준 높이 갱신
+    RefreshRewardSlotContentHeight(rewardSlotContent.childCount); // 현재 슬롯 수 기준 높이 갱신
 }
 
 private void OnBattleEventSlotClicked(BattleOccurrenceEvent battleEvent) // 전투 이벤트 슬롯 클릭 처리
@@ -330,6 +346,127 @@ private void OnBattleEventSlotClicked(BattleOccurrenceEvent battleEvent) // 전�
         SceneManager.LoadScene(battleSceneName); // 전투 씬 이동
     }
 }
+
+public void TryShowReturnedBattleEventResult() // 전투 복귀 후 직전 전투 이벤트 결과 UI 표시 시도
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance; // 저장소 재참조
+    }
+
+    if (saveStorage == null || saveStorage.HasExecutedBattle == false)
+    {
+        return; // 전투 수행 상태가 아니면 종료
+    }
+
+    int eventID = saveStorage.LastExecutedEventID; // 직전 실행 이벤트 ID 가져오기
+
+    EventInfoDefinition eventInfoDefinition = FindEventInfoDefinition(eventID); // 이벤트 정보 찾기
+    BattleOccurrenceEvent battleEvent = FindBattleOccurrenceEvent(eventID); // 전투 이벤트 찾기
+
+    if (eventInfoDefinition == null || battleEvent == null)
+    {
+        saveStorage.ClearBattleReturnState(); // 잘못된 상태면 초기화
+        return;
+    }
+
+    ShowReturnedBattleEventResult(eventInfoDefinition, battleEvent); // 전투 복귀 결과 UI 표시
+    saveStorage.ClearBattleReturnState(); // 한 번 표시 후 상태 초기화
+}
+
+private void ShowReturnedBattleEventResult(EventInfoDefinition eventInfoDefinition, BattleOccurrenceEvent battleEvent) // 전투 복귀 결과 UI 표시
+{
+    if (eventUIParent != null)
+        eventUIParent.SetActive(true); // 이벤트 UI 부모 활성화
+
+    ClearCurrentEventVisual(); // 이전 이벤트 비주얼 제거
+    ClearRewardSlots(); // 이전 슬롯 제거
+
+    SpawnAfterBattleEventVisual(battleEvent); // 전투 이후 전용 이벤트 비주얼 생성
+    CreateBattleEventSlot(battleEvent, true, false); // 전투 슬롯 생성, 버튼 상호작용 비활성화
+
+    if (battleEvent.ExecuteItemRewardAfterBattle == false)
+    {
+        return; // 전투 후 아이템 획득이 꺼져 있으면 종료
+    }
+
+    if (battleEvent.PostBattleItemRewardEvent == null)
+    {
+        return; // 연결된 아이템 획득 이벤트가 없으면 종료
+    }
+
+    battleEvent.PostBattleItemRewardEvent.ExecuteRewardEventWithoutClearingSlots(this); // 전투 슬롯 유지한 채 아이템 획득 실행
+}
+
+private EventInfoDefinition FindEventInfoDefinition(int eventID) // 이벤트 ID에 맞는 이벤트 정보 찾기
+{
+    if (eventInfoManager == null)
+        eventInfoManager = EventInfoManager.Instance; // 이벤트 매니저 재참조
+
+    if (eventInfoManager == null || eventInfoManager.eventInfoDefinitionList == null)
+        return null; // 이벤트 목록이 없으면 null 반환
+
+    for (int i = 0; i < eventInfoManager.eventInfoDefinitionList.Count; i++)
+    {
+        EventInfoDefinition eventInfoDefinition = eventInfoManager.eventInfoDefinitionList[i]; // 현재 이벤트 정보
+
+        if (eventInfoDefinition == null)
+            continue; // 비어 있으면 건너뜀
+
+        if (eventInfoDefinition.eventID == eventID)
+            return eventInfoDefinition; // ID가 같으면 반환
+    }
+
+    return null; // 찾지 못하면 null 반환
+}
+
+public void AppendRewardSlots(List<ItemRewardEvent.RewardItemResult> rewardResults) // 기존 슬롯 유지 후 획득 아이템 슬롯 추가
+{
+    if (rewardSlotContent == null || rewardResults == null)
+        return; // 필수값이 없으면 종료
+
+    List<ItemRewardEvent.RewardItemResult> sortedResults = rewardResults
+        .Where(result => result != null && result.itemDefinition != null && result.itemCount > 0)
+        .OrderBy(result => result.itemDefinition.displayPriority)
+        .ToList(); // 표시 우선순위 기준 정렬
+
+    for (int i = 0; i < sortedResults.Count; i++)
+    {
+        ItemRewardEvent.RewardItemResult result = sortedResults[i]; // 현재 보상 결과
+
+        if (result.itemDefinition.rewardItemDisplaySlotPrefab == null)
+            continue; // 슬롯 프리팹이 없으면 건너뜀
+
+        GameObject slotObject = Instantiate(result.itemDefinition.rewardItemDisplaySlotPrefab, rewardSlotContent); // 슬롯 프리팹 생성
+        EventSlot eventSlot = slotObject.GetComponent<EventSlot>(); // 이벤트 슬롯 컴포넌트 참조
+
+        if (eventSlot != null)
+        {
+            eventSlot.SetSlot(result.itemDefinition, result.itemCount); // 슬롯 표시 갱신
+        }
+    }
+
+    RefreshRewardSlotContentHeight(rewardSlotContent.childCount); // 현재 전체 슬롯 수 기준 높이 갱신
+}
+
+private void SpawnAfterBattleEventVisual(BattleOccurrenceEvent battleEvent) // 전투 이후 이벤트 비주얼 생성
+{
+    if (battleEvent == null || battleEvent.AfterBattleEventVisualPrefab == null || eventVisualParent == null)
+        return; // 필수값이 없으면 종료
+
+    currentEventVisualInstance = Instantiate(
+        battleEvent.AfterBattleEventVisualPrefab,
+        eventVisualParent); // 전투 이후 전용 비주얼 프리팹 생성
+}
+
+public void StartBattleEventDirectly(BattleOccurrenceEvent battleEvent) // 전투 이벤트를 슬롯 클릭 없이 즉시 실행
+{
+    OnBattleEventSlotClicked(battleEvent); // 기존 전투 이벤트 실행 흐름 재사용
+}
+
+
+
+
 
 
 

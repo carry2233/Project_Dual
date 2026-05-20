@@ -1627,7 +1627,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 85058624}
   m_HandleRect: {fileID: 85058623}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -5566,8 +5566,6 @@ MonoBehaviour:
     minEnemySpawnDelay: 0
     maxEnemySpawnDelay: 0
     spawnableEnemyList: []
-  lastExecutedEventID: -1
-  hasExecutedBattle: 0
 --- !u!4 &1871097358
 Transform:
   m_ObjectHideFlags: 0

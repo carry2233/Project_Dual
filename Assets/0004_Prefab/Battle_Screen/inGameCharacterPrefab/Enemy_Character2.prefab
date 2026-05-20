@@ -422,9 +422,9 @@ MonoBehaviour:
   teamNumber: 1
   controlMode: 1
   searchRange: 111
-  dashStartDistance: 4
-  clashDistance: 1.2
-  dashMoveSpeed: 3
+  dashStartDistance: 2
+  clashDistance: 0.7
+  dashMoveSpeed: 2
   priorityTargetPriority: 2
   moveCommandPriority: 1
   attackingMeTargetPriority: 3
@@ -538,7 +538,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  afterimageFadeDuration: 0.2
+  afterimageFadeDuration: 0.4
   afterimageRotationWhenFacingLeft: {x: 0, y: 180, z: 0}
   afterimageRotationWhenFacingRight: {x: 0, y: 0, z: 0}
   afterimagePoolRoot: {fileID: 0}

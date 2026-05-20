@@ -61,6 +61,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\GlobalCharacterManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\InventoryItemDistributionManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\TilePrefab.cs" />
+    <Compile Include="Assets\0003_Script\UI\SceneTransitionSystem.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAfterimageObject.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\FriendlyCharacterDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />

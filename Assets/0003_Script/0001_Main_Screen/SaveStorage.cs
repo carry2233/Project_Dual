@@ -130,6 +130,13 @@ public class SaveEntry
 [Header("현재 전투 이벤트 런타임 데이터")]
 [SerializeField] private BattleEventRuntimeData currentBattleEventRuntimeData; // 씬 이동용 전투 이벤트 임시 데이터
 
+[Header("직전 전투 이벤트 상태")]
+[SerializeField] private int lastExecutedEventID = -1; // 직전에 실행한 이벤트 ID
+[SerializeField] private bool hasExecutedBattle; // 전투 수행 여부
+
+public int LastExecutedEventID => lastExecutedEventID; // 직전 실행 이벤트 ID 반환
+public bool HasExecutedBattle => hasExecutedBattle; // 전투 수행 여부 반환
+
 public bool HasBattleEventRuntimeData => currentBattleEventRuntimeData != null; // 전투 이벤트 데이터 존재 여부
 
 public List<OwnedCharacterInventorySaveData> CurrentOwnedCharacterInventoryList => GetOwnedCharacterInventoryListCopy(currentOwnedCharacterInventoryList); // 현재 캐릭터 인벤토리 목록 복사 반환
@@ -471,7 +478,6 @@ public List<OwnedCharacterData> GetOwnedCharacterListBySaveId(int targetSaveId) 
 
     return new List<OwnedCharacterData>(); // 없으면 빈 리스트 반환
 }
-
 
 public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록, 스탯정보, 인벤토리를 현재 데이터로 적용
 {
@@ -848,6 +854,9 @@ public void StoreBattleEventRuntimeData(BattleOccurrenceEvent battleEvent) // �
         return; // 이벤트가 없으면 종료
     }
 
+    lastExecutedEventID = battleEvent.EventID; // 전투씬 이동 전 직전 실행 이벤트 ID 저장
+    hasExecutedBattle = false; // 아직 전투씬에서 데이터 전달 전이므로 false로 초기화
+
     currentBattleEventRuntimeData = new BattleEventRuntimeData(); // 새 런타임 데이터 생성
     currentBattleEventRuntimeData.eventID = battleEvent.EventID; // 이벤트 ID 저장
     currentBattleEventRuntimeData.minEnemySpawnCount = battleEvent.MinEnemySpawnCount; // 최소 생성 수 저장
@@ -871,6 +880,7 @@ public void SendBattleEventRuntimeDataToEnemySpawnManager(EnemySpawnManager enem
     }
 
     enemySpawnManager.ReceiveBattleEventData(currentBattleEventRuntimeData); // 전투 데이터 전달
+    hasExecutedBattle = true; // 전투씬으로 넘어가 전투 데이터가 사용되었음을 표시
     ClearBattleEventRuntimeData(); // 전달 후 초기화
 }
 
@@ -879,7 +889,11 @@ public void ClearBattleEventRuntimeData() // 전투 이벤트 임시 데이터 �
     currentBattleEventRuntimeData = null; // 전투 데이터 제거
 }
 
-
+public void ClearBattleReturnState() // 전투 복귀 처리 상태 초기화
+{
+    hasExecutedBattle = false; // 전투 수행 여부 초기화
+    lastExecutedEventID = -1; // 직전 실행 이벤트 ID 초기화
+}
 
 
 

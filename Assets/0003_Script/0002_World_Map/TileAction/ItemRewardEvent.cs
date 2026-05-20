@@ -251,4 +251,22 @@ public class ItemRewardEvent : MonoBehaviour
 
         saveStorage.SetCurrentOwnedCharacterInventoryData(saveData); // 현재 세이브 인벤토리 갱신
     }
+
+    public void ExecuteRewardEventWithoutClearingSlots(BaseEventPanel baseEventPanel) // 기존 슬롯을 유지한 채 아이템 획득 이벤트 실행
+{
+    ItemBundle selectedBundle = SelectRandomBundle(); // 랜덤 아이템 모둠 선택
+
+    if (selectedBundle == null)
+        return; // 선택 가능한 모둠이 없으면 종료
+
+    int rewardValue = Random.Range(minRewardValue, maxRewardValue + 1); // 총 획득 가치 랜덤 결정
+    List<RewardItemResult> rewardResults = CalculateRewardItems(selectedBundle, rewardValue); // 획득 아이템 계산
+
+    if (baseEventPanel != null)
+    {
+        baseEventPanel.AppendRewardSlots(rewardResults); // 기존 전투 슬롯 유지 후 보상 슬롯 추가
+    }
+
+    GiveRewardsToFriendlyInventories(rewardResults); // 아군 인벤토리에 아이템 지급
+}
 }
