@@ -5577,6 +5577,8 @@ MonoBehaviour:
     staggerResistancePercent: 0
     maxHunger: 0
     currentHunger: 0
+    isStarving: 0
+    overweightDebuffStackCount: 0
   currentOwnedCharacterInventoryList: []
   currentBattleEventRuntimeData:
     eventID: 0
@@ -5759,6 +5761,8 @@ MonoBehaviour:
     staggerResistancePercent: 10
     maxHunger: 80
     currentHunger: 24
+    isStarving: 0
+    overweightDebuffStackCount: 0
   - characterName: "\uBE59 \uADF8\uB798\uADF8\uB798"
     firstRowID: 1
     secondRowID: 2
@@ -5779,6 +5783,8 @@ MonoBehaviour:
     staggerResistancePercent: 50
     maxHunger: 120
     currentHunger: 85
+    isStarving: 0
+    overweightDebuffStackCount: 0
   startingOwnedCharacterInventoryList:
   - firstRowID: 1
     secondRowID: 1

@@ -30,6 +30,14 @@ public class GlobalCharacterDefinition : ScriptableObject
     [SerializeField] private int firstRowID; // 캐릭터 1열 ID
     [SerializeField] private int secondRowID; // 캐릭터 2열 ID
 
+[Header("허기 감소 설정")]
+[SerializeField] private int hungerDecreaseIntervalMinute = 1; // 허기 감소가 실행될 분 간격
+[SerializeField] private int hungerDecreaseAmount = 1; // 감소 주기마다 감소할 허기량
+
+public int HungerDecreaseIntervalMinute => hungerDecreaseIntervalMinute; // 허기 감소 분 간격 반환
+public int HungerDecreaseAmount => hungerDecreaseAmount; // 주기당 허기 감소량 반환
+
+
     [Header("인게임 캐릭터 프리팹")]
     [SerializeField] private GameObject inGameCharacterPrefab; // 전투씬에서 실제 생성할 캐릭터 프리팹
 

@@ -22,6 +22,8 @@ public class CharacterInventory : MonoBehaviour
 public float overweightKg; // 적정 무게를 초과한 무게값
 public int overweightStackCount; // 초과 무게에 따른 중첩 수
 
+private SaveStorage saveStorage; // 무게 디버프 저장용 SaveStorage 참조
+
     public void SetCharacterID(int newFirstRowID, int newSecondRowID, int newIndividualID) // 담당 캐릭터 ID 설정
     {
         firstRowID = newFirstRowID;
@@ -133,18 +135,53 @@ public void AddOrMergeItem(GlobalItemDefinition itemDefinition, int addCount) //
 
 public void SetOverweightState(float properWeightKg, int weightPerStack) // 초과 무게와 중첩 수 갱신
 {
-    RefreshTotalWeight();
+    RefreshTotalWeight(); // 총 무게 다시 계산
 
-    overweightKg = Mathf.Max(0f, totalWeightKg - properWeightKg);
+    overweightKg = Mathf.Max(0f, totalWeightKg - properWeightKg); // 초과 무게 계산
 
     if (weightPerStack <= 0)
     {
-        overweightStackCount = 0;
+        overweightStackCount = 0; // 잘못된 중첩 기준이면 0 처리
+        SyncOverweightStackCountToSaveStorage(); // 저장 데이터에 중첩값 반영
         return;
     }
 
-    overweightStackCount = Mathf.FloorToInt(overweightKg / weightPerStack);
+    overweightStackCount = Mathf.FloorToInt(overweightKg / weightPerStack); // 초과 무게 중첩 계산
+    SyncOverweightStackCountToSaveStorage(); // 저장 데이터에 중첩값 반영
 }
+
+private void SyncOverweightStackCountToSaveStorage() // 현재 무게 디버프 중첩값을 SaveStorage에 반영
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // 저장소 참조 보정
+    }
+
+    if (saveStorage == null)
+    {
+        return; // 저장소가 없으면 종료
+    }
+
+    saveStorage.SetCurrentOwnedCharacterOverweightStackCount(
+        firstRowID,
+        secondRowID,
+        individualID,
+        overweightStackCount); // 현재 캐릭터 저장 스탯에 무게 디버프 중첩값 저장
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 [Serializable]

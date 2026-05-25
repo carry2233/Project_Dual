@@ -94,10 +94,15 @@ public class OwnedCharacterStatData
     public int maxStaggerAmount; // 최대 와해량
     public int currentStaggerAmount; // 현재 와해량
     public int staggerResistancePercent; // 와해 저항률
-
+    
     [Header("허기 스탯")]
     public int maxHunger; // 최대 허기
     public int currentHunger; // 현재 허기
+    public bool isStarving; // 공복 여부
+
+    [Header("무게 디버프")]
+    public int overweightDebuffStackCount; // 무게 디버프 중첩값
+    
 }
 
 [Serializable]
@@ -133,6 +138,7 @@ public class SaveEntry
     public int currentHour; // 현재 시간
     public int currentMinute; // 현재 분
 }
+
 
 [Header("현재 소유 캐릭터 목록")] 
 [SerializeField] private List<OwnedCharacterData> currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 세이브 기준으로 사용 중인 소유 캐릭터 목록
@@ -201,6 +207,7 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.currentDay = source.currentDay; // 현재 일차 복사
         copy.currentHour = source.currentHour; // 현재 시간 복사
         copy.currentMinute = source.currentMinute; // 현재 분 복사
+        
 
         result.Add(copy); // 복사본 추가
     }
@@ -583,6 +590,11 @@ private List<OwnedCharacterStatData> GetOwnedCharacterStatListCopy(List<OwnedCha
         copy.characterName = source.characterName; // 캐릭터 이름 복사
         copy.maxHunger = source.maxHunger; // 최대 허기 복사
         copy.currentHunger = source.currentHunger; // 현재 허기 복사
+        copy.maxHunger = source.maxHunger; // 최대 허기 복사
+        copy.currentHunger = source.currentHunger; // 현재 허기 복사
+        copy.isStarving = source.isStarving; // 공복 여부 복사
+        copy.overweightDebuffStackCount = source.overweightDebuffStackCount; // 무게 디버프 중첩값 복사
+        
 
         copyList.Add(copy); // 복사본 추가
     }
@@ -1007,6 +1019,8 @@ public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저�
             continue; // 선택 저장본이 아니면 건너뜀
         }
 
+        int passedMinute = Mathf.Max(0, addMinute); // 실제 흐른 시간만 허기 감소에 사용
+
         int totalMinute = entry.currentHour * 60 + entry.currentMinute + addMinute; // 전체 분 계산
         int passedDay = Mathf.FloorToInt(totalMinute / 1440f); // 지난 일차 계산
         int remainMinute = totalMinute % 1440; // 하루 기준 남은 분 계산
@@ -1021,6 +1035,9 @@ public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저�
         entry.currentHour = remainMinute / 60; // 시간 갱신
         entry.currentMinute = remainMinute % 60; // 분 갱신
 
+        ApplyHungerDecreaseByPassedMinute(passedMinute); // 흐른 시간만큼 허기 감소
+        entry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(currentOwnedCharacterStatList); // 감소된 허기 저장본에 반영
+
         SaveToFile(); // 파일 저장
         return true; // 성공 반환
     }
@@ -1028,7 +1045,98 @@ public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저�
     return false; // 대상 저장본 없음
 }
 
+public void SetCurrentOwnedCharacterOverweightStackCount(
+    int firstRowID,
+    int secondRowID,
+    int individualID,
+    int overweightStackCount) // 캐릭터 무게 디버프 중첩값 저장
+{
+    OwnedCharacterStatData statData = FindCurrentOwnedCharacterStatData(firstRowID, secondRowID, individualID); // 저장 스탯 탐색
 
+    if (statData == null)
+    {
+        return; // 대상 캐릭터 스탯정보가 없으면 종료
+    }
+
+    statData.overweightDebuffStackCount = Mathf.Max(0, overweightStackCount); // 음수 방지 후 중첩값 저장
+    SaveCurrentOwnedCharacterStatListToSelectedSave(); // 현재 스탯 목록을 선택 저장본에 반영
+}
+
+private void ApplyHungerDecreaseByPassedMinute(int passedMinute) // 흐른 시간 기준 허기 감소 처리
+{
+    if (passedMinute <= 0)
+    {
+        return; // 시간이 흐르지 않았으면 종료
+    }
+
+    CharacterInfoManager characterInfoManager = CharacterInfoManager.Instance; // 전역 캐릭터 정보 매니저 참조
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = FindFirstObjectByType<CharacterInfoManager>(); // 없으면 씬에서 탐색
+    }
+
+    if (characterInfoManager == null)
+    {
+        return; // 캐릭터 정의를 찾을 수 없으면 종료
+    }
+
+    for (int i = 0; i < currentOwnedCharacterStatList.Count; i++)
+    {
+        OwnedCharacterStatData statData = currentOwnedCharacterStatList[i]; // 현재 캐릭터 스탯 참조
+
+        if (statData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        GlobalCharacterDefinition definition =
+            characterInfoManager.FindDefinitionByID(statData.firstRowID, statData.secondRowID); // 캐릭터 정의 탐색
+
+        if (definition == null)
+        {
+            continue; // 정의가 없으면 건너뜀
+        }
+
+        int intervalMinute = Mathf.Max(1, definition.HungerDecreaseIntervalMinute); // 허기 감소 주기 보정
+        int decreaseCount = passedMinute / intervalMinute; // 흐른 시간 안에서 감소 실행 횟수 계산
+
+        if (decreaseCount <= 0)
+        {
+            statData.isStarving = statData.currentHunger <= 0; // 허기 상태만 갱신
+            continue; // 아직 감소 주기에 도달하지 않았으면 건너뜀
+        }
+
+        int decreaseAmount = Mathf.Max(0, definition.HungerDecreaseAmount) * decreaseCount; // 총 허기 감소량 계산
+
+        statData.currentHunger = Mathf.Max(0, statData.currentHunger - decreaseAmount); // 허기 감소 적용
+        statData.isStarving = statData.currentHunger <= 0; // 현재 허기가 0이면 공복 상태
+    }
+}
+
+public bool SaveCurrentOwnedCharacterStatListToSelectedSave() // 현재 캐릭터 스탯정보 목록을 선택 저장본에 저장
+{
+    if (currentSelectedSaveId < 0)
+    {
+        return false; // 선택된 저장본이 없으면 실패
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        entry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(currentOwnedCharacterStatList); // 현재 스탯 목록 반영
+        SaveToFile(); // 파일 저장
+        return true; // 저장 성공
+    }
+
+    return false; // 대상 저장본 없음
+}
 
 
 
