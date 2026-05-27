@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0857701bf8572e548a2a12da2d05353d, type: 3}
+  m_Name: 2ConsumableItemDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::ConsumableItemDefinition
+  targetItemDefinition: {fileID: 11400000, guid: 3dba8f87f311fba4f896010a8f6566a8, type: 2}
+  applyHealthValue: -10
+  applyHungerValue: 5
+  useNigrumValue: 0
+  applyNigrumCapacityValue: 0
+  consumeButtonPrefab: {fileID: 1076864364285098143, guid: 4e51dcd11134bc64c9aac8abec09f226, type: 3}

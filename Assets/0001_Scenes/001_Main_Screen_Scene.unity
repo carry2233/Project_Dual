@@ -911,6 +911,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f8e984b7cc467ad46a054544fcc87e57, type: 2}
   - {fileID: 11400000, guid: 3dba8f87f311fba4f896010a8f6566a8, type: 2}
   - {fileID: 11400000, guid: ddc9f45509725ef4ca01263e3f9d672c, type: 2}
+  consumableItemDefinitions:
+  - {fileID: 11400000, guid: 9f55ccf7d67017947b7fafd041e38442, type: 2}
+  - {fileID: 11400000, guid: 673a4bc7e74137b418ebf516ff7e43e8, type: 2}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -3542,6 +3545,56 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
   m_UseGraphicAlpha: 1
+--- !u!1 &1201474654
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1201474656}
+  - component: {fileID: 1201474655}
+  m_Layer: 0
+  m_Name: FriendlyNigrumIntakeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1201474655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1201474654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c3e267ee880ab5448f23ff361f51e6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FriendlyNigrumIntakeManager
+  saveStorage: {fileID: 0}
+  nigrumIntakeRuleList:
+  - friendlyCharacterDefinition: {fileID: 11400000, guid: 7ce4b19c46c892f4f94d58aca2830b4e, type: 2}
+    maxNigrumCapacity: 100
+    decreaseIntervalMinute: 3
+    nigrumDecreaseAmountPerInterval: 1
+--- !u!4 &1201474656
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1201474654}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 206.99619, y: 361.4565, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1217980977
 GameObject:
   m_ObjectHideFlags: 0
@@ -5580,6 +5633,7 @@ MonoBehaviour:
     isStarving: 0
     overweightDebuffStackCount: 0
   currentOwnedCharacterInventoryList: []
+  currentFriendlyNigrumSaveList: []
   currentBattleEventRuntimeData:
     eventID: 0
     minEnemySpawnCount: 0
@@ -5806,6 +5860,9 @@ MonoBehaviour:
     - itemAID: 1
       itemBID: 3
       count: 9
+  startingFriendlyNigrumSettingList:
+  - friendlyCharacterDefinition: {fileID: 11400000, guid: 7ce4b19c46c892f4f94d58aca2830b4e, type: 2}
+    startCurrentNigrumCapacity: 20
   startHour: 9
   startMinute: 0
 --- !u!4 &1943530136
@@ -6985,6 +7042,7 @@ SceneRoots:
   - {fileID: 272495427}
   - {fileID: 430116776}
   - {fileID: 1459788289}
+  - {fileID: 1201474656}
   - {fileID: 36241235}
   - {fileID: 1157838091}
   - {fileID: 1140032134}

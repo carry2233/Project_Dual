@@ -1845,7 +1845,7 @@ GameObject:
   - component: {fileID: 9105261579268743832}
   - component: {fileID: 5388920245681467284}
   m_Layer: 7
-  m_Name: 0002_detailUIPrefab
+  m_Name: 0001_detailUIPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1968,7 +1968,7 @@ MonoBehaviour:
   finalMoveSpeedText: {fileID: 7210534361250348975}
   attackPowerText: {fileID: 8161815524084916813}
   defenseValueText: {fileID: 2024983130104693106}
-  healthText: {fileID: 0}
+  healthText: {fileID: 4785112884984596210}
   bodySizeText: {fileID: 6657934836425643876}
   speedStatText: {fileID: 9023033505046547778}
   powerRatePercentText: {fileID: 25895559983674763}
@@ -3103,7 +3103,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 721137290846504446}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99993163
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3477,7 +3477,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1813576324364662136}
   m_FillRect: {fileID: 3917125853067651617}
   m_HandleRect: {fileID: 7636589016846821539}
@@ -4702,7 +4702,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -144.99948, y: 14}
+  m_AnchoredPosition: {x: -144.99995, y: 14}
   m_SizeDelta: {x: 290, y: 25}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3472613207562487222
@@ -4944,7 +4944,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 6335989942002886501}
   m_FillRect: {fileID: 8585743748965303908}
   m_HandleRect: {fileID: 3855910419692168404}

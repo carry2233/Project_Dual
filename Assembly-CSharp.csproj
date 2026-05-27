@@ -84,6 +84,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\CharacterInventorySlot.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\MoveCommandController.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\ConsumableItemDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\ParticleAnimationEvent.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\SlashDecal.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\IntroUISequence.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationPlayer.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\FriendlyNigrumIntakeManager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterAnimationClipSO..cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TimeSystemManager.cs" />

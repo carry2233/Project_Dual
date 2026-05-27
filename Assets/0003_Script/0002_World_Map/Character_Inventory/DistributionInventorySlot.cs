@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 분포 인벤토리 안에서 아이템 이미지와 개수를 표시하는 슬롯 스크립트입니다.
 /// </summary>
-public class DistributionInventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class DistributionInventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [Header("표시 UI")]
     public Image itemImage; // 아이템 이미지 UI
@@ -117,4 +117,32 @@ public void OnEndDrag(PointerEventData eventData) // 드래그 종료
 
     inventoryManager.CancelDragIfNotDropped();
 }
+
+public void OnPointerClick(PointerEventData eventData) // 슬롯 클릭 처리
+{
+    if (inventoryManager == null)
+    {
+        return; // 매니저가 없으면 종료
+    }
+
+    if (eventData.button != PointerEventData.InputButton.Right)
+    {
+        return; // 우클릭이 아니면 종료
+    }
+
+    if (currentItemDefinition == null || currentCount <= 0)
+    {
+        return; // 아이템이 없으면 종료
+    }
+
+    inventoryManager.OpenItemInteractionPanel(this, currentItemDefinition); // 아이템 상호작용 패널 열기
+}
+
+
+
+
+
+
+
+
 }

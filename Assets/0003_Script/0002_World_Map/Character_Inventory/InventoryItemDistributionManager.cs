@@ -3,6 +3,8 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems; // UI 클릭 판정용
+using UnityEngine.InputSystem; // New Input System 마우스 입력용
 
 /// <summary>
 /// 캐릭터별 인벤토리 생성, 캐릭터 슬롯 선택, 아이템 슬롯 표시, 페이지 이동을 관리하는 스크립트입니다.
@@ -56,6 +58,19 @@ public Color properWeightTextColor = Color.white; // 적정 무게 이하일 때
 public Color overweightTextColor = Color.red; // 적정 무게 초과일 때 텍스트 색
 public int weightPerOverStack = 10; // 초과 중첩 1개당 필요한 무게값
 
+
+[Header("____________________________________________________________________________")]
+
+
+[Header("아이템 상호작용 패널")]
+public GameObject itemInteractionPanelObject; // 우클릭 시 표시될 상호작용 패널 오브젝트
+public Transform itemInteractionButtonListObject; // 상호작용 버튼들이 생성될 부모 오브젝트
+public GameObject discardButtonPrefab; // 버리기 버튼 프리팹
+public GameObject consumeItemButtonPrefab; // 기본 소모 버튼 프리팹
+
+private DistributionInventorySlot selectedInteractionSlot; // 우클릭한 아이템 슬롯
+private GlobalItemDefinition selectedInteractionItemDefinition; // 우클릭한 아이템 정의
+
 private DistributionInventorySlot draggingSourceSlot; // 드래그를 시작한 원본 슬롯
 private GlobalItemDefinition draggingItemDefinition; // 드래그 중인 아이템 정의
 private int draggingItemCount; // 드래그 중인 아이템 개수
@@ -65,6 +80,7 @@ private bool isDragDropped; // 정상 드롭 완료 여부
     private readonly List<CharacterInventory> characterInventories = new List<CharacterInventory>(); // 생성된 캐릭터 인벤토리 목록
     private readonly List<CharacterInventorySlot> characterSlots = new List<CharacterInventorySlot>(); // 생성된 캐릭터 슬롯 목록
     private readonly List<DistributionInventorySlot> inventorySlots = new List<DistributionInventorySlot>(); // 생성된 아이템 슬롯 목록
+    private readonly List<RaycastResult> interactionClickRaycastResults = new List<RaycastResult>(); // 상호작용 패널 외부 클릭 판정 결과
 
     private CharacterInventory selectedCharacterInventory; // 현재 선택된 캐릭터 인벤토리
     private List<InventoryDisplaySlotData> currentDisplaySlotItems = new List<InventoryDisplaySlotData>(); // 현재 선택 캐릭터의 슬롯 단위 표시 아이템 목록
@@ -82,6 +98,79 @@ private bool isDragDropped; // 정상 드롭 완료 여부
         CreateCharacterSlots();
         SelectFirstCharacterInventory();
     }
+
+private void Update() // 매 프레임 입력 확인
+{
+    CheckCloseItemInteractionPanelByOutsideClick(); // 상호작용 패널 외부 클릭 시 닫기
+}
+
+private void CheckCloseItemInteractionPanelByOutsideClick() // 생성된 버튼 외 영역 클릭 시 상호작용 패널 닫기
+{
+    if (itemInteractionPanelObject == null || itemInteractionPanelObject.activeSelf == false)
+    {
+        return; // 패널이 꺼져 있으면 종료
+    }
+
+    Mouse mouse = Mouse.current; // 현재 마우스 장치 참조
+
+    if (mouse == null)
+    {
+        return; // 마우스 장치가 없으면 종료
+    }
+
+    bool isLeftClicked = mouse.leftButton.wasPressedThisFrame; // 이번 프레임 좌클릭 여부
+    bool isRightClicked = mouse.rightButton.wasPressedThisFrame; // 이번 프레임 우클릭 여부
+
+    if (isLeftClicked == false && isRightClicked == false)
+    {
+        return; // 좌클릭/우클릭이 아니면 종료
+    }
+
+    if (IsPointerOnInteractionButton() == true)
+    {
+        return; // 생성된 버튼 위 클릭이면 유지
+    }
+
+    CloseItemInteractionPanel(); // 버튼 외 영역 클릭 시 패널 닫기
+}
+
+private bool IsPointerOnInteractionButton() // 현재 포인터가 생성된 상호작용 버튼 위에 있는지 확인
+{
+    if (EventSystem.current == null || itemInteractionButtonListObject == null)
+    {
+        return false; // 이벤트 시스템 또는 버튼 부모가 없으면 버튼 위가 아님
+    }
+
+    Mouse mouse = Mouse.current; // 현재 마우스 장치 참조
+
+    if (mouse == null)
+    {
+        return false; // 마우스 장치가 없으면 버튼 위가 아님
+    }
+
+    PointerEventData pointerEventData = new PointerEventData(EventSystem.current); // 포인터 이벤트 데이터 생성
+    pointerEventData.position = mouse.position.ReadValue(); // New Input System 기준 마우스 위치 설정
+
+    interactionClickRaycastResults.Clear(); // 이전 판정 결과 초기화
+    EventSystem.current.RaycastAll(pointerEventData, interactionClickRaycastResults); // UI 레이캐스트 실행
+
+    for (int i = 0; i < interactionClickRaycastResults.Count; i++)
+    {
+        GameObject hitObject = interactionClickRaycastResults[i].gameObject; // 감지된 UI 오브젝트
+
+        if (hitObject == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (hitObject.transform.IsChildOf(itemInteractionButtonListObject) == true)
+        {
+            return true; // 생성된 버튼 영역이면 true
+        }
+    }
+
+    return false; // 버튼 영역이 아님
+}
 
 private void FindReferences() // 필요한 매니저 참조 찾기
 {
@@ -135,6 +224,13 @@ private void InitializePanelState() // 패널 초기 상태 설정
 
     if (dragSlotObject != null) // 드래그 슬롯 시작 시 비활성화
         dragSlotObject.SetActive(false);
+
+        if (itemInteractionPanelObject != null)
+        {
+            itemInteractionPanelObject.SetActive(false); // 시작 시 상호작용 패널 비활성화
+        }
+
+            ClearItemInteractionButtons(); // 시작 시 상호작용 버튼 정리
 
     SetWorldInputLocked(false);
     RefreshPanelButtons();
@@ -281,12 +377,14 @@ private void SelectFirstCharacterInventory() // 우선순위가 가장 낮은 �
 
 public void SelectCharacterInventory(CharacterInventory characterInventory) // 캐릭터 인벤토리 선택
 {
-    selectedCharacterInventory = characterInventory;
-    currentPageIndex = 0;
+    CloseItemInteractionPanel(); // 다른 캐릭터 선택으로 아이템 목록이 바뀌면 상호작용 패널 닫기
 
-    RefreshCurrentSortedItems();
-    RefreshInventorySlots();
-    RefreshSelectedCharacterWeightInfo();
+    selectedCharacterInventory = characterInventory; // 선택 캐릭터 인벤토리 갱신
+    currentPageIndex = 0; // 페이지를 첫 페이지로 초기화
+
+    RefreshCurrentSortedItems(); // 표시 아이템 목록 갱신
+    RefreshInventorySlots(); // 슬롯 UI 갱신
+    RefreshSelectedCharacterWeightInfo(); // 무게 UI 갱신
 }
 
 private void RefreshCurrentSortedItems() // 현재 선택 캐릭터 아이템을 슬롯 단위로 분할 정렬
@@ -407,13 +505,16 @@ private void OpenPanel() // 패널 열기
 
 private void ClosePanel() // 패널 닫기
 {
+    CloseItemInteractionPanel(); // 인벤토리창 닫기 시 상호작용 패널도 닫기
+
     if (distributionInventoryPanel != null)
-        distributionInventoryPanel.SetActive(false);
+    {
+        distributionInventoryPanel.SetActive(false); // 인벤토리 패널 비활성화
+    }
 
-    SetWorldInputLocked(false);
-    RefreshPanelButtons();
+    SetWorldInputLocked(false); // 월드 입력 잠금 해제
+    RefreshPanelButtons(); // 패널 버튼 상태 갱신
 }
-
     private void RefreshPanelButtons() // 패널 상태에 따른 버튼 표시 갱신
     {
         bool isPanelActive = distributionInventoryPanel != null && distributionInventoryPanel.activeSelf;
@@ -604,8 +705,6 @@ private void SaveCharacterInventory(CharacterInventory characterInventory) // �
     saveStorage.SetCurrentOwnedCharacterInventoryData(saveData);
 }
 
-
-
 private void RefreshCharacterWeightState(CharacterInventory characterInventory) // 캐릭터 인벤토리의 초과 무게 상태 갱신
 {
     if (characterInventory == null)
@@ -667,6 +766,225 @@ private FriendlyCharacterDefinition GetFriendlyDefinition(CharacterInventory cha
         characterInventory.secondRowID
     );
 }
+
+public void OpenItemInteractionPanel(DistributionInventorySlot targetSlot, GlobalItemDefinition itemDefinition) // 아이템 상호작용 패널 열기
+{
+    if (IsDraggingItem())
+    {
+        return; // 아이템 이동 중에는 우클릭 상호작용 무시
+    }
+
+    if (targetSlot == null || itemDefinition == null)
+    {
+        return; // 대상 슬롯이나 아이템이 없으면 종료
+    }
+
+    selectedInteractionSlot = targetSlot; // 우클릭 슬롯 저장
+    selectedInteractionItemDefinition = itemDefinition; // 우클릭 아이템 저장
+
+    ClearItemInteractionButtons(); // 기존 버튼 제거
+
+    if (itemInteractionPanelObject != null)
+    {
+        itemInteractionPanelObject.transform.position = targetSlot.transform.position; // 패널 위치를 슬롯 위치로 이동
+        itemInteractionPanelObject.SetActive(true); // 패널 활성화
+    }
+
+    CreateDiscardButton(); // 버리기 버튼 생성
+    CreateConsumeButtonIfNeeded(itemDefinition); // 소모 아이템이면 소모 버튼 생성
+}
+
+private void CreateDiscardButton() // 버리기 버튼 생성
+{
+    if (discardButtonPrefab == null || itemInteractionButtonListObject == null)
+    {
+        return; // 프리팹이나 부모가 없으면 종료
+    }
+
+    GameObject buttonObject = Instantiate(discardButtonPrefab, itemInteractionButtonListObject); // 버리기 버튼 생성
+    Button button = buttonObject.GetComponent<Button>(); // 버튼 컴포넌트 참조
+
+    if (button != null)
+    {
+        button.onClick.RemoveAllListeners(); // 기존 이벤트 제거
+        button.onClick.AddListener(DiscardSelectedInteractionItem); // 버리기 이벤트 연결
+    }
+}
+
+private void CreateConsumeButtonIfNeeded(GlobalItemDefinition itemDefinition) // 소모 버튼 필요 시 생성
+{
+    if (itemDefinitionList == null)
+    {
+        return; // 아이템 정의 리스트가 없으면 종료
+    }
+
+    ConsumableItemDefinition consumableDefinition = itemDefinitionList.GetConsumableItemDefinition(itemDefinition); // 소모 아이템 정의 탐색
+
+    if (consumableDefinition == null)
+    {
+        return; // 소모 아이템이 아니면 종료
+    }
+
+    GameObject buttonPrefab = consumableDefinition.consumeButtonPrefab != null
+        ? consumableDefinition.consumeButtonPrefab
+        : consumeItemButtonPrefab; // 소모 아이템 전용 버튼 우선 사용
+
+    if (buttonPrefab == null || itemInteractionButtonListObject == null)
+    {
+        return; // 생성할 버튼이 없으면 종료
+    }
+
+    GameObject buttonObject = Instantiate(buttonPrefab, itemInteractionButtonListObject); // 소모 버튼 생성
+    Button button = buttonObject.GetComponent<Button>(); // 버튼 컴포넌트 참조
+
+    if (button != null)
+    {
+        bool canConsumeItem = CanConsumeItemByNigrumRule(consumableDefinition); // 흑체 규칙 기준 소모 가능 여부 확인
+
+        button.interactable = canConsumeItem; // 소모 가능 여부에 따라 버튼 상호작용 설정
+        button.onClick.RemoveAllListeners(); // 기존 이벤트 제거
+
+        if (canConsumeItem == true)
+        {
+            button.onClick.AddListener(() => ConsumeSelectedInteractionItem(consumableDefinition)); // 소모 가능할 때만 소모 이벤트 연결
+        }
+    }
+}
+
+private void DiscardSelectedInteractionItem() // 선택한 아이템 버리기
+{
+    if (selectedCharacterInventory == null || selectedInteractionItemDefinition == null)
+    {
+        CloseItemInteractionPanel(); // 패널 닫기
+        return;
+    }
+
+    selectedCharacterInventory.RemoveItem(selectedInteractionItemDefinition, 1); // 선택 아이템 1개 삭제
+    RefreshCharacterWeightState(selectedCharacterInventory); // 무게 상태 갱신
+    SaveCharacterInventory(selectedCharacterInventory); // 저장 인벤토리 갱신
+
+    RefreshCurrentSortedItems(); // 표시 아이템 재정렬
+    RefreshInventorySlots(); // 슬롯 UI 갱신
+    RefreshSelectedCharacterWeightInfo(); // 무게 UI 갱신
+    CloseItemInteractionPanel(); // 패널 닫기
+}
+
+private void ConsumeSelectedInteractionItem(ConsumableItemDefinition consumableDefinition) // 선택한 소모 아이템 사용
+{
+    if (selectedCharacterInventory == null || selectedInteractionItemDefinition == null || consumableDefinition == null)
+    {
+        CloseItemInteractionPanel(); // 패널 닫기
+        return; // 사용 불가 상태면 종료
+    }
+
+    bool removed = selectedCharacterInventory.RemoveItem(
+        selectedInteractionItemDefinition,
+        1
+    ); // 선택한 소모 아이템을 1개만 제거
+
+    if (removed == false)
+    {
+        CloseItemInteractionPanel(); // 제거 실패 시 패널 닫기
+        return; // 제거 실패 시 종료
+    }
+
+    if (saveStorage != null)
+    {
+        saveStorage.ApplyConsumableValueToCurrentOwnedCharacterStat(
+            selectedCharacterInventory.firstRowID,
+            selectedCharacterInventory.secondRowID,
+            selectedCharacterInventory.individualID,
+            consumableDefinition.applyHealthValue,
+            consumableDefinition.applyHungerValue
+        ); // 체력/허기 적용
+
+        if (consumableDefinition.useNigrumValue == true)
+        {
+            FriendlyCharacterDefinition friendlyDefinition = GetFriendlyDefinition(selectedCharacterInventory); // 선택 캐릭터의 아군 정의 탐색
+
+            FriendlyNigrumIntakeManager nigrumIntakeManager =
+                FriendlyNigrumIntakeManager.Instance != null
+                    ? FriendlyNigrumIntakeManager.Instance
+                    : FindFirstObjectByType<FriendlyNigrumIntakeManager>(); // 흑체 복용 관리자 탐색
+
+            int maxNigrumCapacity = nigrumIntakeManager != null
+                ? nigrumIntakeManager.GetMaxNigrumCapacity(friendlyDefinition)
+                : 0; // 해당 아군의 최대 흑체 수용값 가져오기
+
+            saveStorage.ApplyFriendlyNigrumCapacityValue(
+                friendlyDefinition,
+                maxNigrumCapacity,
+                consumableDefinition.applyNigrumCapacityValue
+            ); // 최대값을 넘지 않게 흑체 수용값 적용
+        }
+    }
+
+    RefreshCharacterWeightState(selectedCharacterInventory); // 무게 상태 갱신
+    SaveCharacterInventory(selectedCharacterInventory); // 저장 인벤토리 갱신
+
+    RefreshCurrentSortedItems(); // 표시 아이템 재정렬
+    RefreshInventorySlots(); // 슬롯 UI 갱신
+    RefreshSelectedCharacterWeightInfo(); // 무게 UI 갱신
+    CloseItemInteractionPanel(); // 패널 닫기
+}
+
+private void CloseItemInteractionPanel() // 아이템 상호작용 패널 닫기
+{
+    if (itemInteractionPanelObject != null)
+    {
+        itemInteractionPanelObject.SetActive(false); // 패널 비활성화
+    }
+
+    ClearItemInteractionButtons(); // 생성된 버튼 제거
+
+    selectedInteractionSlot = null; // 선택 슬롯 초기화
+    selectedInteractionItemDefinition = null; // 선택 아이템 초기화
+}
+
+private void ClearItemInteractionButtons() // 상호작용 버튼 전체 제거
+{
+    if (itemInteractionButtonListObject == null)
+    {
+        return; // 버튼 부모가 없으면 종료
+    }
+
+    for (int i = itemInteractionButtonListObject.childCount - 1; i >= 0; i--)
+    {
+        Destroy(itemInteractionButtonListObject.GetChild(i).gameObject); // 생성된 버튼 제거
+    }
+}
+
+private bool CanConsumeItemByNigrumRule(ConsumableItemDefinition consumableDefinition) // 흑체 규칙 기준 소모 아이템 사용 가능 여부 반환
+{
+    if (consumableDefinition == null)
+    {
+        return false; // 소모 정의가 없으면 사용 불가
+    }
+
+    if (consumableDefinition.useNigrumValue == false)
+    {
+        return true; // 흑체 수용값을 적용하지 않는 아이템은 사용 가능
+    }
+
+    FriendlyCharacterDefinition friendlyDefinition = GetFriendlyDefinition(selectedCharacterInventory); // 선택 캐릭터의 아군 정의 탐색
+
+    FriendlyNigrumIntakeManager nigrumIntakeManager =
+        FriendlyNigrumIntakeManager.Instance != null
+            ? FriendlyNigrumIntakeManager.Instance
+            : FindFirstObjectByType<FriendlyNigrumIntakeManager>(); // 흑체 복용 관리자 탐색
+
+    if (nigrumIntakeManager == null)
+    {
+        return false; // 흑체 복용 관리자가 없으면 사용 불가
+    }
+
+    return nigrumIntakeManager.HasNigrumIntakeRule(friendlyDefinition); // 흑체 규칙 목록에 있는 아군만 사용 가능
+}
+
+
+
+
+
 
 
 }

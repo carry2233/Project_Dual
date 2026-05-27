@@ -122,6 +122,14 @@ public class OwnedCharacterInventorySaveData
     public List<OwnedCharacterInventoryItemSaveData> items = new List<OwnedCharacterInventoryItemSaveData>(); // 캐릭터 인벤토리 아이템 목록
 }
 
+[Serializable]
+public class FriendlyNigrumSaveData
+{
+    public FriendlyCharacterDefinition friendlyCharacterDefinition; // 해당될 아군 정의 에셋
+    public int currentNigrumCapacity; // 현재 흑체 수용량
+    public int nigrumDecreaseRemainMinute; // 흑체 감소 충족 잔여 분
+}
+
 
 [Serializable]
 public class SaveEntry
@@ -133,6 +141,7 @@ public class SaveEntry
     public List<OwnedCharacterStatData> ownedCharacterStatList = new List<OwnedCharacterStatData>(); // 이 저장본에 소속된 캐릭터 스탯정보 목록
     public List<OwnedCharacterInventorySaveData> ownedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 이 저장본에 소속된 캐릭터 인벤토리 목록
     public List<NotepadPageData> notepadPageList = new List<NotepadPageData>(); // 이 저장본에 소속된 메모장 페이지 목록
+    public List<FriendlyNigrumSaveData> friendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 이 저장본에 소속된 아군 흑체 저장 목록
 
     public int currentDay; // 현재 일차
     public int currentHour; // 현재 시간
@@ -148,6 +157,11 @@ public class SaveEntry
 
 [Header("현재 소유 캐릭터 인벤토리 목록")]
 [SerializeField] private List<OwnedCharacterInventorySaveData> currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 세이브 기준 캐릭터 인벤토리 목록
+
+[Header("현재 아군 흑체 저장 목록")]
+[SerializeField] private List<FriendlyNigrumSaveData> currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 세이브 기준 아군 흑체 저장 목록
+
+public List<FriendlyNigrumSaveData> CurrentFriendlyNigrumSaveList => GetFriendlyNigrumSaveListCopy(currentFriendlyNigrumSaveList); // 현재 아군 흑체 목록 복사 반환
 
 [Header("현재 전투 이벤트 런타임 데이터")]
 [SerializeField] private BattleEventRuntimeData currentBattleEventRuntimeData; // 씬 이동용 전투 이벤트 임시 데이터
@@ -165,7 +179,8 @@ public List<OwnedCharacterInventorySaveData> CurrentOwnedCharacterInventoryList 
 public List<OwnedCharacterStatData> CurrentOwnedCharacterStatList => GetOwnedCharacterStatListCopy(currentOwnedCharacterStatList); // 현재 캐릭터 스탯정보 목록 복사 반환
 
 
-public List<OwnedCharacterData> CurrentOwnedCharacterList => GetOwnedCharacterListCopy(currentOwnedCharacterList); // 현재 소유 캐릭터 목록 복사 반환
+public List<OwnedCharacterData> CurrentOwnedCharacterList => GetOwnedCharacterListCopy(currentOwnedCharacterList); // 현재 소유 캐릭터 목록 복사 
+
 
 private static SaveStorage instance; // 전역 인스턴스
 private SaveFileData currentSaveFileData = new SaveFileData(); // 현재 저장 파일 데이터
@@ -204,6 +219,7 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.ownedCharacterStatList = GetOwnedCharacterStatListCopy(source.ownedCharacterStatList); // 소유 캐릭터 스탯정보 목록 복사
         copy.notepadPageList = GetNotepadPageListCopy(source.notepadPageList); // 메모장 페이지 목록 복사
         copy.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(source.ownedCharacterInventoryList); // 소유 캐릭터 인벤토리 목록 복사
+        copy.friendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(source.friendlyNigrumSaveList); // 아군 흑체 저장 목록 복사
         copy.currentDay = source.currentDay; // 현재 일차 복사
         copy.currentHour = source.currentHour; // 현재 시간 복사
         copy.currentMinute = source.currentMinute; // 현재 분 복사
@@ -227,6 +243,7 @@ public bool CreateSave(
     List<OwnedCharacterData> startOwnedCharacterList,
     List<OwnedCharacterStatData> startOwnedCharacterStatList,
     List<OwnedCharacterInventorySaveData> startOwnedCharacterInventoryList,
+    List<FriendlyNigrumSaveData> startFriendlyNigrumSaveList,
     int startHour,
     int startMinute,
     int startDay) // 새 저장본 생성
@@ -243,10 +260,12 @@ public bool CreateSave(
     newEntry.ownedCharacterList = GetOwnedCharacterListCopy(startOwnedCharacterList); // 시작 캐릭터 목록 저장
     newEntry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(startOwnedCharacterStatList); // 시작 캐릭터 스탯정보 저장
     newEntry.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(startOwnedCharacterInventoryList); // 시작 캐릭터 인벤토리 저장
+    newEntry.friendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(startFriendlyNigrumSaveList); // 시작 아군 흑체 저장 목록 저장
     newEntry.notepadPageList = new List<NotepadPageData>(); // 새 세이브의 메모장 페이지 목록 초기화
     newEntry.currentDay = Mathf.Max(0, startDay); // 시작 일차 저장
     newEntry.currentHour = Mathf.Clamp(startHour, 0, 23); // 시작 시간 저장
     newEntry.currentMinute = Mathf.Clamp(startMinute, 0, 59); // 시작 분 저장
+    
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
     currentSaveFileData.saveList.Add(newEntry); // 목록에 저장본 추가
@@ -254,6 +273,7 @@ public bool CreateSave(
     ApplyCurrentOwnedCharacterList(newEntry.ownedCharacterList); // 현재 소유 캐릭터 목록 적용
     ApplyCurrentOwnedCharacterStatList(newEntry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 적용
     ApplyCurrentOwnedCharacterInventoryList(newEntry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 적용
+    ApplyCurrentFriendlyNigrumSaveList(newEntry.friendlyNigrumSaveList); // 현재 아군 흑체 저장 목록 적용
 
     SortAndReindex(); // 번호 정렬 및 재정렬
     SaveToFile(); // 파일 저장
@@ -287,39 +307,42 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
 {
     string path = GetSaveFilePath(); // 저장 파일 경로 가져오기
 
-    if (!File.Exists(path))
-    {
-        currentSaveFileData = new SaveFileData(); // 파일이 없으면 새 데이터 생성
-        currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
-        currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
-        currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
-        SaveToFile(); // 빈 파일 저장
-        return; // 로드 종료
-    }
+if (!File.Exists(path))
+{
+    currentSaveFileData = new SaveFileData(); // 파일이 없으면 새 데이터 생성
+    currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+    currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
+    currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 아군 흑체 저장 목록 초기화
+    SaveToFile(); // 빈 파일 저장
+    return; // 로드 종료
+}
 
     string json = File.ReadAllText(path); // 파일 텍스트 읽기
 
-    if (string.IsNullOrEmpty(json))
-    {
-        currentSaveFileData = new SaveFileData(); // 비어 있으면 새 데이터 생성
-        currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
-        currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
-        currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
-        SaveToFile(); // 빈 파일 저장
-        return; // 로드 종료
-    }
+if (string.IsNullOrEmpty(json))
+{
+    currentSaveFileData = new SaveFileData(); // 비어 있으면 새 데이터 생성
+    currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+    currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
+    currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 아군 흑체 저장 목록 초기화
+    SaveToFile(); // 빈 파일 저장
+    return; // 로드 종료
+}
 
     SaveFileData loadedData = JsonUtility.FromJson<SaveFileData>(json); // JSON 역직렬화
 
-    if (loadedData == null)
-    {
-        currentSaveFileData = new SaveFileData(); // 실패 시 새 데이터 생성
-        currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
-        currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
-        currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
-        SaveToFile(); // 빈 파일 저장
-        return; // 로드 종료
-    }
+if (loadedData == null)
+{
+    currentSaveFileData = new SaveFileData(); // 실패 시 새 데이터 생성
+    currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+    currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
+    currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 아군 흑체 저장 목록 초기화
+    SaveToFile(); // 빈 파일 저장
+    return; // 로드 종료
+}
 
     currentSaveFileData = loadedData; // 로드 데이터 적용
 
@@ -348,6 +371,11 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
         if (currentSaveFileData.saveList[i].ownedCharacterInventoryList == null)
         {
             currentSaveFileData.saveList[i].ownedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 캐릭터 인벤토리 목록 null 방지
+
+        if (currentSaveFileData.saveList[i].friendlyNigrumSaveList == null)
+        {
+            currentSaveFileData.saveList[i].friendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 아군 흑체 저장 목록 null 방지
+        }
         }
 
         if (currentSaveFileData.saveList[i].notepadPageList == null)
@@ -367,9 +395,10 @@ public void LoadFromFile() // 파일에서 저장 데이터 불러오기
     }
     
 
-    currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
-    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
-    currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
+currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐릭터 목록 초기화
+currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
+currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
+currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 아군 흑체 저장 목록 초기화
 
     SortAndReindex(); // 저장본 번호 정렬
 }
@@ -516,7 +545,7 @@ public List<OwnedCharacterData> GetOwnedCharacterListBySaveId(int targetSaveId) 
     return new List<OwnedCharacterData>(); // 없으면 빈 리스트 반환
 }
 
-public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록, 스탯정보, 인벤토리를 현재 데이터로 적용
+public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록, 스탯정보, 인벤토리, 흑체 저장 목록을 현재 데이터로 적용
 {
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
@@ -530,6 +559,7 @@ public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본
         ApplyCurrentOwnedCharacterList(entry.ownedCharacterList); // 현재 소유 캐릭터 목록에 적용
         ApplyCurrentOwnedCharacterStatList(entry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 목록에 적용
         ApplyCurrentOwnedCharacterInventoryList(entry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 목록에 적용
+        ApplyCurrentFriendlyNigrumSaveList(entry.friendlyNigrumSaveList); // 현재 아군 흑체 저장 목록에 적용
 
         return true; // 적용 성공
     }
@@ -1019,7 +1049,7 @@ public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저�
             continue; // 선택 저장본이 아니면 건너뜀
         }
 
-        int passedMinute = Mathf.Max(0, addMinute); // 실제 흐른 시간만 허기 감소에 사용
+        int passedMinute = Mathf.Max(0, addMinute); // 실제 흐른 시간 계산
 
         int totalMinute = entry.currentHour * 60 + entry.currentMinute + addMinute; // 전체 분 계산
         int passedDay = Mathf.FloorToInt(totalMinute / 1440f); // 지난 일차 계산
@@ -1035,8 +1065,15 @@ public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저�
         entry.currentHour = remainMinute / 60; // 시간 갱신
         entry.currentMinute = remainMinute % 60; // 분 갱신
 
-        ApplyHungerDecreaseByPassedMinute(passedMinute); // 흐른 시간만큼 허기 감소
-        entry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(currentOwnedCharacterStatList); // 감소된 허기 저장본에 반영
+        FriendlyNigrumIntakeManager nigrumIntakeManager =
+            FriendlyNigrumIntakeManager.Instance != null
+                ? FriendlyNigrumIntakeManager.Instance
+                : FindFirstObjectByType<FriendlyNigrumIntakeManager>(); // 흑체 복용 관리자 탐색
+
+        if (nigrumIntakeManager != null)
+        {
+            nigrumIntakeManager.ApplyPassedMinute(passedMinute); // 흐른 시간만큼 흑체 수용량 감소 적용
+        }
 
         SaveToFile(); // 파일 저장
         return true; // 성공 반환
@@ -1136,6 +1173,201 @@ public bool SaveCurrentOwnedCharacterStatListToSelectedSave() // 현재 캐릭�
     }
 
     return false; // 대상 저장본 없음
+}
+
+private List<FriendlyNigrumSaveData> GetFriendlyNigrumSaveListCopy(List<FriendlyNigrumSaveData> sourceList) // 아군 흑체 저장 목록 깊은 복사 반환
+{
+    List<FriendlyNigrumSaveData> copyList = new List<FriendlyNigrumSaveData>(); // 복사용 리스트
+
+    if (sourceList == null)
+    {
+        return copyList; // 원본이 없으면 빈 리스트 반환
+    }
+
+    for (int i = 0; i < sourceList.Count; i++)
+    {
+        FriendlyNigrumSaveData source = sourceList[i]; // 원본 데이터 참조
+
+        if (source == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        FriendlyNigrumSaveData copy = new FriendlyNigrumSaveData(); // 복사 데이터 생성
+        copy.friendlyCharacterDefinition = source.friendlyCharacterDefinition; // 대상 아군 에셋 복사
+        copy.currentNigrumCapacity = source.currentNigrumCapacity; // 현재 흑체 수용량 복사
+        copy.nigrumDecreaseRemainMinute = source.nigrumDecreaseRemainMinute; // 흑체 감소 잔여값 복사
+
+        copyList.Add(copy); // 복사본 추가
+    }
+
+    return copyList; // 복사 리스트 반환
+}
+
+public void ApplyCurrentFriendlyNigrumSaveList(List<FriendlyNigrumSaveData> sourceList) // 현재 아군 흑체 저장 목록 적용
+{
+    currentFriendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(sourceList); // 현재 흑체 목록 복사 적용
+}
+
+public FriendlyNigrumSaveData FindCurrentFriendlyNigrumSaveData(FriendlyCharacterDefinition friendlyCharacterDefinition) // 현재 아군 흑체 저장 데이터 탐색
+{
+    if (friendlyCharacterDefinition == null)
+    {
+        return null; // 대상 에셋이 없으면 null 반환
+    }
+
+    for (int i = 0; i < currentFriendlyNigrumSaveList.Count; i++)
+    {
+        FriendlyNigrumSaveData saveData = currentFriendlyNigrumSaveList[i]; // 현재 흑체 데이터 참조
+
+        if (saveData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (saveData.friendlyCharacterDefinition == friendlyCharacterDefinition)
+        {
+            return saveData; // 같은 아군 에셋이면 반환
+        }
+    }
+
+    return null; // 찾지 못했으면 null 반환
+}
+
+public bool SaveCurrentFriendlyNigrumSaveListToSelectedSave() // 현재 아군 흑체 저장 목록을 선택 저장본에 저장
+{
+    if (currentSelectedSaveId <= 0)
+    {
+        return false; // 선택 저장본 없으면 실패
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        entry.friendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(currentFriendlyNigrumSaveList); // 현재 흑체 목록 반영
+        SaveToFile(); // 파일 저장
+        return true; // 저장 성공
+    }
+
+    return false; // 대상 저장본 없음
+}
+
+public void ApplyFriendlyNigrumDecrease(
+    FriendlyCharacterDefinition friendlyCharacterDefinition,
+    int maxNigrumCapacity,
+    int decreaseIntervalMinute,
+    int decreaseAmountPerInterval,
+    int passedMinute) // 아군 흑체 감소 규칙 적용
+{
+    if (friendlyCharacterDefinition == null)
+    {
+        return; // 대상 아군이 없으면 종료
+    }
+
+    if (passedMinute <= 0)
+    {
+        return; // 시간이 흐르지 않았으면 종료
+    }
+
+    int safeIntervalMinute = Mathf.Max(1, decreaseIntervalMinute); // 감소 주기 보정
+    int safeDecreaseAmount = Mathf.Max(0, decreaseAmountPerInterval); // 감소량 보정
+    int safeMaxCapacity = Mathf.Max(0, maxNigrumCapacity); // 최대 수용량 보정
+
+    FriendlyNigrumSaveData saveData = FindCurrentFriendlyNigrumSaveData(friendlyCharacterDefinition); // 저장 데이터 탐색
+
+    if (saveData == null)
+    {
+        saveData = new FriendlyNigrumSaveData(); // 없으면 새 데이터 생성
+        saveData.friendlyCharacterDefinition = friendlyCharacterDefinition; // 대상 아군 저장
+        saveData.currentNigrumCapacity = safeMaxCapacity; // 기본값은 최대 수용량으로 설정
+        saveData.nigrumDecreaseRemainMinute = 0; // 잔여값 초기화
+        currentFriendlyNigrumSaveList.Add(saveData); // 현재 목록에 추가
+    }
+
+    int totalRemainMinute = saveData.nigrumDecreaseRemainMinute + passedMinute; // 기존 잔여값과 흐른 시간 합산
+    int decreaseCount = totalRemainMinute / safeIntervalMinute; // 감소 실행 횟수 계산
+    int newRemainMinute = totalRemainMinute % safeIntervalMinute; // 새 잔여값 계산
+
+    int totalDecreaseAmount = decreaseCount * safeDecreaseAmount; // 총 감소량 계산
+
+    saveData.currentNigrumCapacity = Mathf.Clamp(
+        saveData.currentNigrumCapacity - totalDecreaseAmount,
+        0,
+        safeMaxCapacity
+    ); // 현재 흑체 수용량 감소 적용
+
+    saveData.nigrumDecreaseRemainMinute = newRemainMinute; // 감소 후 잔여값 저장
+
+    SaveCurrentFriendlyNigrumSaveListToSelectedSave(); // 선택 저장본에 반영
+}
+
+public void ApplyConsumableValueToCurrentOwnedCharacterStat(
+    int firstRowID,
+    int secondRowID,
+    int individualID,
+    int applyHealthValue,
+    int applyHungerValue) // 소모 아이템 체력/허기 적용
+{
+    OwnedCharacterStatData statData = FindCurrentOwnedCharacterStatData(firstRowID, secondRowID, individualID); // 캐릭터 스탯 탐색
+
+    if (statData == null)
+    {
+        return; // 대상 스탯이 없으면 종료
+    }
+
+    statData.currentHealth = Mathf.Clamp(
+        statData.currentHealth + applyHealthValue,
+        0,
+        statData.maxHealth
+    ); // 체력 적용 후 범위 제한
+
+    statData.currentHunger = Mathf.Clamp(
+        statData.currentHunger + applyHungerValue,
+        0,
+        statData.maxHunger
+    ); // 허기 적용 후 범위 제한
+
+    statData.isStarving = statData.currentHunger <= 0; // 공복 여부 갱신
+
+    SaveCurrentOwnedCharacterStatListToSelectedSave(); // 선택 저장본에 스탯 반영
+}
+
+public void ApplyFriendlyNigrumCapacityValue(
+    FriendlyCharacterDefinition friendlyCharacterDefinition,
+    int maxNigrumCapacity,
+    int applyNigrumCapacityValue) // 소모 아이템 흑체 수용값 적용
+{
+    if (friendlyCharacterDefinition == null)
+    {
+        return; // 대상 아군 정의가 없으면 종료
+    }
+
+    int safeMaxCapacity = Mathf.Max(0, maxNigrumCapacity); // 최대 수용값 보정
+
+    FriendlyNigrumSaveData saveData = FindCurrentFriendlyNigrumSaveData(friendlyCharacterDefinition); // 흑체 저장 데이터 탐색
+
+    if (saveData == null)
+    {
+        saveData = new FriendlyNigrumSaveData(); // 없으면 새 데이터 생성
+        saveData.friendlyCharacterDefinition = friendlyCharacterDefinition; // 대상 아군 저장
+        saveData.currentNigrumCapacity = safeMaxCapacity; // 기본값은 최대 수용값
+        saveData.nigrumDecreaseRemainMinute = 0; // 감소 잔여 시간 초기화
+        currentFriendlyNigrumSaveList.Add(saveData); // 현재 흑체 목록에 추가
+    }
+
+    saveData.currentNigrumCapacity = Mathf.Clamp(
+        saveData.currentNigrumCapacity + applyNigrumCapacityValue,
+        0,
+        safeMaxCapacity
+    ); // 흑체 수용값 적용 후 최대값 제한
+
+    SaveCurrentFriendlyNigrumSaveListToSelectedSave(); // 선택 저장본에 흑체 목록 반영
 }
 
 

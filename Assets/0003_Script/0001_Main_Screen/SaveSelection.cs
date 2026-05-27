@@ -10,8 +10,17 @@ using UnityEngine.SceneManagement;
 /// 시작 소유 캐릭터 목록, 시작 캐릭터 스탯정보, 시작 캐릭터 인벤토리 전달을 담당한다.
 /// </summary>
 
+[System.Serializable]
+public class StartingFriendlyNigrumSetting
+{
+    public FriendlyCharacterDefinition friendlyCharacterDefinition; // 해당 아군 정의 에셋
+    public int startCurrentNigrumCapacity; // 시작 현재 흑체 수용량
+}
+
 public class SaveSelection : MonoBehaviour
 {
+
+    
 
     [Header("씬 이동 설정")]
     [SerializeField] private string worldMapSceneName = "WorldMap"; // 저장본 선택 후 이동할 월드맵 씬 이름
@@ -53,6 +62,9 @@ public class SaveSelection : MonoBehaviour
 
 [Header("시작 소유 캐릭터 인벤토리 목록")]
 [SerializeField] private List<SaveStorage.OwnedCharacterInventorySaveData> startingOwnedCharacterInventoryList = new List<SaveStorage.OwnedCharacterInventorySaveData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 인벤토리 목록
+
+[Header("시작 아군 흑체 수용량 목록")]
+[SerializeField] private List<StartingFriendlyNigrumSetting> startingFriendlyNigrumSettingList = new List<StartingFriendlyNigrumSetting>(); // 새 세이브 시작 흑체 수용량 목록
 
 [Header("시작 시간 설정")]
 [SerializeField, Range(0, 23)] private int startHour = 0; // 새 세이브 시작 시간
@@ -282,15 +294,16 @@ private void TryCreateSave() // 저장본 생성 시도
         return; // 생성 중단
     }
 
-    bool createResult = saveStorage.CreateSave(
-        inputName,
-        startingOwnedCharacterList,
-        startingOwnedCharacterStatList,
-        startingOwnedCharacterInventoryList,
-        startHour,
-        startMinute,
-        0
-    ); // 시작 시간/분/0일차 포함 생성
+bool createResult = saveStorage.CreateSave(
+    inputName,
+    startingOwnedCharacterList,
+    startingOwnedCharacterStatList,
+    startingOwnedCharacterInventoryList,
+    GetStartingFriendlyNigrumSaveList(),
+    startHour,
+    startMinute,
+    0
+); // 시작 시간/분/0일차/흑체 수용량 포함 생성
 
     if (!createResult) return; // 생성 실패 시 종료
 
@@ -376,7 +389,7 @@ public void NotifySaveSlotClicked(SaveSlotButton clickedSlotButton) // 저장본
     if (string.IsNullOrEmpty(worldMapSceneName)) return; // 이동할 씬 이름이 비어 있으면 종료
 
     saveStorage.SetCurrentSelectedSaveId(clickedSlotButton.SaveId); // 현재 선택된 저장본 ID 기록
-    saveStorage.LoadOwnedCharacterDataFromSave(clickedSlotButton.SaveId); // 해당 세이브의 소유 캐릭터 목록과 스탯정보를 현재 목록에 적용
+    saveStorage.LoadOwnedCharacterDataFromSave(clickedSlotButton.SaveId); // 해당 세이브의 캐릭터/스탯/인벤토리/흑체 저장 목록을 현재 목록에 적용
     SceneManager.LoadScene(worldMapSceneName); // 월드맵 씬으로 이동
 }
 
@@ -418,4 +431,43 @@ private void UpdateBlockedButtonsState() // 모달 UI 상태에 따라 버튼 �
         slotButton.SetInteractable(canClick); // 저장본 버튼 클릭 가능 여부 적용
     }
 }
+
+private List<SaveStorage.FriendlyNigrumSaveData> GetStartingFriendlyNigrumSaveList() // 시작 흑체 설정을 저장 데이터로 변환
+{
+    List<SaveStorage.FriendlyNigrumSaveData> resultList = new List<SaveStorage.FriendlyNigrumSaveData>(); // 반환용 리스트
+
+    for (int i = 0; i < startingFriendlyNigrumSettingList.Count; i++)
+    {
+        StartingFriendlyNigrumSetting setting = startingFriendlyNigrumSettingList[i]; // 현재 시작 설정 참조
+
+        if (setting == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (setting.friendlyCharacterDefinition == null)
+        {
+            continue; // 대상 아군이 없으면 건너뜀
+        }
+
+        SaveStorage.FriendlyNigrumSaveData saveData = new SaveStorage.FriendlyNigrumSaveData(); // 저장 데이터 생성
+        saveData.friendlyCharacterDefinition = setting.friendlyCharacterDefinition; // 대상 아군 저장
+        saveData.currentNigrumCapacity = Mathf.Max(0, setting.startCurrentNigrumCapacity); // 시작 현재 흑체 수용량 저장
+        saveData.nigrumDecreaseRemainMinute = 0; // 시작 시 잔여값은 0
+
+        resultList.Add(saveData); // 변환 데이터 추가
+    }
+
+    return resultList; // 변환된 리스트 반환
+}
+
+
+
+
+
+
+
+
+
+
 }
