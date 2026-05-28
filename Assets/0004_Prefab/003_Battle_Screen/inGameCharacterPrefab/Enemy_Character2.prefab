@@ -421,6 +421,10 @@ MonoBehaviour:
   duelSandbagTarget: {fileID: 323449681190095590}
   teamNumber: 1
   controlMode: 1
+  baseSearchRange: 111
+  baseDashStartDistance: 2
+  baseClashDistance: 0.7
+  baseDashMoveSpeed: 2
   searchRange: 111
   dashStartDistance: 2
   clashDistance: 0.7

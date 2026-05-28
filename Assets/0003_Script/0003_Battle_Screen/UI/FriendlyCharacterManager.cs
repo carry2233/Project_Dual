@@ -74,6 +74,16 @@ public class FriendlyCharacterManager : MonoBehaviour
 [Header("전투 아군 준비 상태")]
 [SerializeField] private bool isFriendlyBattleSetupCompleted; // 아군 생성, 목록 구성, 평균 레벨 계산 완료 여부
 
+
+[Header("결투기술 선택 UI")]
+[SerializeField] private GameObject duelSkillListParentPanel; // 결투기술 목록 부모 패널
+[SerializeField] private Transform duelSkillSlotListPanel; // 결투기술 슬롯들이 생성될 부모
+[SerializeField] private List<DuelSkillSlot> spawnedDuelSkillSlotList = new List<DuelSkillSlot>(); // 생성된 결투기술 슬롯 목록
+
+[Header("결투기술 선택 상태")]
+[SerializeField] private CharacterDuelAI currentDuelSkillMenuOwner; // 현재 결투기술 목록을 연 캐릭터
+[SerializeField] private DuelSkillSlot currentHoveredDuelSkillSlot; // 현재 마우스가 올라간 결투기술 슬롯
+
 public bool IsFriendlyBattleSetupCompleted => isFriendlyBattleSetupCompleted; // 전투 아군 준비 완료 여부 반환
 
 public int FriendlyAverageLevel => friendlyAverageLevel; // 아군 평균 레벨 반환
@@ -132,18 +142,23 @@ private void Start() // 시작 시 아군 생성 및 목록 구성
     {
         globalCharacterManager.RebuildCharacterList(); // 씬 캐릭터 전체 등록
     }
-
+    
+    CloseDuelSkillMenu(); // 시작 시 결투기술 목록 UI 비활성화
+    CloseDuelSkillMenu(); // 시작 시 결투기술 목록 UI 비활성화
     RebuildFriendlyCharacterList(); // 아군 목록 재구성
     RefreshFriendlyAverageLevel(); // 아군 평균 레벨 계산
+    
+    
 
     isFriendlyBattleSetupCompleted = true; // 아군 생성, 목록 구성, 평균 레벨 계산 완료
 }
 
-    private void Update() // 매 프레임 숫자키 선택 및 상세 UI 토글 처리
-    {
-        HandleNumberKeySelectionInput(); // 숫자키 선택 처리
-        HandleDetailUIToggleInput(); // 상세 UI 토글 키 처리
-    }
+private void Update() // 매 프레임 숫자키 선택, 상세 UI, 결투기술 선택 처리
+{
+    HandleNumberKeySelectionInput(); // 숫자키 선택 처리
+    HandleDetailUIToggleInput(); // 상세 UI 토글 키 처리
+    HandleDuelSkillMenuReleaseInput(); // 결투기술 목록 우클릭 해제 처리
+}
 
     public bool IsFriendlyTeam(int teamNumber) // 해당 팀 번호가 아군인지 반환
     {
@@ -603,8 +618,6 @@ private void ApplySavedLevelToFriendlyCharacter(GameObject characterObject, Save
     }
 }
 
-
-
 public void RefreshFriendlyAverageLevel() // 아군 평균 레벨 계산
 {
     int totalLevel = 0; // 레벨 합계
@@ -633,6 +646,144 @@ public void RefreshFriendlyAverageLevel() // 아군 평균 레벨 계산
     friendlyAverageLevel = validCount > 0 ? Mathf.Max(1, totalLevel / validCount) : 1; // 평균 레벨 저장
 }
 
+public void OpenDuelSkillMenu(CharacterDuelAI targetCharacter, Vector3 targetWorldPosition) // 결투기술 목록 열기
+{
+    if (targetCharacter == null)
+    {
+        return; // 대상 캐릭터가 없으면 종료
+    }
+
+    if (duelSkillListParentPanel == null || duelSkillSlotListPanel == null)
+    {
+        return; // UI 참조가 없으면 종료
+    }
+
+    currentDuelSkillMenuOwner = targetCharacter; // 현재 목록 소유 캐릭터 저장
+    currentHoveredDuelSkillSlot = null; // 기존 호버 슬롯 초기화
+
+    ClearDuelSkillSlots(); // 기존 슬롯 삭제
+
+    duelSkillListParentPanel.transform.position = targetWorldPosition; // 호버 이미지 위치로 패널 이동
+    duelSkillListParentPanel.SetActive(true); // 부모 패널 활성화
+
+    IReadOnlyList<DuelSkillDefinitionSO> skillList = targetCharacter.DuelSkillList; // 캐릭터 보유 결투기술 목록 가져오기
+
+    if (skillList == null)
+    {
+        return; // 기술 목록이 없으면 종료
+    }
+
+    for (int i = 0; i < skillList.Count; i++)
+    {
+        DuelSkillDefinitionSO skill = skillList[i]; // 현재 생성할 결투기술
+
+        if (skill == null || skill.DuelSkillSlotPrefab == null)
+        {
+            continue; // 기술 또는 프리팹이 없으면 건너뜀
+        }
+
+        DuelSkillSlot spawnedSlot = Instantiate(skill.DuelSkillSlotPrefab, duelSkillSlotListPanel); // 슬롯 생성
+        spawnedSlot.Initialize(this, skill, i); // 슬롯 초기화
+        spawnedDuelSkillSlotList.Add(spawnedSlot); // 생성 목록에 등록
+    }
+}
+
+public void SetHoveredDuelSkillSlot(DuelSkillSlot targetSlot) // 현재 호버 중인 결투기술 슬롯 설정
+{
+    currentHoveredDuelSkillSlot = targetSlot; // 호버 슬롯 저장
+}
+
+public void ClearHoveredDuelSkillSlot(DuelSkillSlot targetSlot) // 현재 호버 중인 결투기술 슬롯 해제
+{
+    if (currentHoveredDuelSkillSlot != targetSlot)
+    {
+        return; // 다른 슬롯이면 무시
+    }
+
+    currentHoveredDuelSkillSlot = null; // 호버 슬롯 초기화
+}
+
+private void HandleDuelSkillMenuReleaseInput() // 우클릭 해제 시 결투기술 선택 또는 취소
+{
+    if (Mouse.current == null)
+    {
+        return; // 마우스가 없으면 종료
+    }
+
+    if (duelSkillListParentPanel == null || !duelSkillListParentPanel.activeSelf)
+    {
+        return; // 목록 UI가 열려있지 않으면 종료
+    }
+
+    if (!Mouse.current.rightButton.wasReleasedThisFrame)
+    {
+        return; // 우클릭 해제 프레임이 아니면 종료
+    }
+
+    DuelSkillSlot releasedSlot = FindDuelSkillSlotUnderMouse(); // 해제 위치의 슬롯 탐색
+
+    if (releasedSlot != null && currentDuelSkillMenuOwner != null)
+    {
+        currentDuelSkillMenuOwner.SetCurrentSelectedDuelSkill(releasedSlot.DuelSkillDefinition); // 슬롯 위에서 해제했으면 기술 변경
+    }
+
+    CloseDuelSkillMenu(); // 슬롯 위든 아니든 패널 닫기
+}
+
+private DuelSkillSlot FindDuelSkillSlotUnderMouse() // 현재 마우스 위치 아래의 결투기술 슬롯 탐색
+{
+    if (Mouse.current == null)
+    {
+        return null; // 마우스가 없으면 null
+    }
+
+    Vector2 mousePosition = Mouse.current.position.ReadValue(); // 현재 마우스 위치
+
+    for (int i = 0; i < spawnedDuelSkillSlotList.Count; i++)
+    {
+        DuelSkillSlot slot = spawnedDuelSkillSlotList[i]; // 검사할 슬롯
+
+        if (slot == null)
+        {
+            continue; // 슬롯이 없으면 건너뜀
+        }
+
+        if (slot.IsScreenPointInsideSlot(mousePosition))
+        {
+            return slot; // 마우스 위치 안에 있는 슬롯 반환
+        }
+    }
+
+    return currentHoveredDuelSkillSlot; // Rect 판정 실패 시 기존 호버 슬롯 보조 사용
+}
+
+private void CloseDuelSkillMenu() // 결투기술 목록 닫기
+{
+    ClearDuelSkillSlots(); // 생성 슬롯 삭제
+
+    currentDuelSkillMenuOwner = null; // 목록 소유 캐릭터 초기화
+    currentHoveredDuelSkillSlot = null; // 호버 슬롯 초기화
+
+    if (duelSkillListParentPanel != null)
+    {
+        duelSkillListParentPanel.SetActive(false); // 부모 패널 비활성화
+    }
+}
+
+private void ClearDuelSkillSlots() // 생성된 결투기술 슬롯 삭제
+{
+    for (int i = 0; i < spawnedDuelSkillSlotList.Count; i++)
+    {
+        if (spawnedDuelSkillSlotList[i] == null)
+        {
+            continue; // 이미 삭제된 슬롯은 건너뜀
+        }
+
+        Destroy(spawnedDuelSkillSlotList[i].gameObject); // 슬롯 오브젝트 삭제
+    }
+
+    spawnedDuelSkillSlotList.Clear(); // 생성 슬롯 목록 초기화
+}
 
 
 

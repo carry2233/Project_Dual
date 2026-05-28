@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
+
+
 
 
 public class FriendlyCharacterListSlot : MonoBehaviour
@@ -26,6 +29,12 @@ public class FriendlyCharacterListSlot : MonoBehaviour
     [SerializeField] private Color selectedColor = Color.green; // 선택 중 색상
     [SerializeField] private Color normalColor = Color.white; // 기본 색상
 
+    [Header("결투기술 목록 호출 이미지")]
+    [SerializeField] private Image duelSkillMenuHoverImage; // 우클릭 유지로 결투기술 목록을 열 이미지
+
+    [Header("결투기술 목록 호출 상태")]
+    [SerializeField] private bool isRequestingDuelSkillMenu; // 현재 이 슬롯이 결투기술 목록 호출 중인지 여부
+
     public CharacterDuelAI TargetCharacter => targetCharacter; // 연결된 캐릭터 반환
     public int AssignedSelectionOrder => assignedSelectionOrder; // 실제 선택 순서값 반환
 
@@ -47,11 +56,11 @@ private void Awake() // 시작 시 버튼 이벤트 연결 및 상태 UI 참조 
     }
 }
 
-    private void Update() // 매 프레임 선택 상태 색상 갱신
-    {
-        RefreshSelectionVisual(); // 선택 상태 색상 갱신
-    }
-
+private void Update() // 매 프레임 선택 상태와 결투기술 목록 입력 처리
+{
+    RefreshSelectionVisual(); // 선택 상태 색상 갱신
+    HandleDuelSkillMenuInput(); // 결투기술 목록 우클릭 유지 입력 처리
+}
 public void InitializeSlot(
     FriendlyCharacterManager targetManager, // 아군 캐릭터 매니저
     GlobalCharacterDefinition targetDefinition, // 캐릭터 정의
@@ -143,4 +152,64 @@ public void InitializeSlot(
 
     friendlyCharacterStatusUI.SetTargetStatSystem(targetStatSystem); // 상태 UI에 대상 스탯 전달
 }
+
+private void HandleDuelSkillMenuInput() // 호버 이미지 위에서 우클릭을 시작하면 결투기술 목록 호출
+{
+    if (Mouse.current == null)
+    {
+        return; // 마우스가 없으면 종료
+    }
+
+    if (friendlyCharacterManager == null || targetCharacter == null || duelSkillMenuHoverImage == null)
+    {
+        return; // 필수 참조가 없으면 종료
+    }
+
+    bool isHoveringImage = RectTransformUtility.RectangleContainsScreenPoint(
+        duelSkillMenuHoverImage.rectTransform, // 감지할 이미지 RectTransform
+        Mouse.current.position.ReadValue(), // 현재 마우스 위치
+        GetUICamera(duelSkillMenuHoverImage)); // Canvas 방식에 맞는 UI 카메라
+
+    if (isHoveringImage && Mouse.current.rightButton.wasPressedThisFrame)
+    {
+        isRequestingDuelSkillMenu = true; // 호출 중 상태 저장
+        friendlyCharacterManager.OpenDuelSkillMenu(targetCharacter, duelSkillMenuHoverImage.transform.position); // 매니저에 목록 열기 요청
+    }
+
+    if (!Mouse.current.rightButton.isPressed)
+    {
+        isRequestingDuelSkillMenu = false; // 우클릭 해제 시 호출 상태 초기화
+    }
+}
+
+private Camera GetUICamera(Graphic targetGraphic) // UI 판정에 사용할 카메라 반환
+{
+    if (targetGraphic == null)
+    {
+        return null; // 대상 그래픽이 없으면 Overlay 기준 처리
+    }
+
+    Canvas targetCanvas = targetGraphic.canvas; // 그래픽이 속한 Canvas 참조
+
+    if (targetCanvas == null)
+    {
+        return null; // Canvas가 없으면 Overlay 기준 처리
+    }
+
+    if (targetCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
+    {
+        return null; // Overlay Canvas는 카메라 없이 판정
+    }
+
+    return targetCanvas.worldCamera; // Camera Canvas는 Canvas 카메라 사용
+}
+
+
+
+
+
+
+
+
+
 }

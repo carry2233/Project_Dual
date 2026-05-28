@@ -68,6 +68,7 @@
     <Compile Include="Assets\0003_Script\0001_Main_Screen\SaveSelection.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
+    <Compile Include="Assets\0003_Script\0002_World_Map\UISoundPlaybackSystem.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventInfoDefinition.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\ScriptEffect.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventSlot.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EnemySpawnManager.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\AudioSourcePool.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterEffectInstance.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\DuelSkillSlot.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\PerObjectTextureOverride.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventInfoManager.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterUI.cs" />

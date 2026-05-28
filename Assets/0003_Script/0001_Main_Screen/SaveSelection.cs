@@ -66,6 +66,13 @@ public class SaveSelection : MonoBehaviour
 [Header("시작 아군 흑체 수용량 목록")]
 [SerializeField] private List<StartingFriendlyNigrumSetting> startingFriendlyNigrumSettingList = new List<StartingFriendlyNigrumSetting>(); // 새 세이브 시작 흑체 수용량 목록
 
+[Header("시작 소리 설정")]
+[SerializeField, Range(0, 100)] private int startMasterVolume = 100; // 새 세이브 시작 전체 사운드 볼륨
+[SerializeField, Range(0, 100)] private int startEffectVolume = 100; // 새 세이브 시작 효과음 볼륨
+[SerializeField, Range(0, 100)] private int startVoiceVolume = 100; // 새 세이브 시작 음성 볼륨
+[SerializeField, Range(0, 100)] private int startBgmVolume = 100; // 새 세이브 시작 음악/BGM 볼륨
+[SerializeField, Range(0, 100)] private int startUISoundVolume = 100; // 새 세이브 시작 UI 사운드 볼륨
+
 [Header("시작 시간 설정")]
 [SerializeField, Range(0, 23)] private int startHour = 0; // 새 세이브 시작 시간
 [SerializeField, Range(0, 59)] private int startMinute = 0; // 새 세이브 시작 분
@@ -300,10 +307,11 @@ bool createResult = saveStorage.CreateSave(
     startingOwnedCharacterStatList,
     startingOwnedCharacterInventoryList,
     GetStartingFriendlyNigrumSaveList(),
+    GetStartingSoundVolumeSaveData(),
     startHour,
     startMinute,
     0
-); // 시작 시간/분/0일차/흑체 수용량 포함 생성
+); // 시작 시간/분/0일차/흑체 수용량/소리 설정 포함 생성
 
     if (!createResult) return; // 생성 실패 시 종료
 
@@ -461,7 +469,18 @@ private List<SaveStorage.FriendlyNigrumSaveData> GetStartingFriendlyNigrumSaveLi
     return resultList; // 변환된 리스트 반환
 }
 
+private SaveStorage.SoundVolumeSaveData GetStartingSoundVolumeSaveData() // 시작 소리 설정을 저장 데이터로 변환
+{
+    SaveStorage.SoundVolumeSaveData soundData = new SaveStorage.SoundVolumeSaveData(); // 소리 설정 데이터 생성
 
+    soundData.masterVolume = Mathf.Clamp(startMasterVolume, 0, 100); // 전체 사운드 설정
+    soundData.effectVolume = Mathf.Clamp(startEffectVolume, 0, 100); // 효과음 설정
+    soundData.voiceVolume = Mathf.Clamp(startVoiceVolume, 0, 100); // 음성 설정
+    soundData.bgmVolume = Mathf.Clamp(startBgmVolume, 0, 100); // 음악/BGM 설정
+    soundData.uiSoundVolume = Mathf.Clamp(startUISoundVolume, 0, 100); // UI 사운드 설정
+
+    return soundData; // 변환된 소리 설정 반환
+}
 
 
 

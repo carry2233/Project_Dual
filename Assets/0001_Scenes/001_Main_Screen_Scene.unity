@@ -238,6 +238,7 @@ GameObject:
   - component: {fileID: 150175496}
   - component: {fileID: 150175495}
   - component: {fileID: 150175498}
+  - component: {fileID: 150175499}
   m_Layer: 5
   m_Name: campaignButton
   m_TagString: Untagged
@@ -290,7 +291,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -361,7 +362,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 2, y: -1}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &150175499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 150175493}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 150175496}
+  buttonComponent: {fileID: 150175495}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &151196731
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,6 +486,7 @@ GameObject:
   - component: {fileID: 173170597}
   - component: {fileID: 173170596}
   - component: {fileID: 173170599}
+  - component: {fileID: 173170600}
   m_Layer: 5
   m_Name: exitSuggestButton
   m_TagString: Untagged
@@ -517,7 +539,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -588,7 +610,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 2, y: -1}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &173170600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 173170594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 173170597}
+  buttonComponent: {fileID: 173170596}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &201333358
 GameObject:
   m_ObjectHideFlags: 0
@@ -2511,6 +2553,7 @@ GameObject:
   - component: {fileID: 902029705}
   - component: {fileID: 902029704}
   - component: {fileID: 902029707}
+  - component: {fileID: 902029708}
   m_Layer: 5
   m_Name: exitButton
   m_TagString: Untagged
@@ -2563,7 +2606,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -2634,7 +2677,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &902029708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 902029702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 902029705}
+  buttonComponent: {fileID: 902029704}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &959179571
 GameObject:
   m_ObjectHideFlags: 0
@@ -3421,6 +3484,7 @@ GameObject:
   - component: {fileID: 1191263376}
   - component: {fileID: 1191263375}
   - component: {fileID: 1191263378}
+  - component: {fileID: 1191263379}
   m_Layer: 5
   m_Name: deleteCancelButton
   m_TagString: Untagged
@@ -3473,7 +3537,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -3544,7 +3608,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &1191263379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1191263373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 1191263376}
+  buttonComponent: {fileID: 1191263375}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &1201474654
 GameObject:
   m_ObjectHideFlags: 0
@@ -3822,6 +3906,7 @@ GameObject:
   - component: {fileID: 1359445057}
   - component: {fileID: 1359445056}
   - component: {fileID: 1359445059}
+  - component: {fileID: 1359445060}
   m_Layer: 5
   m_Name: deleteExecuteButton
   m_TagString: Untagged
@@ -3874,7 +3959,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -3945,7 +4030,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &1359445060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359445054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 1359445057}
+  buttonComponent: {fileID: 1359445056}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &1420877356
 GameObject:
   m_ObjectHideFlags: 0
@@ -3959,6 +4064,7 @@ GameObject:
   - component: {fileID: 1420877359}
   - component: {fileID: 1420877358}
   - component: {fileID: 1420877361}
+  - component: {fileID: 1420877362}
   m_Layer: 5
   m_Name: backButton
   m_TagString: Untagged
@@ -4011,7 +4117,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -4082,7 +4188,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &1420877362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420877356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 1420877359}
+  buttonComponent: {fileID: 1420877358}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &1431762918
 GameObject:
   m_ObjectHideFlags: 0
@@ -4233,6 +4359,7 @@ GameObject:
   - component: {fileID: 1451255549}
   - component: {fileID: 1451255548}
   - component: {fileID: 1451255551}
+  - component: {fileID: 1451255552}
   m_Layer: 5
   m_Name: createCancelButton
   m_TagString: Untagged
@@ -4285,7 +4412,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -4356,7 +4483,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &1451255552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1451255546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 1451255549}
+  buttonComponent: {fileID: 1451255548}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &1459788287
 GameObject:
   m_ObjectHideFlags: 0
@@ -5355,6 +5502,7 @@ GameObject:
   - component: {fileID: 1823580858}
   - component: {fileID: 1823580857}
   - component: {fileID: 1823580860}
+  - component: {fileID: 1823580861}
   m_Layer: 5
   m_Name: createSaveButton
   m_TagString: Untagged
@@ -5407,7 +5555,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -5478,7 +5626,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &1823580861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823580855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 1823580858}
+  buttonComponent: {fileID: 1823580857}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &1845931490
 GameObject:
   m_ObjectHideFlags: 0
@@ -5634,6 +5802,12 @@ MonoBehaviour:
     overweightDebuffStackCount: 0
   currentOwnedCharacterInventoryList: []
   currentFriendlyNigrumSaveList: []
+  currentSoundVolumeSaveData:
+    masterVolume: 100
+    effectVolume: 50
+    voiceVolume: 50
+    bgmVolume: 50
+    uiSoundVolume: 50
   currentBattleEventRuntimeData:
     eventID: 0
     minEnemySpawnCount: 0
@@ -5863,6 +6037,11 @@ MonoBehaviour:
   startingFriendlyNigrumSettingList:
   - friendlyCharacterDefinition: {fileID: 11400000, guid: 7ce4b19c46c892f4f94d58aca2830b4e, type: 2}
     startCurrentNigrumCapacity: 20
+  startMasterVolume: 86
+  startEffectVolume: 66
+  startVoiceVolume: 100
+  startBgmVolume: 48
+  startUISoundVolume: 69
   startHour: 9
   startMinute: 0
 --- !u!4 &1943530136
@@ -6763,6 +6942,7 @@ GameObject:
   - component: {fileID: 2134594367}
   - component: {fileID: 2134594366}
   - component: {fileID: 2134594369}
+  - component: {fileID: 2134594370}
   m_Layer: 5
   m_Name: exitCancelButton
   m_TagString: Untagged
@@ -6815,7 +6995,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -6886,7 +7066,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
-  m_UseGraphicAlpha: 1
+  m_UseGraphicAlpha: 0
+--- !u!114 &2134594370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2134594364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 2134594367}
+  buttonComponent: {fileID: 2134594366}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  imagePointerEnterBaseVolume: 0.15
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.4
 --- !u!1 &2136145139
 GameObject:
   m_ObjectHideFlags: 0
@@ -6952,7 +7152,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:

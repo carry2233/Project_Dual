@@ -130,6 +130,16 @@ public class FriendlyNigrumSaveData
     public int nigrumDecreaseRemainMinute; // 흑체 감소 충족 잔여 분
 }
 
+[Serializable]
+public class SoundVolumeSaveData
+{
+    [Range(0, 100)] public int masterVolume = 100; // 전체 사운드 볼륨
+    [Range(0, 100)] public int effectVolume = 100; // 효과음 볼륨
+    [Range(0, 100)] public int voiceVolume = 100; // 음성 볼륨
+    [Range(0, 100)] public int bgmVolume = 100; // 음악/BGM 볼륨
+    [Range(0, 100)] public int uiSoundVolume = 100; // UI 사운드 볼륨
+}
+
 
 [Serializable]
 public class SaveEntry
@@ -142,6 +152,7 @@ public class SaveEntry
     public List<OwnedCharacterInventorySaveData> ownedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 이 저장본에 소속된 캐릭터 인벤토리 목록
     public List<NotepadPageData> notepadPageList = new List<NotepadPageData>(); // 이 저장본에 소속된 메모장 페이지 목록
     public List<FriendlyNigrumSaveData> friendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 이 저장본에 소속된 아군 흑체 저장 목록
+    public SoundVolumeSaveData soundVolumeSaveData = new SoundVolumeSaveData(); // 이 저장본에 소속된 소리 설정
 
     public int currentDay; // 현재 일차
     public int currentHour; // 현재 시간
@@ -162,6 +173,11 @@ public class SaveEntry
 [SerializeField] private List<FriendlyNigrumSaveData> currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 세이브 기준 아군 흑체 저장 목록
 
 public List<FriendlyNigrumSaveData> CurrentFriendlyNigrumSaveList => GetFriendlyNigrumSaveListCopy(currentFriendlyNigrumSaveList); // 현재 아군 흑체 목록 복사 반환
+
+[Header("현재 소리 설정")]
+[SerializeField] private SoundVolumeSaveData currentSoundVolumeSaveData = new SoundVolumeSaveData(); // 현재 세이브 기준 소리 설정
+
+public SoundVolumeSaveData CurrentSoundVolumeSaveData => GetSoundVolumeSaveDataCopy(currentSoundVolumeSaveData); // 현재 소리 설정 복사 반환
 
 [Header("현재 전투 이벤트 런타임 데이터")]
 [SerializeField] private BattleEventRuntimeData currentBattleEventRuntimeData; // 씬 이동용 전투 이벤트 임시 데이터
@@ -220,6 +236,7 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.notepadPageList = GetNotepadPageListCopy(source.notepadPageList); // 메모장 페이지 목록 복사
         copy.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(source.ownedCharacterInventoryList); // 소유 캐릭터 인벤토리 목록 복사
         copy.friendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(source.friendlyNigrumSaveList); // 아군 흑체 저장 목록 복사
+        copy.soundVolumeSaveData = GetSoundVolumeSaveDataCopy(source.soundVolumeSaveData); // 소리 설정 복사
         copy.currentDay = source.currentDay; // 현재 일차 복사
         copy.currentHour = source.currentHour; // 현재 시간 복사
         copy.currentMinute = source.currentMinute; // 현재 분 복사
@@ -244,6 +261,7 @@ public bool CreateSave(
     List<OwnedCharacterStatData> startOwnedCharacterStatList,
     List<OwnedCharacterInventorySaveData> startOwnedCharacterInventoryList,
     List<FriendlyNigrumSaveData> startFriendlyNigrumSaveList,
+    SoundVolumeSaveData startSoundVolumeSaveData,
     int startHour,
     int startMinute,
     int startDay) // 새 저장본 생성
@@ -261,11 +279,11 @@ public bool CreateSave(
     newEntry.ownedCharacterStatList = GetOwnedCharacterStatListCopy(startOwnedCharacterStatList); // 시작 캐릭터 스탯정보 저장
     newEntry.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(startOwnedCharacterInventoryList); // 시작 캐릭터 인벤토리 저장
     newEntry.friendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(startFriendlyNigrumSaveList); // 시작 아군 흑체 저장 목록 저장
+    newEntry.soundVolumeSaveData = GetSoundVolumeSaveDataCopy(startSoundVolumeSaveData); // 시작 소리 설정 저장
     newEntry.notepadPageList = new List<NotepadPageData>(); // 새 세이브의 메모장 페이지 목록 초기화
     newEntry.currentDay = Mathf.Max(0, startDay); // 시작 일차 저장
     newEntry.currentHour = Mathf.Clamp(startHour, 0, 23); // 시작 시간 저장
     newEntry.currentMinute = Mathf.Clamp(startMinute, 0, 59); // 시작 분 저장
-    
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
     currentSaveFileData.saveList.Add(newEntry); // 목록에 저장본 추가
@@ -274,13 +292,13 @@ public bool CreateSave(
     ApplyCurrentOwnedCharacterStatList(newEntry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 적용
     ApplyCurrentOwnedCharacterInventoryList(newEntry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 적용
     ApplyCurrentFriendlyNigrumSaveList(newEntry.friendlyNigrumSaveList); // 현재 아군 흑체 저장 목록 적용
+    ApplyCurrentSoundVolumeSaveData(newEntry.soundVolumeSaveData); // 현재 소리 설정 적용
 
     SortAndReindex(); // 번호 정렬 및 재정렬
     SaveToFile(); // 파일 저장
 
     return true; // 생성 성공 반환
 }
-
     public bool DeleteSaveByNumber(int targetSaveNumber) // 번호 기준 저장본 삭제
     {
         int removeIndex = -1; // 삭제할 인덱스
@@ -314,6 +332,7 @@ if (!File.Exists(path))
     currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
     currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
     currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 아군 흑체 저장 목록 초기화
+    currentSoundVolumeSaveData = new SoundVolumeSaveData(); // 현재 소리 설정 초기화
     SaveToFile(); // 빈 파일 저장
     return; // 로드 종료
 }
@@ -371,11 +390,16 @@ if (loadedData == null)
         if (currentSaveFileData.saveList[i].ownedCharacterInventoryList == null)
         {
             currentSaveFileData.saveList[i].ownedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 캐릭터 인벤토리 목록 null 방지
+        }
 
         if (currentSaveFileData.saveList[i].friendlyNigrumSaveList == null)
         {
             currentSaveFileData.saveList[i].friendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 아군 흑체 저장 목록 null 방지
         }
+
+        if (currentSaveFileData.saveList[i].soundVolumeSaveData == null)
+        {
+            currentSaveFileData.saveList[i].soundVolumeSaveData = new SoundVolumeSaveData(); // 소리 설정 null 방지
         }
 
         if (currentSaveFileData.saveList[i].notepadPageList == null)
@@ -399,6 +423,7 @@ currentOwnedCharacterList = new List<OwnedCharacterData>(); // 현재 소유 캐
 currentOwnedCharacterStatList = new List<OwnedCharacterStatData>(); // 현재 캐릭터 스탯정보 목록 초기화
 currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>(); // 현재 캐릭터 인벤토리 목록 초기화
 currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 현재 아군 흑체 저장 목록 초기화
+currentSoundVolumeSaveData = new SoundVolumeSaveData(); // 현재 소리 설정 초기화
 
     SortAndReindex(); // 저장본 번호 정렬
 }
@@ -545,7 +570,7 @@ public List<OwnedCharacterData> GetOwnedCharacterListBySaveId(int targetSaveId) 
     return new List<OwnedCharacterData>(); // 없으면 빈 리스트 반환
 }
 
-public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록, 스탯정보, 인벤토리, 흑체 저장 목록을 현재 데이터로 적용
+public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본의 캐릭터 목록, 스탯정보, 인벤토리, 흑체 저장 목록, 소리 설정을 현재 데이터로 적용
 {
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
@@ -560,6 +585,7 @@ public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본
         ApplyCurrentOwnedCharacterStatList(entry.ownedCharacterStatList); // 현재 소유 캐릭터 스탯정보 목록에 적용
         ApplyCurrentOwnedCharacterInventoryList(entry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 목록에 적용
         ApplyCurrentFriendlyNigrumSaveList(entry.friendlyNigrumSaveList); // 현재 아군 흑체 저장 목록에 적용
+        ApplyCurrentSoundVolumeSaveData(entry.soundVolumeSaveData); // 현재 소리 설정에 적용
 
         return true; // 적용 성공
     }
@@ -1370,7 +1396,37 @@ public void ApplyFriendlyNigrumCapacityValue(
     SaveCurrentFriendlyNigrumSaveListToSelectedSave(); // 선택 저장본에 흑체 목록 반영
 }
 
+private SoundVolumeSaveData GetSoundVolumeSaveDataCopy(SoundVolumeSaveData sourceData) // 소리 설정 깊은 복사 반환
+{
+    SoundVolumeSaveData copyData = new SoundVolumeSaveData(); // 복사용 데이터 생성
 
+    if (sourceData == null)
+    {
+        return copyData; // 원본이 없으면 기본값 반환
+    }
+
+    copyData.masterVolume = Mathf.Clamp(sourceData.masterVolume, 0, 100); // 전체 사운드 복사
+    copyData.effectVolume = Mathf.Clamp(sourceData.effectVolume, 0, 100); // 효과음 복사
+    copyData.voiceVolume = Mathf.Clamp(sourceData.voiceVolume, 0, 100); // 음성 복사
+    copyData.bgmVolume = Mathf.Clamp(sourceData.bgmVolume, 0, 100); // BGM 복사
+    copyData.uiSoundVolume = Mathf.Clamp(sourceData.uiSoundVolume, 0, 100); // UI 사운드 복사
+
+    return copyData; // 복사본 반환
+}
+
+public void ApplyCurrentSoundVolumeSaveData(SoundVolumeSaveData sourceData) // 현재 소리 설정 적용
+{
+    currentSoundVolumeSaveData = GetSoundVolumeSaveDataCopy(sourceData); // 현재 소리 설정 복사 적용
+}
+
+public float GetUISoundFinalVolume01(float baseVolume) // UI 사운드 최종 볼륨 반환
+{
+    float safeBaseVolume = Mathf.Max(0f, baseVolume); // 기본 볼륨 음수 방지
+    float masterRate = Mathf.Clamp(currentSoundVolumeSaveData.masterVolume, 0, 100) / 100f; // 전체 사운드 비율
+    float uiRate = Mathf.Clamp(currentSoundVolumeSaveData.uiSoundVolume, 0, 100) / 100f; // UI 사운드 비율
+
+    return safeBaseVolume * masterRate * uiRate; // 최종 UI 사운드 볼륨 반환
+}
 
 
 

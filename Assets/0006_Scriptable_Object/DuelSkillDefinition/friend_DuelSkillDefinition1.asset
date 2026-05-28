@@ -17,6 +17,15 @@ MonoBehaviour:
   secondRowID: 1
   minimumSpeedRatePercent: 200
   maximumSpeedRatePercent: 300
+  useOverrideSearchRange: 1
+  overrideSearchRange: 200
+  useOverrideDashStartDistance: 0
+  overrideDashStartDistance: 4
+  useOverrideClashDistance: 0
+  overrideClashDistance: 1.2
+  useOverrideDashMoveSpeed: 0
+  overrideDashMoveSpeed: 3
+  duelSkillSlotPrefab: {fileID: 6310775288524787427, guid: a29d832f716221f4fb175b6ba2af6ace, type: 3}
   hitStaggerDamageData:
     useStaggerDamage: 1
     staggerDamage: 20

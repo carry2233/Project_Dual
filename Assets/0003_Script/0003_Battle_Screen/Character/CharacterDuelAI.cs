@@ -46,6 +46,11 @@ public Collider2D PhysicalContactCollider => physicalContactCollider; // 본인 
     [SerializeField] private ControlMode controlMode = ControlMode.PlayerControlled; // 현재 캐릭터의 조작 방식
 
 
+    [Header("결투 AI 기본 수치 백업")]
+[SerializeField] private float baseSearchRange; // 기본 탐색 거리 백업값
+[SerializeField] private float baseDashStartDistance; // 기본 돌진 시작 거리 백업값
+[SerializeField] private float baseClashDistance; // 기본 결투 판정 거리 백업값
+[SerializeField] private float baseDashMoveSpeed; // 기본 돌진 이동속도 배율 백업값
 
 [Header("결투 거리 설정")]
 [SerializeField] private float searchRange = 20f; // 탐색 거리
@@ -90,6 +95,7 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 
     [Header("결투 기술 목록")]
     [SerializeField] private List<DuelSkillDefinitionSO> duelSkillList = new List<DuelSkillDefinitionSO>(); // 이 캐릭터가 보유한 결투 기술 목록
+    public IReadOnlyList<DuelSkillDefinitionSO> DuelSkillList => duelSkillList; // 보유 결투 기술 목록 반환
 
     [Header("현재선택한 결투기술")]
     [SerializeField] private int currentSelectedDuelSkillIndex; // 현재 선택한 결투 기술 리스트 순서값
@@ -249,6 +255,14 @@ public bool CanBeDuelTriggeredByOther // 다른 대상이 본인에게 결투를
 
 private void Awake() // 초기 참조 자동 연결
 {
+
+        baseSearchRange = searchRange; // 기본 탐색 거리 저장
+        baseDashStartDistance = dashStartDistance; // 기본 돌진 시작 거리 저장
+        baseClashDistance = clashDistance; // 기본 결투 판정 거리 저장
+        baseDashMoveSpeed = dashMoveSpeed; // 기본 돌진 이동속도 배율 저장
+
+        ApplyCurrentDuelSkillOverrideSettings(); // 현재 선택 결투기술 수치 적용
+
     if (characterStatSystem == null)
     {
         characterStatSystem = GetComponent<CharacterStatSystem>(); // 스탯 자동 참조
@@ -1177,7 +1191,15 @@ private string BuildDuelDebugLog(
 
 public void SetCurrentSelectedDuelSkillIndex(int newIndex) // 현재 선택된 결투 기술 인덱스 설정
 {
-    currentSelectedDuelSkillIndex = newIndex; // 새 인덱스 저장
+    if (duelSkillList == null || duelSkillList.Count == 0)
+    {
+        currentSelectedDuelSkillIndex = 0; // 기술 목록이 없으면 0으로 초기화
+        ApplyCurrentDuelSkillOverrideSettings(); // 기본 수치로 복구
+        return;
+    }
+
+    currentSelectedDuelSkillIndex = Mathf.Clamp(newIndex, 0, duelSkillList.Count - 1); // 범위 보정 후 저장
+    ApplyCurrentDuelSkillOverrideSettings(); // 선택 기술 기준 수치 적용
 }
 
 public DuelSkillDefinitionSO GetCurrentSelectedDuelSkill() // 현재 선택된 결투 기술 반환
@@ -1880,4 +1902,68 @@ public void SetCharacterIDs(int newFirstRowID, int newSecondRowID, int newIndivi
     secondRowID = newSecondRowID; // 2열 ID 저장
     individualID = newIndividualID; // 개체별 ID 저장
 }
+
+public void SetCurrentSelectedDuelSkill(DuelSkillDefinitionSO targetSkill) // 결투 기술 직접 선택
+{
+    if (targetSkill == null)
+    {
+        return; // 대상 기술이 없으면 종료
+    }
+
+    if (duelSkillList == null)
+    {
+        return; // 기술 목록이 없으면 종료
+    }
+
+    int foundIndex = duelSkillList.IndexOf(targetSkill); // 기술 목록에서 인덱스 탐색
+
+    if (foundIndex < 0)
+    {
+        return; // 보유하지 않은 기술이면 종료
+    }
+
+    SetCurrentSelectedDuelSkillIndex(foundIndex); // 인덱스 기준 선택 처리
+}
+
+private void ApplyCurrentDuelSkillOverrideSettings() // 현재 결투기술의 AI 수치 덮어쓰기 적용
+{
+    searchRange = baseSearchRange; // 기본 탐색 거리로 복구
+    dashStartDistance = baseDashStartDistance; // 기본 돌진 시작 거리로 복구
+    clashDistance = baseClashDistance; // 기본 결투 판정 거리로 복구
+    dashMoveSpeed = baseDashMoveSpeed; // 기본 돌진 이동속도 배율로 복구
+
+    DuelSkillDefinitionSO currentSkill = GetCurrentSelectedDuelSkill(); // 현재 선택 기술 가져오기
+
+    if (currentSkill == null)
+    {
+        return; // 선택 기술이 없으면 기본값 유지
+    }
+
+    if (currentSkill.UseOverrideSearchRange)
+    {
+        searchRange = currentSkill.OverrideSearchRange; // 탐색 거리 덮어쓰기
+    }
+
+    if (currentSkill.UseOverrideDashStartDistance)
+    {
+        dashStartDistance = currentSkill.OverrideDashStartDistance; // 돌진 시작 거리 덮어쓰기
+    }
+
+    if (currentSkill.UseOverrideClashDistance)
+    {
+        clashDistance = currentSkill.OverrideClashDistance; // 결투 판정 거리 덮어쓰기
+    }
+
+    if (currentSkill.UseOverrideDashMoveSpeed)
+    {
+        dashMoveSpeed = currentSkill.OverrideDashMoveSpeed; // 돌진 이동속도 배율 덮어쓰기
+    }
+}
+
+
+
+
+
+
+
 }

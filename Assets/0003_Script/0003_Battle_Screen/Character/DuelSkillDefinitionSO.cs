@@ -14,6 +14,36 @@ public class DuelSkillDefinitionSO : ScriptableObject
 [SerializeField] private int minimumSpeedRatePercent = 90; // 이 기술의 최소 속도율
 [SerializeField] private int maximumSpeedRatePercent = 110; // 이 기술의 최대 속도율
 
+[Header("결투 AI 수치 조정 설정")]
+[SerializeField] private bool useOverrideSearchRange; // 탐색 거리 덮어쓰기 여부
+[SerializeField] private float overrideSearchRange = 20f; // 선택 시 적용할 탐색 거리
+
+[SerializeField] private bool useOverrideDashStartDistance; // 돌진 시작 거리 덮어쓰기 여부
+[SerializeField] private float overrideDashStartDistance = 4f; // 선택 시 적용할 돌진 시작 거리
+
+[SerializeField] private bool useOverrideClashDistance; // 결투 판정 거리 덮어쓰기 여부
+[SerializeField] private float overrideClashDistance = 1.2f; // 선택 시 적용할 결투 판정 거리
+
+[SerializeField] private bool useOverrideDashMoveSpeed; // 돌진 이동속도 배율 덮어쓰기 여부
+[SerializeField] private float overrideDashMoveSpeed = 3f; // 선택 시 적용할 돌진 이동속도 배율
+
+[Header("결투기술 선택 UI")]
+[SerializeField] private DuelSkillSlot duelSkillSlotPrefab; // 이 결투기술 선택용 슬롯 프리팹
+
+public bool UseOverrideSearchRange => useOverrideSearchRange; // 탐색 거리 덮어쓰기 여부 반환
+public float OverrideSearchRange => overrideSearchRange; // 탐색 거리 덮어쓰기 값 반환
+
+public bool UseOverrideDashStartDistance => useOverrideDashStartDistance; // 돌진 시작 거리 덮어쓰기 여부 반환
+public float OverrideDashStartDistance => overrideDashStartDistance; // 돌진 시작 거리 덮어쓰기 값 반환
+
+public bool UseOverrideClashDistance => useOverrideClashDistance; // 결투 판정 거리 덮어쓰기 여부 반환
+public float OverrideClashDistance => overrideClashDistance; // 결투 판정 거리 덮어쓰기 값 반환
+
+public bool UseOverrideDashMoveSpeed => useOverrideDashMoveSpeed; // 돌진 이동속도 배율 덮어쓰기 여부 반환
+public float OverrideDashMoveSpeed => overrideDashMoveSpeed; // 돌진 이동속도 배율 덮어쓰기 값 반환
+
+public DuelSkillSlot DuelSkillSlotPrefab => duelSkillSlotPrefab; // 결투기술 슬롯 프리팹 반환
+
 
 [System.Serializable]
 public class DuelResultStaggerDamageData

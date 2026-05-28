@@ -697,6 +697,10 @@ MonoBehaviour:
   duelSandbagTarget: {fileID: 0}
   teamNumber: 0
   controlMode: 0
+  baseSearchRange: 111
+  baseDashStartDistance: 2
+  baseClashDistance: 0.7
+  baseDashMoveSpeed: 2
   searchRange: 111
   dashStartDistance: 2
   clashDistance: 0.7
@@ -717,7 +721,7 @@ MonoBehaviour:
   characterAnimationPlayer: {fileID: 622442859872565919}
   duelSkillList:
   - {fileID: 11400000, guid: 2e7209fe13746494a87da5009767b390, type: 2}
-  - {fileID: 11400000, guid: e989f9ad55989b042ac3ca1fb83219a9, type: 2}
+  - {fileID: 11400000, guid: 5d547a0ef205f3044b9ab1b732605c44, type: 2}
   currentSelectedDuelSkillIndex: 0
   postDuelStopDuration: 0.3
   isCountingPostDuelStop: 0
