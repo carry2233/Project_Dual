@@ -1,5 +1,6 @@
 using System; // 상태값 변경 알림 이벤트용
 using UnityEngine;
+using System.Collections; // 와해상태 코루틴 처리용
 
 /// <summary>
 /// 캐릭터의 레벨, 전투 스탯, 체력, 와해량, 이동속도 계산값을 관리한다.
@@ -51,6 +52,25 @@ public int StaggerResistancePercent => staggerResistancePercent; // 와해 저�
     [Header("행동 상태 관련")]
     [SerializeField] private bool isActionLocked; // 현재 행동 불가 여부
 
+    [Header("________________________________________________________________________________")]
+
+    [Header("와해 상태 설정")]
+[SerializeField] private CharacterAnimationPlayer characterAnimationPlayer; // 와해 애니메이션 재생기 참조
+[SerializeField] private CharacterAnimationClipSO brokenLoopAnimationClip; // 와해 중 루프 재생 애니메이션
+[SerializeField] private CharacterAnimationClipSO brokenReleaseAnimationClip; // 와해 해제 애니메이션
+[SerializeField] private float brokenMaintainDuration = 3f; // 와해 유지시간
+[SerializeField] private float brokenReleaseAnimationWaitTime = 0.5f; // 와해해제 애니메이션 대기시간
+
+[Header("현재 와해 상태")]
+[SerializeField] private bool isBrokenState; // 현재 와해상태 여부
+[SerializeField] private float currentBrokenTimer; // 현재 와해 유지 타이머
+
+[SerializeField] private NavigationMovementSystem NavigationMovementSystem; // 이동속도를 적용하고 와해 중 이동을 정지할 네비 이동 시스템
+
+private Coroutine brokenStateCoroutine; // 와해상태 진행 코루틴
+
+public bool IsBrokenState => isBrokenState; // 와해상태 여부 반환
+
     public int LevelStats => levelstats; // 레벨 수치 반환
 public int AttackPower => attackPower; // 공격력 반환
 public int DefenseValue => defenseValue; // 방어력 반환
@@ -80,6 +100,11 @@ private void Awake() // 시작 시 현재값 범위 보정
     if (navigationMovementSystem == null)
     {
         navigationMovementSystem = GetComponent<NavigationMovementSystem>(); // 네비 이동 시스템 자동 참조
+    }
+
+    if (characterAnimationPlayer == null)
+    {
+        characterAnimationPlayer = GetComponent<CharacterAnimationPlayer>(); // 캐릭터 애니메이션 재생기 자동 참조
     }
 
     RefreshFinalMoveSpeed(); // 최종 이동속도 계산 및 적용
@@ -133,6 +158,11 @@ public int ApplyStaggerDamage(int rawStaggerDamage) // 저지율 퍼센트를 �
     currentStaggerAmount = Mathf.Clamp(currentStaggerAmount + finalStaggerDamage, 0, Mathf.Max(0, maxStaggerAmount)); // 현재 와해량 증가
     NotifyStatusValueChanged(); // 와해 UI 즉시 갱신 알림
 
+    if (currentStaggerAmount >= maxStaggerAmount)
+    {
+        StartBrokenState(); // 최대 와해량 도달 시 와해상태 시작
+    }
+
     return finalStaggerDamage; // 실제 적용된 최종 와해피해 반환
 }
 
@@ -154,4 +184,123 @@ public void SetLevelStats(int newLevelStats) // 레벨 수치 설정
     levelstats = Mathf.Max(1, newLevelStats); // 최소 1 이상으로 보정
     NotifyStatusValueChanged(); // UI 갱신 알림
 }
+
+public void StartBrokenState() // 와해상태 시작
+{
+    if (isBrokenState)
+    {
+        return; // 이미 와해상태면 중복 실행 방지
+    }
+
+    if (brokenStateCoroutine != null)
+    {
+        StopCoroutine(brokenStateCoroutine); // 기존 와해 코루틴 정리
+    }
+
+    brokenStateCoroutine = StartCoroutine(BrokenStateRoutine()); // 와해상태 코루틴 시작
+}
+
+
+private void ReleaseBrokenState() // 와해상태 해제
+{
+    if (brokenStateCoroutine != null)
+    {
+        StopCoroutine(brokenStateCoroutine); // 와해 코루틴 정리
+        brokenStateCoroutine = null; // 코루틴 참조 초기화
+    }
+
+    StartCoroutine(BrokenReleaseRoutine()); // 와해해제 애니메이션 처리 시작
+}
+
+private IEnumerator BrokenReleaseRoutine() // 와해해제 애니메이션 후 행동 복구
+{
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.PlayBrokenReleaseAnimation(brokenReleaseAnimationClip); // 와해해제 애니메이션 재생
+    }
+
+    float safeWaitTime = Mathf.Max(0f, brokenReleaseAnimationWaitTime); // 대기시간 보정
+
+    if (safeWaitTime > 0f)
+    {
+        yield return new WaitForSeconds(safeWaitTime); // 해제 애니메이션 대기
+    }
+
+    isBrokenState = false; // 와해상태 해제
+    SetActionLocked(false); // 행동 잠금 해제
+
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.StopManualAnimation(); // 기존 자동 행동 애니메이션으로 복귀
+    }
+
+    NotifyStatusValueChanged(); // UI 갱신
+}
+
+public void CancelBrokenStateByAttackSkillHit() // 공격기술 피격 진입으로 와해상태를 즉시 종료 처리
+{
+    if (!isBrokenState)
+    {
+        return; // 와해상태가 아니면 종료
+    }
+
+    if (brokenStateCoroutine != null)
+    {
+        StopCoroutine(brokenStateCoroutine); // 와해 유지 코루틴 정지
+        brokenStateCoroutine = null; // 코루틴 참조 초기화
+    }
+
+    isBrokenState = false; // 와해상태 해제
+    currentBrokenTimer = 0f; // 와해 유지 타이머 초기화
+
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.ClearBrokenAnimationLock(); // 공격기술 피격으로 넘어가므로 와해 루프 고정 해제
+    }
+
+    SetActionLocked(true); // 공격기술 피격 상태가 이어지므로 행동 잠금은 유지
+    NotifyStatusValueChanged(); // UI 갱신
+}
+
+private IEnumerator BrokenStateRoutine() // 와해상태 유지 및 해제 처리
+{
+    isBrokenState = true; // 와해상태 설정
+    currentBrokenTimer = Mathf.Max(0f, brokenMaintainDuration); // 유지시간 초기화
+    SetActionLocked(true); // 와해 중 행동 잠금
+
+    if (navigationMovementSystem != null)
+    {
+        navigationMovementSystem.StopMove(); // 와해 시작 즉시 일반 이동 정지
+    }
+
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.PlayBrokenLoopAnimation(brokenLoopAnimationClip); // 와해 루프 애니메이션 고정 재생
+    }
+
+    while (currentBrokenTimer > 0f)
+    {
+        if (navigationMovementSystem != null)
+        {
+            navigationMovementSystem.StopMove(); // 와해 유지 중 일반 이동 재개 방지
+        }
+
+        if (characterAnimationPlayer != null)
+        {
+            characterAnimationPlayer.PlayBrokenLoopAnimation(brokenLoopAnimationClip); // idle/move가 끼어들어도 와해 루프 유지
+        }
+
+        currentBrokenTimer -= Time.deltaTime; // 와해 유지시간 감소
+        yield return null;
+    }
+
+    ReleaseBrokenState(); // 와해 해제 실행
+}
+
+
+
+
+
+
+
 }

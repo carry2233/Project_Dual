@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GlobalCharacterDefinition
   firstRowID: 1
   secondRowID: 2
-  hungerDecreasePerMinute: 2
-  inGameCharacterPrefab: {fileID: 8797095827369585324, guid: d5a385b0545018742b16f0f541060688, type: 3}
+  hungerDecreaseIntervalMinute: 1
+  hungerDecreaseAmount: 1
+  inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 2b7ec501f4eecec4eadc38edc3c27ec5, type: 3}
   displayPriority: 0
   detailUIPrefab: {fileID: 2177999571878758286, guid: 31cedc5b583c6534faaa73d40ba1b25a, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}

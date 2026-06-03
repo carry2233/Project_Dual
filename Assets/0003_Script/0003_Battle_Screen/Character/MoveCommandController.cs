@@ -197,6 +197,12 @@ public void SetMoveDestination(Vector2 destination) // 이동 목적지 전달
 
         CharacterStatSystem statSystem = characterDuelAI.GetCharacterStatSystem(); // 현재 캐릭터 스탯 참조 가져오기
 
+        if (statSystem != null && statSystem.IsBrokenState)
+        {
+            StopMove(); // 와해상태면 기존 일반 이동도 즉시 정지
+            return; // 와해상태면 새 이동 명령 차단
+        }
+
         if (statSystem != null && statSystem.IsActionLocked)
         {
             return; // 행동 잠금 상태면 새 이동 명령 차단

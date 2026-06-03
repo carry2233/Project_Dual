@@ -185,6 +185,12 @@ public class DuelEffectSpawnData
     [Header("방향별 생성 회전 보정 (+X 방향)")]
     [SerializeField] private Vector3 spawnRotationOffsetWhenFacingRight; // X+ 방향일 때 적용할 회전값
 
+    [Header("방향별 생성 스케일 보정 (-X 방향)")]
+    [SerializeField] private Vector3 spawnScaleWhenFacingLeft = Vector3.one; // X- 방향일 때 적용할 스케일값
+
+    [Header("방향별 생성 스케일 보정 (+X 방향)")]
+    [SerializeField] private Vector3 spawnScaleWhenFacingRight = Vector3.one; // X+ 방향일 때 적용할 스케일값
+
     public GameObject EffectPrefab => effectPrefab; // 이펙트 프리팹 반환
     public float SpawnDelay => spawnDelay; // 생성 딜레이 반환
     public float EffectLifetime => effectLifetime; // 유지 시간 반환
@@ -195,6 +201,9 @@ public class DuelEffectSpawnData
     public Vector3 SpawnRotationOffsetWhenFacingLeft => spawnRotationOffsetWhenFacingLeft; // X- 방향 회전값 반환
     public Vector3 SpawnPositionOffsetWhenFacingRight => spawnPositionOffsetWhenFacingRight; // X+ 방향 위치값 반환
     public Vector3 SpawnRotationOffsetWhenFacingRight => spawnRotationOffsetWhenFacingRight; // X+ 방향 회전값 반환
+
+    public Vector3 SpawnScaleWhenFacingLeft => spawnScaleWhenFacingLeft; // X- 방향 스케일값 반환
+    public Vector3 SpawnScaleWhenFacingRight => spawnScaleWhenFacingRight; // X+ 방향 스케일값 반환
 }
 
 [System.Serializable]

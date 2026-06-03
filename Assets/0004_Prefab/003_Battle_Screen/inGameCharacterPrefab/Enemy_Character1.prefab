@@ -36,7 +36,7 @@ Transform:
   m_GameObject: {fileID: 42997402686422953}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8, y: 0, z: 0}
+  m_LocalPosition: {x: 13.71, y: -0.6600003, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -175,9 +175,17 @@ MonoBehaviour:
   maximumSpeedRatePercent: 144
   powerRatePercent: 100
   currentStaggerAmount: 0
-  maxStaggerAmount: 200
+  maxStaggerAmount: 20
   staggerResistancePercent: 0
   isActionLocked: 0
+  characterAnimationPlayer: {fileID: 4721317008947267112}
+  brokenLoopAnimationClip: {fileID: 11400000, guid: 2465f28c85d789f4bb650d440c902606, type: 2}
+  brokenReleaseAnimationClip: {fileID: 11400000, guid: 110f4dbf18a8c124d9bf5d0a36a80ccf, type: 2}
+  brokenMaintainDuration: 3
+  brokenReleaseAnimationWaitTime: 0.5
+  isBrokenState: 0
+  currentBrokenTimer: 0
+  NavigationMovementSystem: {fileID: 1415452274839756729}
 --- !u!114 &1415452274839756729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,6 +199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NavigationMoveSystem
   targetRigidbody2D: {fileID: 5190957508425949532}
+  characterStatSystem: {fileID: 7995397536527646193}
   moveSpeed: 8
   stoppingDistance: 0.05
   destinationSampleDistance: 2.5
@@ -304,6 +313,27 @@ MonoBehaviour:
   assignedFriendlySelectionOrder: 0
   approachStopDistanceWhenTargetInExternalForce: 3
   isInterruptibleByNewDuelDuringRecovery: 1
+  attackSkillHitboxParentRoot: {fileID: 5585033741951860609}
+  attackSkillWallLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  attackSkillList:
+  - {fileID: 11400000, guid: d5791ae18dd26da4a990b319c4362652, type: 2}
+  currentSelectedAttackSkillIndex: 0
+  isAttackSkillCasting: 0
+  isAttackSkillHitState: 0
+  hasAttackSkillFirstHitOccurred: 0
+  currentAttackSkillTarget: {fileID: 0}
+  currentAttackSkillDefinition: {fileID: 0}
+  currentAttackSkillHitbox: {fileID: 0}
+  currentAttackSkillFacingDirection: 0
+  attackSkillTargetCorrectionLocalPosition: {x: 0, y: 0, z: 0}
+  attackSkillTargetCorrectionMoveSpeed: 5
+  attackSkillWallEscapeMoveDistance: 0.25
+  skillCastBlockDurationAfterDuelSkill: 0.5
+  skillCastBlockDurationAfterAttackSkill: 0.5
+  isSkillCastBlocked: 0
+  currentSkillCastBlockTimer: 0
 --- !u!114 &5682521965813233513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -510,6 +540,15 @@ MonoBehaviour:
   damageFloaterPoolRoot: {fileID: 0}
   pooledHealthDamageFloaterCount: 0
   pooledStaggerDamageFloaterCount: 0
+  attackSkillVictimHitLoopAnimationClip: {fileID: 11400000, guid: 2465f28c85d789f4bb650d440c902606, type: 2}
+  attackSkillFixedLoopAnimationClip: {fileID: 11400000, guid: 110f4dbf18a8c124d9bf5d0a36a80ccf, type: 2}
+  attackSkillBeforeFirstHitLoopAnimationClip: {fileID: 11400000, guid: aa845dc08552c454bb10938ce9a61641, type: 2}
+  attackSkillAfterFirstHitLoopAnimationClip: {fileID: 11400000, guid: 2465f28c85d789f4bb650d440c902606, type: 2}
+  isAttackSkillAnimationLocked: 1
+  isAttackSkillAfterFirstHitLoopLocked: 0
+  isAfterimageSpawnBlocked: 0
+  isBrokenAnimationLocked: 0
+  brokenLockedLoopAnimationClip: {fileID: 11400000, guid: 2465f28c85d789f4bb650d440c902606, type: 2}
 --- !u!1 &171446446684834104
 GameObject:
   m_ObjectHideFlags: 0
@@ -868,7 +907,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1f48960290c0cda4f93fe400b18186e0, type: 2}
+  - {fileID: 2100000, guid: b78244f260becfa4d9667cb864514976, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

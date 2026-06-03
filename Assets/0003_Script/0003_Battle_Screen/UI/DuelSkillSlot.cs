@@ -12,27 +12,51 @@ public class DuelSkillSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [Header("현재 슬롯 정보")]
     [SerializeField] private FriendlyCharacterManager friendlyCharacterManager; // 결투기술 목록을 관리하는 매니저
     [SerializeField] private DuelSkillDefinitionSO duelSkillDefinition; // 이 슬롯이 나타내는 결투기술
+
+    public enum DuelSkillSlotType
+{
+    DuelSkill, // 결투기술
+    AttackSkill // 공격기술
+}
+
+[Header("슬롯 타입")]
+[SerializeField] private DuelSkillSlotType slotType = DuelSkillSlotType.DuelSkill; // 본인 슬롯 타입
+
+[SerializeField] private AttackSkillDefinitionSO attackSkillDefinition; // 이 슬롯이 나타내는 공격기술
+
+public DuelSkillSlotType SlotType => slotType; // 슬롯 타입 반환
+public AttackSkillDefinitionSO AttackSkillDefinition => attackSkillDefinition; // 공격기술 반환
     [SerializeField] private int skillIndex; // 결투기술 목록 인덱스
 
     public DuelSkillDefinitionSO DuelSkillDefinition => duelSkillDefinition; // 결투기술 반환
     public int SkillIndex => skillIndex; // 결투기술 인덱스 반환
 
-    public void Initialize(FriendlyCharacterManager targetManager, DuelSkillDefinitionSO targetSkill, int targetIndex) // 슬롯 초기화
-    {
-        friendlyCharacterManager = targetManager; // 매니저 저장
-        duelSkillDefinition = targetSkill; // 결투기술 저장
-        skillIndex = targetIndex; // 인덱스 저장
+public void Initialize(FriendlyCharacterManager targetManager, DuelSkillDefinitionSO targetSkill, int targetIndex) // 결투기술 슬롯 초기화
+{
+    friendlyCharacterManager = targetManager; // 매니저 저장
+    duelSkillDefinition = targetSkill; // 결투기술 저장
+    attackSkillDefinition = null; // 공격기술 참조 초기화
+    skillIndex = targetIndex; // 인덱스 저장
+    slotType = DuelSkillSlotType.DuelSkill; // 결투기술 슬롯으로 설정
 
-        RefreshVisual(); // 표시 정보 갱신
+    RefreshVisual(); // 표시 정보 갱신
+}
+
+private void RefreshVisual() // 슬롯 표시 갱신
+{
+    if (skillNameText == null)
+    {
+        return; // 텍스트가 없으면 종료
     }
 
-    private void RefreshVisual() // 슬롯 표시 갱신
+    if (slotType == DuelSkillSlotType.AttackSkill)
     {
-        if (skillNameText != null)
-        {
-            skillNameText.text = duelSkillDefinition != null ? duelSkillDefinition.SkillName : string.Empty; // 기술 이름 표시
-        }
+        skillNameText.text = attackSkillDefinition != null ? attackSkillDefinition.AttackSkillName : string.Empty; // 공격기술 이름 표시
+        return;
     }
+
+    skillNameText.text = duelSkillDefinition != null ? duelSkillDefinition.SkillName : string.Empty; // 결투기술 이름 표시
+}
 
     public void OnPointerEnter(PointerEventData eventData) // 마우스가 슬롯 위에 올라왔을 때
     {

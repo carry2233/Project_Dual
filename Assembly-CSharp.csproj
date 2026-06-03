@@ -55,7 +55,6 @@
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Management\CharacterManagementSlot.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Tile_Map\TileSelectionManager.cs" />
-    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\NavigationMoveSystem.cs" />
     <Compile Include="Assets\0005_External_Assets\NamuFX\_CommonAssets\Scripts\Viewer.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\GlobalCharacterManager.cs" />
@@ -66,6 +65,7 @@
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\FriendlyCharacterDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\SaveSelection.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\AttackSkillHitbox.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\UISoundPlaybackSystem.cs" />
@@ -78,6 +78,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\CharacterInfoManager.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\AttackSkillDefinitionSO.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\DistributionInventorySlot.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\BattleOccurrenceEvent.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\EnemyAIController.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\PlayerInput.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TeleType.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\SaveStorage.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\NavigationMovementSystem.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleCameraController.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\CharacterActionSound.cs" />

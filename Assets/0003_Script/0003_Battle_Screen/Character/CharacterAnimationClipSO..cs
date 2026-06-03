@@ -60,6 +60,12 @@ public class EffectSpawnEventData
     [Header("이펙트 생성 회전 (+X 방향)")]
     [SerializeField] private Vector3 spawnLocalRotationWhenFacingRight; // X+ 방향일 때 생성 로컬 회전값
 
+    [Header("이펙트 생성 스케일 (-X 방향)")]
+    [SerializeField] private Vector3 spawnLocalScaleWhenFacingLeft = Vector3.one; // X- 방향일 때 생성 로컬 스케일
+
+    [Header("이펙트 생성 스케일 (+X 방향)")]
+    [SerializeField] private Vector3 spawnLocalScaleWhenFacingRight = Vector3.one; // X+ 방향일 때 생성 로컬 스케일
+
     [Header("이펙트 타임라인 설정")]
     [SerializeField] private float effectStartTimelineTime; // 생성 직후 이 시점까지 재생된 상태로 시작할 시간
     [SerializeField] private float effectLifetime = 1f; // 이펙트 유지 시간
@@ -81,6 +87,9 @@ public class EffectSpawnEventData
     public float EffectLifetime => effectLifetime; // 이펙트 유지 시간 반환
     public float EffectPlaySpeedMultiplier => effectPlaySpeedMultiplier; // 이펙트 재생속도 배율 반환
     public GameObject EffectPrefab => effectPrefab; // 이펙트 프리팹 반환
+
+    public Vector3 SpawnLocalScaleWhenFacingLeft => spawnLocalScaleWhenFacingLeft; // X- 방향 생성 스케일 반환
+    public Vector3 SpawnLocalScaleWhenFacingRight => spawnLocalScaleWhenFacingRight; // X+ 방향 생성 스케일 반환
 }
 
 [Header("프레임 이펙트 이벤트 목록")]

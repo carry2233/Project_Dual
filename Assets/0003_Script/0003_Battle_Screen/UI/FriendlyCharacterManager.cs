@@ -722,10 +722,17 @@ private void HandleDuelSkillMenuReleaseInput() // 우클릭 해제 시 결투기
 
     DuelSkillSlot releasedSlot = FindDuelSkillSlotUnderMouse(); // 해제 위치의 슬롯 탐색
 
-    if (releasedSlot != null && currentDuelSkillMenuOwner != null)
+if (releasedSlot != null && currentDuelSkillMenuOwner != null)
+{
+    if (releasedSlot.SlotType == DuelSkillSlot.DuelSkillSlotType.AttackSkill)
     {
-        currentDuelSkillMenuOwner.SetCurrentSelectedDuelSkill(releasedSlot.DuelSkillDefinition); // 슬롯 위에서 해제했으면 기술 변경
+        currentDuelSkillMenuOwner.SetCurrentSelectedAttackSkill(releasedSlot.AttackSkillDefinition); // 공격기술 선택
     }
+    else
+    {
+        currentDuelSkillMenuOwner.SetCurrentSelectedDuelSkill(releasedSlot.DuelSkillDefinition); // 결투기술 선택
+    }
+}
 
     CloseDuelSkillMenu(); // 슬롯 위든 아니든 패널 닫기
 }

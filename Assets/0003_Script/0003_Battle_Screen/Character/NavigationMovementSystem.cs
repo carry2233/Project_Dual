@@ -10,6 +10,8 @@ public class NavigationMovementSystem : MonoBehaviour
     [Header("필수 참조")]
     [SerializeField] private Rigidbody2D targetRigidbody2D; // 실제 이동에 사용할 Rigidbody2D
 
+    [SerializeField] private CharacterStatSystem characterStatSystem; // 와해상태 이동 차단용 스탯 시스템 참조
+
 [Header("이동 설정")]
 [SerializeField] private float moveSpeed = 5f; // 기본 이동 속도
 [SerializeField] private float stoppingDistance = 0.05f; // 코너 도착 판정 거리
@@ -81,15 +83,20 @@ public Vector2 CurrentDestination => currentDestination; // 현재 목적지 반
     /// </summary>
     public bool IsMoving => isMoving; // 현재 이동 상태 반환
 
-    private void Awake() // 초기 참조 및 경로 객체 준비
+private void Awake() // 초기 참조 및 경로 객체 준비
+{
+    if (targetRigidbody2D == null)
     {
-        if (targetRigidbody2D == null)
-        {
-            targetRigidbody2D = GetComponent<Rigidbody2D>(); // Rigidbody2D 자동 참조
-        }
-
-        navMeshPath = new NavMeshPath(); // NavMesh 경로 객체 생성
+        targetRigidbody2D = GetComponent<Rigidbody2D>(); // Rigidbody2D 자동 참조
     }
+
+    if (characterStatSystem == null)
+    {
+        characterStatSystem = GetComponent<CharacterStatSystem>(); // 스탯 시스템 자동 참조
+    }
+
+    navMeshPath = new NavMeshPath(); // NavMesh 경로 객체 생성
+}
 
 private void FixedUpdate() // 물리 프레임마다 실제 이동 처리
 {
@@ -142,6 +149,12 @@ private void UpdateFacingDirectionState() // 현재 이동 방향 기준으로 X
     /// </summary>
 public void SetMoveDestination(Vector2 destination) // 새 목적지 설정
 {
+    if (characterStatSystem != null && characterStatSystem.IsBrokenState)
+    {
+        StopMove(); // 와해상태면 기존 이동 정지
+        return; // 와해상태면 일반 목적지 이동 차단
+    }
+
     UpdateFacingDirectionByTargetPosition(destination); // 이동 목적지 기준으로 방향 상태 먼저 갱신
 
     currentDestination = destination; // 현재 목적지 저장
@@ -180,6 +193,12 @@ private void HandlePathMovement() // 경로 이동 처리
     if (targetRigidbody2D == null)
     {
         return; // Rigidbody2D가 없으면 종료
+    }
+
+    if (characterStatSystem != null && characterStatSystem.IsBrokenState)
+    {
+        StopMove(); // 와해상태면 일반 이동 즉시 정지
+        return; // 와해상태에서는 경로 이동 차단
     }
 
     if (isUnderExternalForce)

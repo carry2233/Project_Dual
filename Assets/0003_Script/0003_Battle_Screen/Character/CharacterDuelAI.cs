@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Text; // 상세 결투 로그 문자열 조립용
+using System.Collections; // 공격기술 코루틴 처리용
+
 
 /// <summary>
 /// 공통 캐릭터 결투 AI
@@ -136,6 +138,52 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [Header("후딜 중 새 결투 인터럽트 허용 상태")]
 [SerializeField] private bool isInterruptibleByNewDuelDuringRecovery = true; // 후딜 중 새 결투 인터럽트 허용 여부
 
+
+[Header("____________________________________________________________")]
+
+
+[Header("공격기술 판정 콜라이더 설정")]
+[SerializeField] private Transform attackSkillHitboxParentRoot; // 공격기술 2D 박스콜라이더 부모 오브젝트
+[SerializeField] private LayerMask attackSkillWallLayerMask; // 공격기술 콜라이더가 벽으로 감지할 레이어
+
+[Header("공격기술 목록")]
+[SerializeField] private List<AttackSkillDefinitionSO> attackSkillList = new List<AttackSkillDefinitionSO>(); // 보유한 공격기술 목록
+[SerializeField] private int currentSelectedAttackSkillIndex; // 현재 사용할 공격기술 리스트 인덱스
+
+[Header("공격기술 상태")]
+[SerializeField] private bool isAttackSkillCasting; // 공격기술 시전상태 여부
+[SerializeField] private bool isAttackSkillHitState; // 공격기술 피격상태 여부
+[SerializeField] private bool hasAttackSkillFirstHitOccurred; // 첫 실제공격 피격 여부
+[SerializeField] private CharacterDuelAI currentAttackSkillTarget; // 현재 공격기술 대상
+[SerializeField] private AttackSkillDefinitionSO currentAttackSkillDefinition; // 현재 실행 중인 공격기술 정의
+[SerializeField] private AttackSkillHitbox currentAttackSkillHitbox; // 현재 생성된 공격기술 판정 콜라이더
+[SerializeField] private NavigationMovementSystem.FacingXDirectionType currentAttackSkillFacingDirection; // 현재 시전할 공격기술 방향상태
+[SerializeField] private Vector3 attackSkillTargetCorrectionLocalPosition; // 본인 위치, 방향 기준 피격자 보정 위치값
+[SerializeField] private float attackSkillTargetCorrectionMoveSpeed = 5f; // 피격자 위치보정 이동속도
+[SerializeField] private float attackSkillWallEscapeMoveDistance = 0.25f; // 벽 접촉 해제용 1회 이동 거리
+
+
+[Header("____________________________________________________________")]
+
+
+[Header("결투/공격기술 시전 금지 설정")]
+[SerializeField] private float skillCastBlockDurationAfterDuelSkill = 0.5f; // 결투기술 시전이 끝난 뒤 결투/공격기술 시전을 금지할 시간
+[SerializeField] private float skillCastBlockDurationAfterAttackSkill = 0.5f; // 공격기술 시전이 끝난 뒤 결투/공격기술 시전을 금지할 시간
+
+[Header("현재 결투/공격기술 시전 금지 상태")]
+[SerializeField] private bool isSkillCastBlocked; // 현재 결투/공격기술 시전 금지 여부
+[SerializeField] private float currentSkillCastBlockTimer; // 현재 남은 시전 금지 시간
+
+private Coroutine skillCastBlockCoroutine; // 시전 금지 타이머 코루틴
+
+private Coroutine attackSkillCoroutine; // 공격기술 진행 코루틴
+
+public IReadOnlyList<AttackSkillDefinitionSO> AttackSkillList => attackSkillList; // 보유 공격기술 목록 반환
+public int CurrentSelectedAttackSkillIndex => currentSelectedAttackSkillIndex; // 현재 선택 공격기술 인덱스 반환
+public AttackSkillDefinitionSO CurrentSelectedAttackSkill => GetCurrentSelectedAttackSkill(); // 현재 선택 공격기술 반환
+public bool IsAttackSkillCasting => isAttackSkillCasting; // 공격기술 시전상태 반환
+public bool IsAttackSkillHitState => isAttackSkillHitState; // 공격기술 피격상태 반환
+
 public bool IsInterruptibleByNewDuelDuringRecovery => // 후딜 중 새 결투 인터럽트 가능 상태 반환
     isInterruptibleByNewDuelDuringRecovery && (isWaitingForPostDuelRecoveryStart || isInPostDuelRecovery);
 
@@ -242,12 +290,22 @@ public bool CanBeDuelTriggeredByOther // 다른 대상이 본인에게 결투를
             return false; // 스탯 참조가 없으면 결투 불가
         }
 
+        if (isAttackSkillCasting || isAttackSkillHitState)
+        {
+            return false; // 공격기술 시전/피격 중이면 일반 결투 진입 차단
+        }
+
+        if (characterStatSystem.IsBrokenState)
+        {
+            return false; // 와해상태면 일반 결투 대상으로 진입 불가
+        }
+
         if (navigationMovementSystem != null && navigationMovementSystem.IsUnderExternalForce)
         {
             return false; // 넉백 중이면 결투 대상으로 받을 수 없음
         }
 
-        return true; // 넉백만 아니면 결투 대상으로 받을 수 있음
+        return true; // 차단 상태가 아니면 결투 대상으로 받을 수 있음
     }
 }
 
@@ -302,6 +360,11 @@ private void Awake() // 초기 참조 자동 연결
     {
         physicalContactCollider = GetComponent<Collider2D>(); // 물리접촉 전용 콜라이더 자동 참조
     }
+
+    if (attackSkillHitboxParentRoot == null)
+    {
+        attackSkillHitboxParentRoot = transform; // 히트박스 부모가 없으면 자기 자신 사용
+    }
 }
 
 private void Start() // 시작 시 필요한 매니저 자동 참조
@@ -323,6 +386,17 @@ private void Update() // 매 프레임 결투 상태 처리
         return; // 필수 참조가 없으면 종료
     }
 
+    if (isAttackSkillCasting || isAttackSkillHitState)
+    {
+        return; // 공격기술 진행/피격 중이면 일반 결투 AI 행동 정지
+    }
+
+    if (characterStatSystem.IsBrokenState)
+    {
+        navigationMovementSystem.StopMove(); // 와해 중 이동 정지 유지
+        return; // 와해상태면 와해 애니메이션 외 행동 금지
+    }
+
     if (navigationMovementSystem.IsUnderExternalForce)
     {
         return; // 외부 힘 적용 중이면 종료
@@ -339,13 +413,11 @@ private void Update() // 매 프레임 결투 상태 처리
         return; // 샌드백 대상이면 능동 행동 로직을 수행하지 않음
     }
 
-    // ✅ 후딜 중이라도 새 결투 인터럽트 허용 상태면 결투 진입 로직은 계속 태움
     if (characterStatSystem.IsActionLocked && !IsInterruptibleByNewDuelDuringRecovery)
     {
         return; // 일반 행동 잠금 상태면 종료
     }
 
-    // ✅ 후딜 중 인터럽트 허용 상태에서는 일반 행동 대신 결투 진입만 처리
     if (IsInterruptibleByNewDuelDuringRecovery)
     {
         UpdateRecoveryInterruptTarget(); // 후딜 중 새 결투 진입용 타겟 갱신
@@ -399,59 +471,74 @@ public bool IsDirectionLinkedRotationLocked
     }
 }
 
-private void TryStartDuel() // 상호 타겟이 아니어도 한쪽이 돌진 시작 시 상대를 강제 결투 상태로 동기화
+private void TryStartDuel() // 현재 타겟 기준 결투 또는 와해 대상 공격기술 돌진 시작 시도
 {
-    if (currentTarget == null) // 현재 타겟이 없으면 종료
+    if (isAttackSkillCasting || isAttackSkillHitState)
     {
-        return;
+        return; // 공격기술 시전/피격 중이면 시작 차단
     }
 
-    if (!CanDuelWith(currentTarget)) // 결투 불가능 대상이면 타겟 제거 후 종료
+    if (characterStatSystem != null && characterStatSystem.IsBrokenState)
     {
-        SetCurrentTarget(null);
-        return;
+        return; // 본인이 와해상태면 아무 행동도 시작하지 않음
     }
 
-    NavigationMovementSystem targetMovementSystem = currentTarget.GetNavigationMovementSystem(); // 상대 이동 시스템 참조
-
-    if (targetMovementSystem != null && targetMovementSystem.IsUnderExternalForce) // 상대가 넉백 중이면 시작 금지
+    if (currentTarget == null)
     {
-        return;
+        return; // 현재 타겟이 없으면 종료
     }
 
-    bool isTargetSandbag = currentTarget.IsSandbagTargetCharacter(); // 상대가 샌드백 대상인지 확인
-
-    if (!isTargetSandbag && !currentTarget.CanBeDuelTriggeredByOther) // 일반 대상은 결투를 받을 수 있는 상태여야 함
+    if (!CanDuelWith(currentTarget))
     {
-        return;
-    }
-
-    if (!isTargetSandbag
-        && currentTarget.CurrentDuelTarget != null
-        && currentTarget.CurrentDuelTarget != this) // 상대가 이미 다른 대상과 결투 중이면 가로채지 않음
-    {
+        SetCurrentTarget(null); // 결투 불가능 대상이면 타겟 제거
         return;
     }
 
     float distanceToTarget = Vector2.Distance(transform.position, currentTarget.transform.position); // 현재 거리 계산
 
-    if (distanceToTarget > dashStartDistance) // 돌진 시작 거리 밖이면 종료
+    if (TryStartAttackSkillDashToBrokenTarget(distanceToTarget))
     {
-        return;
+        return; // 와해 대상 공격기술 돌진으로 전환
     }
 
-    if (IsInterruptibleByNewDuelDuringRecovery) // 후딜 중 새 결투 인터럽트 허용 상태면 이전 상태 초기화
+    NavigationMovementSystem targetMovementSystem = currentTarget.GetNavigationMovementSystem(); // 상대 이동 시스템 참조
+
+    if (targetMovementSystem != null && targetMovementSystem.IsUnderExternalForce)
     {
-        PrepareForImmediateResolvedDuel(); // 기존 후딜/잠금/이미지 고정 상태 초기화
-        FinishImmediateResolvedDuelPreparation(); // 준비용 임시 보호 상태 종료
+        return; // 상대가 넉백 중이면 일반 결투 시작 금지
     }
 
-    if (!isTargetSandbag) // 샌드백이 아니면 상대도 같은 결투 상태로 강제 진입
+    bool isTargetSandbag = currentTarget.IsSandbagTargetCharacter(); // 상대가 샌드백인지 확인
+
+    if (!isTargetSandbag && !currentTarget.CanBeDuelTriggeredByOther)
     {
-        currentTarget.ForceStartDuelByIncomingChallenger(this); // 상대를 나와의 결투 상태로 즉시 동기화
+        return; // 일반 결투를 받을 수 없는 상대면 일반 결투 시작 금지
     }
 
-    StartDuelDashState(currentTarget, false); // 자신도 기존 결투 돌진 상태로 진입
+    if (!isTargetSandbag
+        && currentTarget.CurrentDuelTarget != null
+        && currentTarget.CurrentDuelTarget != this)
+    {
+        return; // 상대가 이미 다른 대상과 결투 중이면 가로채지 않음
+    }
+
+    if (distanceToTarget > dashStartDistance)
+    {
+        return; // 일반 결투 돌진 시작 거리 밖이면 종료
+    }
+
+    if (IsInterruptibleByNewDuelDuringRecovery)
+    {
+        PrepareForImmediateResolvedDuel(); // 기존 후딜 상태 초기화
+        FinishImmediateResolvedDuelPreparation(); // 준비 보호 상태 종료
+    }
+
+    if (!isTargetSandbag)
+    {
+        currentTarget.ForceStartDuelByIncomingChallenger(this); // 일반 결투일 때만 상대 강제 결투 동기화
+    }
+
+    StartDuelDashState(currentTarget, false); // 일반 결투 돌진 시작
 }
 
 public void SetPriorityTarget(CharacterDuelAI target) // 직접 지정 공격 대상 설정
@@ -752,6 +839,28 @@ private void UpdateAutoChaseToCurrentTarget() // 현재 공격 대상으로 자�
     float distanceToTarget = Vector2.Distance(transform.position, currentTarget.transform.position); // 현재 타겟까지 거리 계산
     NavigationMovementSystem targetMovementSystem = currentTarget.GetNavigationMovementSystem(); // 현재 타겟 이동 시스템 참조
     bool isTargetUnderExternalForce = targetMovementSystem != null && targetMovementSystem.IsUnderExternalForce; // 현재 타겟 넉백 상태 여부
+    bool isTargetBroken = currentTarget.characterStatSystem != null && currentTarget.characterStatSystem.IsBrokenState; // 현재 타겟 와해상태 여부
+
+    if (isTargetBroken)
+    {
+        if (distanceToTarget <= dashStartDistance)
+        {
+            isAutoChasingCurrentTarget = false; // 공격기술 돌진 거리 이내면 일반 추적 중지
+            navigationMovementSystem.StopMove(); // 본인 추적 이동 정지
+            return;
+        }
+
+        isAutoChasingCurrentTarget = true; // 와해 대상 추적 중 상태 저장
+        navigationMovementSystem.UpdateFacingDirectionByTargetPosition(currentTarget.transform.position); // 타겟 방향 갱신
+
+        if (moveCommandController != null)
+        {
+            moveCommandController.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 회전 즉시 적용
+        }
+
+        navigationMovementSystem.SetMoveDestination(currentTarget.transform.position); // 본인이 와해 대상에게 접근
+        return;
+    }
 
     if (isTargetUnderExternalForce)
     {
@@ -782,11 +891,11 @@ private void UpdateAutoChaseToCurrentTarget() // 현재 공격 대상으로 자�
     }
 
     isAutoChasingCurrentTarget = true; // 공격 대상 자동 추적 상태 저장
-    navigationMovementSystem.UpdateFacingDirectionByTargetPosition(currentTarget.transform.position); // 현재 공격 대상 위치 기준으로 방향 상태 먼저 갱신
+    navigationMovementSystem.UpdateFacingDirectionByTargetPosition(currentTarget.transform.position); // 현재 공격 대상 위치 기준 방향 갱신
 
     if (moveCommandController != null)
     {
-        moveCommandController.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 갱신된 방향 상태 기준으로 회전 즉시 1회 적용
+        moveCommandController.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 회전 즉시 적용
     }
 
     navigationMovementSystem.SetMoveDestination(currentTarget.transform.position); // 현재 타겟 위치로 추적 이동
@@ -824,6 +933,11 @@ private void UpdateDashToDuel() // 결투 대상에게 돌진 처리
         hasLastDashWorldDirection = true; // 유효한 돌진 방향 저장 상태 설정
     }
 
+    if (TryResolveAttackSkillCastDistance(distanceToTarget))
+    {
+        return; // 공격기술 판정거리 충족 시 공격기술 시전 준비로 전환
+    }
+
     if (distanceToTarget <= clashDistance)
     {
         TryResolveDuel(); // 결투 판정 시도
@@ -838,6 +952,11 @@ private void TryResolveDuel() // 결투 판정 처리
     if (currentDuelTarget == null)
     {
         return; // 결투 대상이 없으면 종료
+    }
+
+    if (isSkillCastBlocked)
+    {
+        return; // 시전 금지 시간 중이면 결투/공격기술 시작 차단
     }
 
     CharacterDuelAI resolvedTarget = currentDuelTarget; // 판정 시점의 상대 참조를 임시 저장
@@ -1057,6 +1176,17 @@ public NavigationMovementSystem GetNavigationMovementSystem() // 이동 시스�
 
 private void OnDisable() // 비활성화 시 참조 정리
 {
+    if (skillCastBlockCoroutine != null)
+    {
+        StopCoroutine(skillCastBlockCoroutine); // 비활성화 시 시전 금지 코루틴 중지
+        skillCastBlockCoroutine = null; // 코루틴 참조 초기화
+    }
+
+    isSkillCastBlocked = false; // 비활성화 시 시전 금지 해제
+    currentSkillCastBlockTimer = 0f; // 시전 금지 타이머 초기화
+
+    CancelAttackSkillState(); // 비활성화 시 공격기술 상태 정리
+
     CharacterDuelAI previousTarget = currentTarget; // 기존 현재 타겟 임시 저장
     CharacterDuelAI previousDuelTarget = currentDuelTarget; // 기존 결투 대상 임시 저장
 
@@ -1247,7 +1377,6 @@ public int GetCurrentMaximumSpeedRatePercent() // 현재 선택된 결투 기술
     return 100; // 참조가 없으면 기본값 반환
 }
 
-
 public void EndDuel(bool stopManualAnimation = true) // 결투 종료 처리
 {
     isDuelResolutionProcessing = false; // 결투 판정 실행 잠금 해제
@@ -1257,6 +1386,8 @@ public void EndDuel(bool stopManualAnimation = true) // 결투 종료 처리
     currentDuelTarget = null; // 현재 결투 대상 제거
     lastDashWorldDirection = Vector2.zero; // 저장된 돌진 방향 초기화
     hasLastDashWorldDirection = false; // 저장된 돌진 방향 유효 여부 초기화
+
+    StartSkillCastBlock(skillCastBlockDurationAfterDuelSkill); // 결투기술 종료 후 결투/공격기술 시전 금지 시작
 
     if (navigationMovementSystem != null)
     {
@@ -1277,7 +1408,6 @@ public void EndDuel(bool stopManualAnimation = true) // 결투 종료 처리
         characterAnimationPlayer.RefreshAnimationByCurrentState(); // 상태 변화 기준 애니메이션 즉시 갱신
     }
 }
-
 
 private float ResolveRepelForceForSelf(
     CharacterDuelAI resolvedTarget, // 판정 시점의 상대 참조
@@ -1426,30 +1556,33 @@ private void UpdatePostDuelRecoveryState() // 결투 후 후딜 시작/진행 �
 
     if (isWaitingForPostDuelRecoveryStart)
     {
-        if (!navigationMovementSystem.ConsumeExternalForceEndedSignal())
+        bool didExternalForceEnd = navigationMovementSystem.ConsumeExternalForceEndedSignal(); // 외부 힘 종료 신호 확인
+        bool canStartRecoveryWithoutForce = !navigationMovementSystem.IsUnderExternalForce; // 현재 외부 힘이 없으면 후딜 시작 가능
+
+        if (!didExternalForceEnd && !canStartRecoveryWithoutForce)
         {
-            return; // 아직 넉백 종료 신호가 없으면 대기
+            return; // 아직 넉백 중이면 대기
         }
 
         isWaitingForPostDuelRecoveryStart = false; // 넉백 종료 대기 상태 해제
         isInPostDuelRecovery = true; // 후딜 시작
 
-        float remainingPostDuelStopTime = isCountingPostDuelStop ? currentPostDuelStopTimer : 0f; // 넉백 종료 시점의 남은 결투 후 정지 시간 계산
-        currentPostDuelRecoveryTimer = Mathf.Max(0f, postDuelRecoveryDuration + remainingPostDuelStopTime); // 기존 후딜에 남은 결투 후 정지 시간을 더해 최종 후딜 시간 설정
+        float remainingPostDuelStopTime = isCountingPostDuelStop ? currentPostDuelStopTimer : 0f; // 남은 결투 후 정지 시간 계산
+        currentPostDuelRecoveryTimer = Mathf.Max(0f, postDuelRecoveryDuration + remainingPostDuelStopTime); // 최종 후딜 시간 설정
 
-        isCountingPostDuelStop = false; // 후딜 시간에 합산했으므로 별도 카운트 종료
+        isCountingPostDuelStop = false; // 결투 후 정지 카운트 종료
         currentPostDuelStopTimer = 0f; // 결투 후 정지 시간 초기화
 
-        navigationMovementSystem.SetForcedFacingDirection(lockedFacingDirectionAfterDuel); // 후딜 시작 시 내부 방향값 다시 고정
-        navigationMovementSystem.StopMove(); // 후딜 시작 시 현재 이동 즉시 정지
+        navigationMovementSystem.SetForcedFacingDirection(lockedFacingDirectionAfterDuel); // 후딜 시작 시 방향 고정
+        navigationMovementSystem.StopMove(); // 후딜 시작 시 이동 정지
 
         if (moveCommandController != null)
         {
-            moveCommandController.SetMoveCommandLocked(true); // 후딜 시작 시 플레이어 이동 명령 잠금
-            moveCommandController.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 고정 방향 기준 회전 즉시 적용
+            moveCommandController.SetMoveCommandLocked(true); // 후딜 중 이동 명령 잠금
+            moveCommandController.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 고정 방향 회전 반영
         }
 
-        characterStatSystem.SetActionLocked(true); // 행동 잠금
+        characterStatSystem.SetActionLocked(true); // 후딜 중 행동 잠금
     }
 
     if (!isInPostDuelRecovery)
@@ -1457,32 +1590,34 @@ private void UpdatePostDuelRecoveryState() // 결투 후 후딜 시작/진행 �
         return; // 후딜 중이 아니면 종료
     }
 
-    currentPostDuelRecoveryTimer -= Time.unscaledDeltaTime; // 현실시간 기준으로 후딜 시간 감소
+    currentPostDuelRecoveryTimer -= Time.unscaledDeltaTime; // 후딜 시간 감소
 
     if (currentPostDuelRecoveryTimer > 0f)
     {
-        navigationMovementSystem.SetForcedFacingDirection(lockedFacingDirectionAfterDuel); // 후딜 동안 내부 방향 유지
+        navigationMovementSystem.SetForcedFacingDirection(lockedFacingDirectionAfterDuel); // 후딜 동안 방향 유지
 
         if (moveCommandController != null)
         {
-            moveCommandController.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 후딜 동안 외부 회전 유지
+            moveCommandController.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 후딜 동안 회전 유지
         }
 
-        return; // 아직 시간이 남아 있으면 유지
+        return; // 후딜 유지
     }
 
     isInPostDuelRecovery = false; // 후딜 종료
-    currentPostDuelRecoveryTimer = 0f; // 타이머 초기화
-    isFacingDirectionLockedAfterDuel = false; // 방향 고정 해제
+    currentPostDuelRecoveryTimer = 0f; // 후딜 타이머 초기화
+    isFacingDirectionLockedAfterDuel = false; // 결투 후 방향 고정 해제
+
+    navigationMovementSystem.ClearForcedFacingDirection(); // 실제 이동 시스템의 강제 방향 고정 해제
 
     characterStatSystem.SetActionLocked(false); // 행동 잠금 해제
 
     if (moveCommandController != null)
     {
-        moveCommandController.SetMoveCommandLocked(false); // 후딜 종료 시 플레이어 이동 명령 잠금 해제
+        moveCommandController.SetMoveCommandLocked(false); // 이동 명령 잠금 해제
     }
 
-    characterAnimationPlayer?.RefreshAnimationByCurrentState(); // 현재 상태 기준 애니메이션 즉시 갱신
+    characterAnimationPlayer?.StopManualAnimation(); // 결투 판정 애니 마지막 프레임 고정 해제
 }
 
 private void LockCurrentFacingDirectionAfterDuel() // 현재 방향을 결투 후 고정 방향으로 저장
@@ -1959,6 +2094,652 @@ private void ApplyCurrentDuelSkillOverrideSettings() // 현재 결투기술의 A
         dashMoveSpeed = currentSkill.OverrideDashMoveSpeed; // 돌진 이동속도 배율 덮어쓰기
     }
 }
+
+private bool TryStartAttackSkillDashToBrokenTarget(float distanceToTarget) // 와해 대상에게 공격기술 돌진 시작 시도
+{
+    AttackSkillDefinitionSO selectedAttackSkill = GetCurrentSelectedAttackSkill(); // 현재 선택 공격기술 가져오기
+
+    if (selectedAttackSkill == null)
+    {
+        return false; // 공격기술이 없으면 기존 결투 진행
+    }
+
+    if (currentTarget == null || currentTarget.characterStatSystem == null)
+    {
+        return false; // 대상 정보가 없으면 기존 결투 진행
+    }
+
+    if (selectedAttackSkill.CanUseOnlyOnBrokenTarget && !currentTarget.characterStatSystem.IsBrokenState)
+    {
+        return false; // 와해 전용인데 대상이 와해상태가 아니면 기존 결투 진행
+    }
+
+    if (distanceToTarget > dashStartDistance)
+    {
+        return false; // 돌진 시작 거리 밖이면 실행하지 않음
+    }
+
+    StartAttackSkillDashState(currentTarget, selectedAttackSkill); // 공격기술 돌진 시작
+    return true; // 공격기술 흐름으로 전환
+}
+
+private bool TryResolveAttackSkillCastDistance(float distanceToTarget) // 공격기술 시전 판정거리 충족 확인
+{
+    if (currentAttackSkillDefinition == null)
+    {
+        return false; // 공격기술 흐름이 아니면 기존 결투 판정 사용
+    }
+
+    if (currentDuelTarget == null)
+    {
+        return false; // 대상이 없으면 기존 처리
+    }
+
+    if (distanceToTarget > currentAttackSkillDefinition.AttackSkillCastDistance)
+    {
+        return false; // 공격기술 판정거리 밖이면 계속 돌진
+    }
+
+    BeginAttackSkillCast(currentDuelTarget, currentAttackSkillDefinition); // 공격기술 시전 준비 시작
+    return true; // 일반 결투 판정 차단
+}
+
+private void StartAttackSkillDashState(CharacterDuelAI target, AttackSkillDefinitionSO attackSkillDefinition) // 공격기술 돌진 진입
+{
+    if (target == null || attackSkillDefinition == null)
+    {
+        return; // 필수 정보가 없으면 종료
+    }
+
+    currentDuelTarget = target; // 기존 돌진 대상 슬롯 재사용
+    currentAttackSkillTarget = target; // 공격기술 대상 저장
+    currentAttackSkillDefinition = attackSkillDefinition; // 사용할 공격기술 저장
+    isDashingToDuel = true; // 기존 돌진 처리 재사용
+    lastDashWorldDirection = Vector2.zero; // 돌진 방향 초기화
+    hasLastDashWorldDirection = false; // 돌진 방향 유효 상태 초기화
+
+    ApplyPreDuelFacingDirection(target); // 대상 방향으로 방향 갱신
+    currentAttackSkillFacingDirection = navigationMovementSystem.CurrentFacingXDirection; // 시전 방향 고정
+
+    if (controlMode == ControlMode.PlayerControlled && moveCommandController != null)
+    {
+        moveCommandController.SetMoveCommandLocked(true); // 플레이어 이동 명령 잠금
+    }
+
+    if (navigationMovementSystem != null)
+    {
+        navigationMovementSystem.StopMove(); // 기존 이동 정지
+        navigationMovementSystem.SetTemporaryMoveSpeedMultiplier(dashMoveSpeed); // 돌진 속도 적용
+    }
+
+    if (characterActionSound != null && attackSkillDefinition.DashSoundClip != null)
+    {
+        characterActionSound.PlaySound(
+            attackSkillDefinition.DashSoundClip,
+            attackSkillDefinition.DashSoundVolume,
+            attackSkillDefinition.DashSoundGroupType); // 공격기술 돌진 효과음 재생
+    }
+}
+
+private void BeginAttackSkillCast(CharacterDuelAI target, AttackSkillDefinitionSO attackSkillDefinition) // 공격기술 시전 준비 시작
+{
+    if (attackSkillCoroutine != null)
+    {
+        StopCoroutine(attackSkillCoroutine); // 기존 공격기술 코루틴 중지
+    }
+
+    attackSkillCoroutine = StartCoroutine(AttackSkillCastRoutine(target, attackSkillDefinition)); // 공격기술 코루틴 시작
+}
+
+private IEnumerator AttackSkillCastRoutine(CharacterDuelAI target, AttackSkillDefinitionSO attackSkillDefinition) // 공격기술 전체 진행
+{
+    characterAnimationPlayer?.SetAttackSkillAnimationLock(true); // 공격기술 중 idle 자동 복귀 차단
+    target.characterAnimationPlayer?.SetAttackSkillAnimationLock(true); // 피격자도 idle 자동 복귀 차단
+
+    if (target == null || attackSkillDefinition == null)
+    {
+        yield break; // 대상 또는 기술이 없으면 종료
+    }
+
+    isDashingToDuel = false; // 돌진 종료
+    isAttackSkillCasting = true; // 시전상태 시작
+    currentAttackSkillTarget = target; // 대상 저장
+    currentAttackSkillDefinition = attackSkillDefinition; // 기술 저장
+    currentAttackSkillFacingDirection = navigationMovementSystem.CurrentFacingXDirection; // 시전 방향 고정
+    attackSkillTargetCorrectionLocalPosition = attackSkillDefinition.TargetLocalCorrectionPosition; // 위치보정값 저장
+    hasAttackSkillFirstHitOccurred = false; // 첫 피격 상태 초기화
+
+    target.ReceiveAttackSkillHitState(this, currentAttackSkillFacingDirection); // 피격자 공격기술 피격상태 시작
+
+    LockAttackSkillFacingDirection(this); // 공격자 방향 고정
+    LockAttackSkillFacingDirection(target); // 피격자 방향 고정
+
+    characterAnimationPlayer?.PlayAttackSkillFixedLoopAnimation(); // 공격자 고정 루프 애니메이션
+    target.characterAnimationPlayer?.PlayAttackSkillFixedLoopAnimation(); // 피격자 고정 루프 애니메이션
+
+    currentAttackSkillHitbox = CreateAttackSkillHitbox(attackSkillDefinition); // 공격기술 히트박스 생성
+
+    yield return MoveUntilAttackSkillHitboxFreeFromWall(target); // 벽 접촉 해제 위치까지 이동
+
+    navigationMovementSystem?.StopMove(); // 공격자 이동 정지
+    target.navigationMovementSystem?.StopMove(); // 피격자 이동 정지
+
+    yield return MoveAttackSkillTargetToCorrectionPosition(target); // 피격자 위치 보정
+
+    ClearAttackSkillFixedState(target); // 방향고정 및 고정 루프 해제
+    ApplyTargetOppositeFacingAfterAttackSkillCorrection(target); // 위치보정 완료 후 피격자 방향을 시전 반대방향으로 조정
+
+    characterAnimationPlayer?.StopManualAnimation(); // 공격자 고정 애니메이션 종료
+    target.characterAnimationPlayer?.PlayAttackSkillBeforeFirstHitLoopAnimation(); // 피격자 피격 전 루프 시작
+
+    yield return PlayAttackSkillAnimationSequence(attackSkillDefinition); // 공격자 공격기술 애니메이션 순차 재생
+
+    EndAttackSkillCast(target); // 공격기술 종료
+}
+
+private AttackSkillHitbox CreateAttackSkillHitbox(AttackSkillDefinitionSO attackSkillDefinition) // 공격기술 판정 콜라이더 생성
+{
+    if (attackSkillDefinition == null || attackSkillDefinition.AttackSkillHitboxPrefab == null)
+    {
+        return null; // 프리팹이 없으면 null
+    }
+
+    Transform parentRoot = attackSkillHitboxParentRoot != null ? attackSkillHitboxParentRoot : transform; // 부모 결정
+    AttackSkillHitbox spawnedHitbox = Instantiate(attackSkillDefinition.AttackSkillHitboxPrefab, parentRoot); // 히트박스 생성
+    spawnedHitbox.transform.localPosition = Vector3.zero; // 부모 기준 위치 초기화
+    spawnedHitbox.transform.localRotation = Quaternion.identity; // 회전 초기화
+    spawnedHitbox.Initialize(attackSkillWallLayerMask); // 벽 레이어 초기화
+
+    return spawnedHitbox; // 생성된 히트박스 반환
+}
+
+private IEnumerator MoveUntilAttackSkillHitboxFreeFromWall(CharacterDuelAI target) // 히트박스가 벽과 겹치지 않을 때까지 이동
+{
+    if (currentAttackSkillHitbox == null)
+    {
+        yield break; // 히트박스가 없으면 보정 없음
+    }
+
+    yield return null; // 트리거 접촉 갱신 대기
+
+    while (currentAttackSkillHitbox != null && currentAttackSkillHitbox.IsTouchingWall)
+    {
+        Vector2 escapeDirection = GetAttackSkillBackwardDirection(); // 시전 방향 반대 방향 계산
+        Vector2 selfDestination = (Vector2)transform.position + escapeDirection * attackSkillWallEscapeMoveDistance; // 공격자 이동 위치
+        Vector2 targetDestination = (Vector2)target.transform.position + escapeDirection * attackSkillWallEscapeMoveDistance; // 피격자 이동 위치
+
+        navigationMovementSystem?.SetMoveDestination(selfDestination); // 공격자 이동
+        target.navigationMovementSystem?.SetMoveDestination(targetDestination); // 피격자도 같은 방향 이동
+
+        yield return null; // 다음 프레임에서 접촉 재확인
+    }
+}
+
+private IEnumerator MoveAttackSkillTargetToCorrectionPosition(CharacterDuelAI target) // 피격자 위치 보정
+{
+    if (target == null || target.navigationMovementSystem == null)
+    {
+        yield break; // 대상 이동 시스템이 없으면 종료
+    }
+
+    Vector3 targetWorldPosition = GetAttackSkillTargetCorrectionWorldPosition(); // 최종 보정 위치 계산
+    float safeMoveSpeed = Mathf.Max(0.01f, attackSkillTargetCorrectionMoveSpeed); // 이동속도 보정
+
+    while (Vector2.Distance(target.transform.position, targetWorldPosition) > 0.05f)
+    {
+        Vector2 nextPosition = Vector2.MoveTowards(
+            target.transform.position,
+            targetWorldPosition,
+            safeMoveSpeed * Time.deltaTime); // 보정 위치로 이동
+
+        target.transform.position = new Vector3(nextPosition.x, nextPosition.y, target.transform.position.z); // 피격자 위치 직접 보정
+        yield return null;
+    }
+}
+
+private Vector3 GetAttackSkillTargetCorrectionWorldPosition() // 공격자 기준 피격자 보정 월드 위치 계산
+{
+    float facingSign = currentAttackSkillFacingDirection == NavigationMovementSystem.FacingXDirectionType.XNegative ? -1f : 1f; // 방향 부호 계산
+
+    Vector3 correctedOffset = new Vector3(
+        attackSkillTargetCorrectionLocalPosition.x * facingSign,
+        attackSkillTargetCorrectionLocalPosition.y,
+        attackSkillTargetCorrectionLocalPosition.z); // 방향 반영 보정값
+
+    return transform.position + correctedOffset; // 공격자 위치 기준 최종 위치 반환
+}
+
+private Vector2 GetAttackSkillBackwardDirection() // 공격기술 시전 방향 반대 방향 반환
+{
+    if (currentAttackSkillFacingDirection == NavigationMovementSystem.FacingXDirectionType.XNegative)
+    {
+        return Vector2.right; // X- 시전이면 뒤쪽은 X+
+    }
+
+    return Vector2.left; // X+ 시전이면 뒤쪽은 X-
+}
+
+private IEnumerator PlayAttackSkillAnimationSequence(AttackSkillDefinitionSO attackSkillDefinition) // 공격기술 애니메이션 순차 재생
+{
+    IReadOnlyList<AttackSkillDefinitionSO.AttackSkillAnimationData> animationList = attackSkillDefinition.AttackSkillAnimationList; // 애니메이션 목록
+
+    if (animationList == null)
+    {
+        yield break; // 애니메이션 목록이 없으면 종료
+    }
+
+    for (int i = 0; i < animationList.Count; i++)
+    {
+        AttackSkillDefinitionSO.AttackSkillAnimationData animationData = animationList[i]; // 현재 애니메이션 데이터
+
+        if (animationData == null || animationData.AnimationClip == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        characterAnimationPlayer?.PlayOneShotAnimation(animationData.AnimationClip); // 공격자 애니메이션 재생
+
+        StartAttackSkillEventsForAnimationIndex(attackSkillDefinition, i); // 현재 애니메이션 인덱스 기준 이벤트 실행
+
+        float waitTime = Mathf.Max(0.01f, animationData.AnimationClip.FrameCount * 0.1f); // 임시 재생 대기시간
+        yield return new WaitForSeconds(waitTime); // 애니메이션 재생 대기
+
+        if (animationData.DelayAfterEnd > 0f)
+        {
+            yield return new WaitForSeconds(animationData.DelayAfterEnd); // 다음 애니메이션 전 딜레이
+        }
+    }
+}
+
+private void StartAttackSkillEventsForAnimationIndex(AttackSkillDefinitionSO attackSkillDefinition, int animationIndex) // 애니메이션 인덱스 기준 이벤트 실행
+{
+    StartCoroutine(ApplyAttackExecutionEvents(attackSkillDefinition, animationIndex)); // 공격 실행 이벤트
+    StartCoroutine(ApplyAttackSkillSoundEvents(attackSkillDefinition, animationIndex)); // 사운드 이벤트
+    StartCoroutine(ApplyAttackSkillMotionEvents(attackSkillDefinition, animationIndex)); // 넉백/방향전환 이벤트
+}
+
+private IEnumerator ApplyAttackExecutionEvents(AttackSkillDefinitionSO attackSkillDefinition, int animationIndex) // 공격 실행 이벤트 처리
+{
+    IReadOnlyList<AttackSkillDefinitionSO.AttackExecutionData> attackList = attackSkillDefinition.AttackExecutionList; // 공격 목록
+
+    if (attackList == null || currentAttackSkillTarget == null)
+    {
+        yield break; // 공격 목록 또는 대상이 없으면 종료
+    }
+
+    for (int i = 0; i < attackList.Count; i++)
+    {
+        AttackSkillDefinitionSO.AttackExecutionData attackData = attackList[i]; // 공격 데이터
+
+        if (attackData == null || attackData.AnimationListIndex != animationIndex)
+        {
+            continue; // 현재 애니메이션 인덱스와 다르면 제외
+        }
+
+        if (attackData.AttackStartDelay > 0f)
+        {
+            yield return new WaitForSeconds(attackData.AttackStartDelay); // 공격 실행 딜레이
+        }
+
+        ApplyAttackSkillDamage(attackData); // 실제 피해 적용
+    }
+}
+
+private void ApplyAttackSkillDamage(AttackSkillDefinitionSO.AttackExecutionData attackData) // 공격기술 피해 적용
+{
+    if (attackData == null || currentAttackSkillTarget == null)
+    {
+        return; // 필수 정보 없으면 종료
+    }
+
+    CharacterStatSystem targetStatSystem = currentAttackSkillTarget.GetCharacterStatSystem(); // 피격자 스탯
+    CharacterAnimationPlayer targetAnimationPlayer = currentAttackSkillTarget.GetCharacterAnimationPlayer(); // 피격자 애니메이션
+
+    if (characterStatSystem == null || targetStatSystem == null)
+    {
+        return; // 스탯이 없으면 종료
+    }
+
+    int damage = attackData.CalculateAttackDamage(
+        characterStatSystem.AttackPower,
+        characterStatSystem.PowerRatePercent); // 최종위력률 * 공격력 / 100 계산
+
+    targetStatSystem.ApplyHealthDamage(damage); // 체력 피해 적용
+
+    if (!hasAttackSkillFirstHitOccurred)
+    {
+        hasAttackSkillFirstHitOccurred = true; // 첫 실제공격 피격 완료
+        currentAttackSkillTarget.hasAttackSkillFirstHitOccurred = true; // 피격자에도 첫 피격 기록
+        targetAnimationPlayer?.PlayAttackSkillAfterFirstHitLoopAnimation(); // 첫 피격 후 루프 애니메이션 재생 및 변경 잠금
+    }
+
+    if (attackData.UseHitEffect)
+    {
+        targetAnimationPlayer?.SpawnAttackSkillHitEffect(attackData.HitEffectData); // 피격자 effectParentRoot 기준 이펙트 생성
+    }
+}
+
+private IEnumerator ApplyAttackSkillSoundEvents(AttackSkillDefinitionSO attackSkillDefinition, int animationIndex) // 공격기술 사운드 이벤트 처리
+{
+    IReadOnlyList<AttackSkillDefinitionSO.AttackSkillSoundEventData> soundList = attackSkillDefinition.AttackSkillSoundEventList; // 사운드 목록
+
+    if (soundList == null)
+    {
+        yield break;
+    }
+
+    for (int i = 0; i < soundList.Count; i++)
+    {
+        AttackSkillDefinitionSO.AttackSkillSoundEventData soundData = soundList[i]; // 사운드 데이터
+
+        if (soundData == null || soundData.AnimationListIndex != animationIndex)
+        {
+            continue;
+        }
+
+        if (soundData.SoundStartDelay > 0f)
+        {
+            yield return new WaitForSeconds(soundData.SoundStartDelay); // 사운드 딜레이
+        }
+
+        characterActionSound?.PlaySound(soundData.AudioClip, soundData.Volume, soundData.AudioGroupType); // 사운드 재생
+    }
+}
+
+private IEnumerator ApplyAttackSkillMotionEvents(AttackSkillDefinitionSO attackSkillDefinition, int animationIndex) // 넉백/방향전환 이벤트 처리
+{
+    IReadOnlyList<AttackSkillDefinitionSO.AttackSkillMotionEventData> motionList = attackSkillDefinition.AttackSkillMotionEventList; // 모션 이벤트 목록
+
+    if (motionList == null || currentAttackSkillTarget == null)
+    {
+        yield break;
+    }
+
+    for (int i = 0; i < motionList.Count; i++)
+    {
+        AttackSkillDefinitionSO.AttackSkillMotionEventData motionData = motionList[i]; // 모션 데이터
+
+        if (motionData == null)
+        {
+            continue;
+        }
+
+        if (motionData.KnockbackAnimationListIndex == animationIndex)
+        {
+            StartCoroutine(ApplyAttackSkillKnockbackEvent(motionData)); // 넉백 적용
+        }
+
+        if (motionData.DirectionFlipAnimationListIndex == animationIndex)
+        {
+            StartCoroutine(ApplyAttackSkillDirectionFlipEvent(motionData)); // 방향전환 적용
+        }
+    }
+}
+
+private IEnumerator ApplyAttackSkillKnockbackEvent(AttackSkillDefinitionSO.AttackSkillMotionEventData motionData) // 넉백 이벤트 적용
+{
+    Vector2 forwardDirection = currentAttackSkillFacingDirection == NavigationMovementSystem.FacingXDirectionType.XNegative
+        ? Vector2.left
+        : Vector2.right; // 공격기술 진행 방향
+
+    if (motionData.UseSelfKnockback)
+    {
+        yield return new WaitForSeconds(Mathf.Max(0f, motionData.SelfKnockbackStartDelay)); // 본인 넉백 딜레이
+        navigationMovementSystem?.ApplyExternalForce(forwardDirection * motionData.SelfKnockbackValue, false); // 본인 넉백
+    }
+
+    if (motionData.UseTargetKnockback && currentAttackSkillTarget != null)
+    {
+        yield return new WaitForSeconds(Mathf.Max(0f, motionData.TargetKnockbackStartDelay)); // 피격자 넉백 딜레이
+        currentAttackSkillTarget.navigationMovementSystem?.ApplyExternalForce(forwardDirection * motionData.TargetKnockbackValue, false); // 피격자 넉백
+    }
+}
+
+private IEnumerator ApplyAttackSkillDirectionFlipEvent(AttackSkillDefinitionSO.AttackSkillMotionEventData motionData) // 방향전환 이벤트 적용
+{
+    if (motionData.UseSelfDirectionFlip)
+    {
+        yield return new WaitForSeconds(Mathf.Max(0f, motionData.SelfDirectionFlipStartDelay)); // 본인 방향전환 딜레이
+        FlipAttackSkillFacingDirection(this); // 본인 방향전환
+    }
+
+    if (motionData.UseTargetDirectionFlip && currentAttackSkillTarget != null)
+    {
+        yield return new WaitForSeconds(Mathf.Max(0f, motionData.TargetDirectionFlipStartDelay)); // 피격자 방향전환 딜레이
+        FlipAttackSkillFacingDirection(currentAttackSkillTarget); // 피격자 방향전환
+    }
+}
+
+private void ReceiveAttackSkillHitState(CharacterDuelAI caster, NavigationMovementSystem.FacingXDirectionType casterFacingDirection) // 공격기술 피격상태 진입
+{
+    characterStatSystem?.CancelBrokenStateByAttackSkillHit(); // 와해 루프 상태를 공격기술 피격 상태로 전환
+
+    isAttackSkillHitState = true; // 피격상태 설정
+    currentAttackSkillTarget = caster; // 공격자를 임시 참조로 저장
+    currentAttackSkillFacingDirection = casterFacingDirection; // 공격자 방향 저장
+    hasAttackSkillFirstHitOccurred = false; // 첫 피격 여부 초기화
+
+    characterStatSystem?.SetActionLocked(true); // 행동 잠금
+    navigationMovementSystem?.StopMove(); // 이동 정지
+
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.SetAfterimageSpawnBlocked(true); // 공격기술 피격 동안 잔상 생성 금지
+        characterAnimationPlayer.PlayAttackSkillVictimHitLoopAnimation(); // 피격상태 애니메이션 재생
+    }
+}
+
+private void LockAttackSkillFacingDirection(CharacterDuelAI targetAI) // 공격기술 중 방향 고정
+{
+    if (targetAI == null || targetAI.navigationMovementSystem == null)
+    {
+        return; // 대상 또는 이동 시스템이 없으면 종료
+    }
+
+    targetAI.navigationMovementSystem.SetForcedFacingDirection(currentAttackSkillFacingDirection); // 방향 고정
+    targetAI.moveCommandController?.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 회전 즉시 반영
+}
+
+private void ClearAttackSkillFixedState(CharacterDuelAI targetAI) // 공격기술 고정상태 해제
+{
+    navigationMovementSystem?.ClearForcedFacingDirection(); // 공격자 방향고정 해제
+    targetAI?.navigationMovementSystem?.ClearForcedFacingDirection(); // 피격자 방향고정 해제
+}
+
+private void FlipAttackSkillFacingDirection(CharacterDuelAI targetAI) // 현재 방향 반대로 전환
+{
+    if (targetAI == null || targetAI.navigationMovementSystem == null)
+    {
+        return; // 대상이 없으면 종료
+    }
+
+    NavigationMovementSystem.FacingXDirectionType flippedDirection =
+        targetAI.navigationMovementSystem.CurrentFacingXDirection == NavigationMovementSystem.FacingXDirectionType.XNegative
+            ? NavigationMovementSystem.FacingXDirectionType.XPositive
+            : NavigationMovementSystem.FacingXDirectionType.XNegative; // 반대 방향 계산
+
+    targetAI.navigationMovementSystem.SetForcedFacingDirection(flippedDirection); // 반대 방향 고정
+    targetAI.moveCommandController?.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 회전 즉시 반영
+}
+
+private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
+{
+    isAttackSkillCasting = false; // 시전상태 해제
+    isAttackSkillHitState = false; // 피격상태 해제
+    hasAttackSkillFirstHitOccurred = false; // 첫 피격 상태 초기화
+
+    StartSkillCastBlock(skillCastBlockDurationAfterAttackSkill); // 공격기술 종료 후 결투/공격기술 시전 금지 시작
+
+    if (target != null)
+    {
+        target.isAttackSkillHitState = false; // 피격자 피격상태 해제
+        target.hasAttackSkillFirstHitOccurred = false; // 피격자 첫 피격 상태 초기화
+        target.StartSkillCastBlock(target.skillCastBlockDurationAfterAttackSkill); // 피격자도 공격기술 종료 후 시전 금지 시작
+        target.characterStatSystem?.SetActionLocked(false); // 피격자 행동 잠금 해제
+
+        if (target.characterAnimationPlayer != null)
+        {
+            target.characterAnimationPlayer.ClearAttackSkillAfterFirstHitLoopLock(); // 피격 후 루프 애니메이션 잠금 해제
+            target.characterAnimationPlayer.SetAfterimageSpawnBlocked(false); // 공격기술 피격 종료 후 잔상 생성 허용
+            target.characterAnimationPlayer.StopManualAnimation(); // 피격자 자동 애니메이션 복귀
+        }
+
+        target.navigationMovementSystem?.ClearForcedFacingDirection(); // 피격자 방향고정 해제
+    }
+
+    characterStatSystem?.SetActionLocked(false); // 공격자 행동 잠금 해제
+
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.ClearAttackSkillAfterFirstHitLoopLock(); // 혹시 남은 공격기술 애니 잠금 해제
+        characterAnimationPlayer.StopManualAnimation(); // 공격자 자동 애니메이션 복귀
+    }
+
+    navigationMovementSystem?.ClearForcedFacingDirection(); // 공격자 방향고정 해제
+    navigationMovementSystem?.ClearTemporaryMoveSpeedMultiplier(); // 돌진 배율 해제
+
+    if (moveCommandController != null)
+    {
+        moveCommandController.SetMoveCommandLocked(false); // 이동 명령 잠금 해제
+    }
+
+    if (currentAttackSkillHitbox != null)
+    {
+        Destroy(currentAttackSkillHitbox.gameObject); // 생성된 히트박스 제거
+    }
+
+    currentAttackSkillHitbox = null; // 히트박스 참조 초기화
+    currentAttackSkillTarget = null; // 공격기술 대상 초기화
+    currentAttackSkillDefinition = null; // 공격기술 정의 초기화
+    attackSkillCoroutine = null; // 코루틴 참조 초기화
+}
+
+private void CancelAttackSkillState() // 공격기술 상태 강제 정리
+{
+    if (attackSkillCoroutine != null)
+    {
+        StopCoroutine(attackSkillCoroutine); // 진행 중 코루틴 정지
+        attackSkillCoroutine = null; // 코루틴 참조 초기화
+    }
+
+    if (currentAttackSkillHitbox != null)
+    {
+        Destroy(currentAttackSkillHitbox.gameObject); // 히트박스 제거
+        currentAttackSkillHitbox = null; // 참조 초기화
+    }
+
+    if (currentAttackSkillTarget != null && currentAttackSkillTarget.characterAnimationPlayer != null)
+    {
+        currentAttackSkillTarget.characterAnimationPlayer.ClearAttackSkillAfterFirstHitLoopLock(); // 피격자 피격 후 루프 잠금 해제
+        currentAttackSkillTarget.characterAnimationPlayer.SetAfterimageSpawnBlocked(false); // 피격자 잔상 생성 금지 해제
+    }
+
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.ClearAttackSkillAfterFirstHitLoopLock(); // 자신의 피격 후 루프 잠금 해제
+        characterAnimationPlayer.SetAfterimageSpawnBlocked(false); // 자신의 잔상 생성 금지 해제
+    }
+
+    isAttackSkillCasting = false; // 시전상태 해제
+    isAttackSkillHitState = false; // 피격상태 해제
+    hasAttackSkillFirstHitOccurred = false; // 첫 피격 여부 초기화
+    currentAttackSkillTarget = null; // 대상 초기화
+    currentAttackSkillDefinition = null; // 정의 초기화
+}
+
+public void SetCurrentSelectedAttackSkillIndex(int newIndex) // 현재 선택된 공격기술 인덱스 설정
+{
+    if (attackSkillList == null || attackSkillList.Count == 0)
+    {
+        currentSelectedAttackSkillIndex = 0; // 목록이 없으면 0으로 초기화
+        return;
+    }
+
+    currentSelectedAttackSkillIndex = Mathf.Clamp(newIndex, 0, attackSkillList.Count - 1); // 범위 보정 후 저장
+}
+
+public void SetCurrentSelectedAttackSkill(AttackSkillDefinitionSO targetSkill) // 현재 선택된 공격기술 설정
+{
+    if (targetSkill == null || attackSkillList == null)
+    {
+        return; // 대상 기술 또는 목록이 없으면 종료
+    }
+
+    int foundIndex = attackSkillList.IndexOf(targetSkill); // 목록에서 기술 위치 탐색
+
+    if (foundIndex < 0)
+    {
+        return; // 보유하지 않은 기술이면 무시
+    }
+
+    SetCurrentSelectedAttackSkillIndex(foundIndex); // 인덱스 기준 선택 적용
+}
+
+public AttackSkillDefinitionSO GetCurrentSelectedAttackSkill() // 현재 선택된 공격기술 반환
+{
+    if (attackSkillList == null || attackSkillList.Count == 0)
+    {
+        return null; // 목록이 없으면 null
+    }
+
+    int clampedIndex = Mathf.Clamp(currentSelectedAttackSkillIndex, 0, attackSkillList.Count - 1); // 범위 보정
+    return attackSkillList[clampedIndex]; // 현재 공격기술 반환
+}
+
+private void StartSkillCastBlock(float blockDuration) // 결투/공격기술 시전 금지 시작
+{
+    float safeDuration = Mathf.Max(0f, blockDuration); // 음수 시간 방지
+
+    if (safeDuration <= 0f)
+    {
+        isSkillCastBlocked = false; // 시간이 0이면 차단 없음
+        currentSkillCastBlockTimer = 0f; // 타이머 초기화
+        return;
+    }
+
+    if (skillCastBlockCoroutine != null)
+    {
+        StopCoroutine(skillCastBlockCoroutine); // 기존 차단 타이머 중지
+    }
+
+    skillCastBlockCoroutine = StartCoroutine(SkillCastBlockRoutine(safeDuration)); // 새 차단 타이머 시작
+}
+
+private IEnumerator SkillCastBlockRoutine(float blockDuration) // 결투/공격기술 시전 금지 타이머
+{
+    isSkillCastBlocked = true; // 시전 금지 시작
+    currentSkillCastBlockTimer = blockDuration; // 남은 시간 설정
+
+    while (currentSkillCastBlockTimer > 0f)
+    {
+        currentSkillCastBlockTimer -= Time.deltaTime; // 남은 시간 감소
+        yield return null;
+    }
+
+    currentSkillCastBlockTimer = 0f; // 남은 시간 초기화
+    isSkillCastBlocked = false; // 시전 금지 해제
+    skillCastBlockCoroutine = null; // 코루틴 참조 초기화
+}
+
+private void ApplyTargetOppositeFacingAfterAttackSkillCorrection(CharacterDuelAI target) // 위치보정 후 피격자 방향을 시전 반대방향으로 조정
+{
+    if (target == null || target.navigationMovementSystem == null)
+    {
+        return; // 대상 또는 이동 시스템이 없으면 종료
+    }
+
+    NavigationMovementSystem.FacingXDirectionType oppositeDirection =
+        currentAttackSkillFacingDirection == NavigationMovementSystem.FacingXDirectionType.XNegative
+            ? NavigationMovementSystem.FacingXDirectionType.XPositive
+            : NavigationMovementSystem.FacingXDirectionType.XNegative; // 공격기술 시전 방향의 반대방향 계산
+
+    target.navigationMovementSystem.SetForcedFacingDirection(oppositeDirection); // 피격자 방향을 반대방향으로 즉시 반영
+    target.navigationMovementSystem.ClearForcedFacingDirection(); // 강제 고정은 해제하고 방향값만 유지
+    target.moveCommandController?.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 피격자 오브젝트 회전 즉시 반영
+}
+
+
+
 
 
 

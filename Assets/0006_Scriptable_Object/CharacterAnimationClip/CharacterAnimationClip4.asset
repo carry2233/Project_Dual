@@ -30,10 +30,12 @@ MonoBehaviour:
   effectSpawnEventList:
   - useEffectSpawn: 1
     spawnFrameIndex: 0
-    spawnLocalPositionWhenFacingLeft: {x: -0.2, y: 0.75, z: 0}
-    spawnLocalPositionWhenFacingRight: {x: 0.2, y: 0.75, z: 0}
+    spawnLocalPositionWhenFacingLeft: {x: -0.2, y: 0.75, z: -1.5}
+    spawnLocalPositionWhenFacingRight: {x: 0.2, y: 0.75, z: -1.5}
     spawnLocalRotationWhenFacingLeft: {x: -112, y: -180, z: 10}
     spawnLocalRotationWhenFacingRight: {x: -112, y: 0, z: 10}
+    spawnLocalScaleWhenFacingLeft: {x: 1, y: 1, z: 1}
+    spawnLocalScaleWhenFacingRight: {x: 1, y: 1, z: 1}
     effectStartTimelineTime: 0.1
     effectLifetime: 1
     effectPlaySpeedMultiplier: 0.8

@@ -105,6 +105,36 @@ public class DamageFloaterSpawnSettings
 [SerializeField] private int pooledHealthDamageFloaterCount; // 현재 생성된 체력피해 플로터 수
 [SerializeField] private int pooledStaggerDamageFloaterCount; // 현재 생성된 와해피해 플로터 수
 
+
+[Header("______________________________________________________________________________-")]
+
+
+[Header("공격기술 상태 애니메이션")]
+[SerializeField] private CharacterAnimationClipSO attackSkillVictimHitLoopAnimationClip; // 공격기술 피격상태 루프 애니메이션
+[SerializeField] private CharacterAnimationClipSO attackSkillFixedLoopAnimationClip; // 공격기술 진행 전 고정상태 루프 애니메이션
+[SerializeField] private CharacterAnimationClipSO attackSkillBeforeFirstHitLoopAnimationClip; // 공격기술 피격 전 루프 애니메이션
+[SerializeField] private CharacterAnimationClipSO attackSkillAfterFirstHitLoopAnimationClip; // 첫 실제공격 피격 후 루프 애니메이션
+
+[Header("공격기술 애니메이션 잠금")]
+[SerializeField] private bool isAttackSkillAnimationLocked; // 공격기술 시전 중 idle 자동 복귀 차단 여부
+
+
+[Header("______________________________________________________________________________-")]
+
+
+[Header("공격기술 피격 애니메이션 보호 상태")]
+[SerializeField] private bool isAttackSkillAfterFirstHitLoopLocked; // 현재 첫 피격 후 루프 애니메이션 변경 금지 여부
+
+[Header("잔상 생성 금지 상태")]
+[SerializeField] private bool isAfterimageSpawnBlocked; // 현재 잔상 생성 금지 여부
+
+[Header("와해 애니메이션 잠금")]
+[SerializeField] private bool isBrokenAnimationLocked; // 와해 중 idle/move 자동 재생 차단 여부
+[SerializeField] private CharacterAnimationClipSO brokenLockedLoopAnimationClip; // 와해 중 강제로 유지할 루프 애니메이션
+
+
+public Transform EffectParentRoot => effectParentRoot; // 일반 이펙트 생성 부모 반환
+
 private readonly List<DamageFloaterCanvasObject> healthDamageFloaterPoolList
     = new List<DamageFloaterCanvasObject>(); // 체력피해 플로터 풀 리스트
 
@@ -214,6 +244,15 @@ public void StopManualAnimation() // 수동 애니메이션 종료
     UpdateCurrentAnimationState(); // 현재 상태 기준 자동 애니메이션 즉시 반영
 }
 
+public void SetAttackSkillAnimationLock(bool isLocked) // 공격기술 애니메이션 잠금 설정
+{
+    isAttackSkillAnimationLocked = isLocked; // 공격기술 중 idle 자동 복귀 차단 상태 저장
+}
+
+public void ClearAttackSkillAnimationLock() // 공격기술 애니메이션 잠금 해제
+{
+    isAttackSkillAnimationLocked = false; // 공격기술 애니메이션 잠금 해제
+}
     private void UpdateAutoAnimationSelection() // 자동 상태 기준 클립 선택
     {
         CharacterAnimationClipSO targetClip = idleAnimationClip; // 기본은 대기 클립 사용
@@ -279,6 +318,13 @@ private void AdvanceFrame() // 다음 프레임으로 이동
     {
         if (isManualAnimationPlaying && !isManualAnimationLoop)
         {
+            if (isAttackSkillAnimationLocked)
+            {
+                currentFrameIndex = lastFrameIndex; // 공격기술 중이면 마지막 프레임 유지
+                ApplyCurrentFrame(); // 마지막 프레임 적용
+                return; // idleAnimationClip 복귀 차단
+            }
+
             requestedManualAnimationClip = null; // 1회 수동 애니메이션 재생이 끝나면 요청 제거
             requestedManualAnimationLoop = false; // 요청된 루프 정보 초기화
             isManualAnimationPlaying = false; // 현재 수동 재생 상태 해제
@@ -365,46 +411,67 @@ private float GetCurrentBaseInterval() // 현재 상태에 따른 기본 주기 
 
 private void UpdateCurrentAnimationState() // 현재 상태 기준으로 재생할 클립 결정 및 즉시 반영
 {
-    CharacterAnimationClipSO targetClip = idleAnimationClip; 
-    bool shouldUseManualState = false;
-    bool targetManualLoop = false;
+    CharacterAnimationClipSO targetClip = idleAnimationClip; // 기본은 대기 애니메이션
+    bool shouldUseManualState = false; // 수동 애니메이션 사용 여부
+    bool targetManualLoop = false; // 수동 애니메이션 루프 여부
 
-    // ✅ 결투 보호 상태일 때만 수동 애니 허용 (핵심 수정)
-    if (characterDuelAI != null
+    if (isBrokenAnimationLocked && brokenLockedLoopAnimationClip != null)
+    {
+        targetClip = brokenLockedLoopAnimationClip; // 와해 중에는 와해 루프 애니메이션만 유지
+        shouldUseManualState = true; // 수동 애니메이션 상태 사용
+        targetManualLoop = true; // 와해 애니메이션 루프 유지
+    }
+    else if (isAttackSkillAfterFirstHitLoopLocked && attackSkillAfterFirstHitLoopAnimationClip != null)
+    {
+        targetClip = attackSkillAfterFirstHitLoopAnimationClip; // 첫 피격 후에는 공격기술 종료 전까지 이 루프 유지
+        shouldUseManualState = true; // 수동 애니메이션 유지
+        targetManualLoop = true; // 루프 유지
+    }
+    else if (isAttackSkillAnimationLocked && requestedManualAnimationClip != null)
+    {
+        targetClip = requestedManualAnimationClip; // 공격기술 중에는 요청된 수동 애니메이션 유지
+        shouldUseManualState = true; // 수동 애니메이션 상태 사용
+        targetManualLoop = requestedManualAnimationLoop; // 요청된 루프 여부 사용
+    }
+    else if (characterDuelAI != null
         && characterDuelAI.IsDuelAnimationProtectedState
         && requestedManualAnimationClip != null)
     {
-        targetClip = requestedManualAnimationClip;
-        shouldUseManualState = true;
-        targetManualLoop = requestedManualAnimationLoop;
+        targetClip = requestedManualAnimationClip; // 결투 보호 상태에서는 수동 애니메이션 유지
+        shouldUseManualState = true; // 수동 애니메이션 상태 사용
+        targetManualLoop = requestedManualAnimationLoop; // 요청된 루프 여부 사용
+    }
+    else if (requestedManualAnimationClip != null)
+    {
+        targetClip = requestedManualAnimationClip; // 일반 수동 애니메이션 요청 반영
+        shouldUseManualState = true; // 수동 애니메이션 상태 사용
+        targetManualLoop = requestedManualAnimationLoop; // 요청된 루프 여부 사용
     }
     else if (navigationMovementSystem != null && navigationMovementSystem.IsMoving)
     {
-        targetClip = moveAnimationClip;
-        shouldUseManualState = false;
-        targetManualLoop = false;
+        targetClip = moveAnimationClip; // 이동 중이면 이동 애니메이션
+        shouldUseManualState = false; // 자동 애니메이션 상태
+        targetManualLoop = false; // 자동 애니메이션 루프
     }
     else
     {
-        // ✅ 기존: 요청된 수동 애니 사용 가능
-        // ❌ 수정: 결투 상태 아닐 때는 무조건 idle로 강제
-        targetClip = idleAnimationClip;
-        shouldUseManualState = false;
-        targetManualLoop = false;
+        targetClip = idleAnimationClip; // 기본 대기 애니메이션
+        shouldUseManualState = false; // 자동 애니메이션 상태
+        targetManualLoop = false; // 자동 애니메이션 루프
     }
 
-    bool clipChanged = currentAnimationClip != targetClip;
-    bool manualStateChanged = isManualAnimationPlaying != shouldUseManualState;
-    bool manualLoopChanged = isManualAnimationLoop != targetManualLoop;
+    bool clipChanged = currentAnimationClip != targetClip; // 클립 변경 여부
+    bool manualStateChanged = isManualAnimationPlaying != shouldUseManualState; // 수동 상태 변경 여부
+    bool manualLoopChanged = isManualAnimationLoop != targetManualLoop; // 루프 상태 변경 여부
 
     if (!clipChanged && !manualStateChanged && !manualLoopChanged)
     {
-        return;
+        return; // 바뀐 내용이 없으면 종료
     }
 
-    isManualAnimationPlaying = shouldUseManualState;
-    isManualAnimationLoop = targetManualLoop;
-    SetAnimationClip(targetClip);
+    isManualAnimationPlaying = shouldUseManualState; // 수동 상태 반영
+    isManualAnimationLoop = targetManualLoop; // 루프 상태 반영
+    SetAnimationClip(targetClip); // 애니메이션 클립 교체
 }
 
 public void RefreshAnimationByCurrentState() // 현재 상태 기준 애니메이션 즉시 갱신
@@ -427,6 +494,13 @@ private void CreateAfterimagePoolRootIfNeeded() // 잔상 풀 부모 오브젝�
 
 private void UpdateAfterimageGeneration() // 돌진 상태 기준 잔상 생성 처리
 {
+    if (isAfterimageSpawnBlocked)
+    {
+        wasDashingLastFrame = false; // 잔상 생성 상태 초기화
+        afterimageSpawnTimer = 0f; // 잔상 생성 타이머 초기화
+        return; // 잔상 생성 금지 중이면 생성하지 않음
+    }
+
     bool isCurrentlyDashing = characterDuelAI != null && characterDuelAI.IsDashingToDuel; // 현재 돌진 여부 확인
 
     if (!isCurrentlyDashing)
@@ -456,6 +530,11 @@ private void UpdateAfterimageGeneration() // 돌진 상태 기준 잔상 생성 
 
 private void SpawnAfterimage() // 현재 상태 기준 잔상 생성
 {
+    if (isAfterimageSpawnBlocked)
+    {
+        return; // 잔상 생성 금지 중이면 생성하지 않음
+    }
+
     if (afterimagePrefab == null)
     {
         return; // 프리팹이 없으면 종료
@@ -608,6 +687,7 @@ private void SpawnEffectEvent(CharacterAnimationClipSO.EffectSpawnEventData even
     GameObject spawnedEffectObject = Instantiate(eventData.EffectPrefab, parentRoot); // 부모 오브젝트 자식으로 이펙트 생성
 
     bool isFacingLeft = IsCurrentFacingLeft(); // 현재 캐릭터가 X- 방향인지 확인
+
     Vector3 localPosition = isFacingLeft
         ? eventData.SpawnLocalPositionWhenFacingLeft
         : eventData.SpawnLocalPositionWhenFacingRight; // 방향별 생성 위치 결정
@@ -616,9 +696,13 @@ private void SpawnEffectEvent(CharacterAnimationClipSO.EffectSpawnEventData even
         ? eventData.SpawnLocalRotationWhenFacingLeft
         : eventData.SpawnLocalRotationWhenFacingRight; // 방향별 생성 회전 결정
 
+    Vector3 localScale = isFacingLeft
+        ? eventData.SpawnLocalScaleWhenFacingLeft
+        : eventData.SpawnLocalScaleWhenFacingRight; // 방향별 생성 스케일 결정
+
     spawnedEffectObject.transform.localPosition = localPosition; // 로컬 위치 적용
     spawnedEffectObject.transform.localRotation = Quaternion.Euler(localRotationEuler); // 로컬 회전 적용
-    spawnedEffectObject.transform.localScale = Vector3.one; // 기본 스케일 유지
+    spawnedEffectObject.transform.localScale = localScale; // 인스펙터 설정 스케일 적용
 
     CharacterEffectInstance effectInstance = spawnedEffectObject.GetComponent<CharacterEffectInstance>(); // 이펙트 인스턴스 관리 스크립트 참조
 
@@ -797,13 +881,14 @@ private void ApplyDuelEffectTransform(
     DuelEffectSpawnType spawnType, // 생성 방식
     CharacterDuelAI otherCharacter) // 상대 캐릭터
 {
-    if (effectTransform == null) // Transform이 없으면 종료
+    if (effectTransform == null)
     {
-        return;
+        return; // Transform이 없으면 종료
     }
 
     Vector3 directionalPositionOffset = GetDuelEffectDirectionalPositionOffset(spawnData); // 현재 방향 기준 위치값
     Vector3 directionalRotationOffset = GetDuelEffectDirectionalRotationOffset(spawnData); // 현재 방향 기준 회전값
+    Vector3 directionalScale = GetDuelEffectDirectionalScale(spawnData); // 현재 방향 기준 스케일값
 
     switch (spawnType)
     {
@@ -811,21 +896,21 @@ private void ApplyDuelEffectTransform(
             Vector3 otherPosition = otherCharacter != null ? otherCharacter.transform.position : transform.position; // 상대 위치 계산
             Vector3 middlePosition = (transform.position + otherPosition) * 0.5f; // 두 캐릭터 사이 위치 계산
 
-            effectTransform.position = middlePosition + directionalPositionOffset; // 원래 생성 위치에 방향별 위치값을 더해서 적용
-            effectTransform.rotation = Quaternion.Euler(directionalRotationOffset); // 원래 회전에 방향별 회전값을 더한 결과 적용
-            effectTransform.localScale = Vector3.one; // 기본 스케일 적용
+            effectTransform.position = middlePosition + directionalPositionOffset; // 월드 위치 적용
+            effectTransform.rotation = Quaternion.Euler(directionalRotationOffset); // 월드 회전 적용
+            effectTransform.localScale = directionalScale; // 인스펙터 설정 스케일 적용
             break;
 
         case DuelEffectSpawnType.SelfParent:
-            effectTransform.localPosition = directionalPositionOffset; // 방향별 위치값으로 덮어쓰기
-            effectTransform.localRotation = Quaternion.Euler(directionalRotationOffset); // 방향별 회전값으로 덮어쓰기
-            effectTransform.localScale = Vector3.one; // 기본 스케일 적용
+            effectTransform.localPosition = directionalPositionOffset; // 로컬 위치 적용
+            effectTransform.localRotation = Quaternion.Euler(directionalRotationOffset); // 로컬 회전 적용
+            effectTransform.localScale = directionalScale; // 인스펙터 설정 스케일 적용
             break;
 
         case DuelEffectSpawnType.TargetParent:
-            effectTransform.localPosition = directionalPositionOffset; // 방향별 위치값으로 덮어쓰기
-            effectTransform.localRotation = Quaternion.Euler(directionalRotationOffset); // 방향별 회전값으로 덮어쓰기
-            effectTransform.localScale = Vector3.one; // 기본 스케일 적용
+            effectTransform.localPosition = directionalPositionOffset; // 로컬 위치 적용
+            effectTransform.localRotation = Quaternion.Euler(directionalRotationOffset); // 로컬 회전 적용
+            effectTransform.localScale = directionalScale; // 인스펙터 설정 스케일 적용
             break;
     }
 }
@@ -861,7 +946,6 @@ private Vector3 GetDuelEffectDirectionalRotationOffset(
 
     return spawnData.SpawnRotationOffsetWhenFacingRight; // X+ 방향 회전값 반환
 }
-
 
 public void ShowHealthDamageFloater(int finalAppliedDamage) // 최종 체력피해 숫자 표시
 {
@@ -980,4 +1064,135 @@ private DamageFloaterCanvasObject GetPooledDamageFloaterObject(
 
     return newObject; // 새 플로터 반환
 }
+
+public void PlayBrokenLoopAnimation(CharacterAnimationClipSO clip) // 와해 루프 애니메이션 재생
+{
+    if (clip == null || clip.FrameCount == 0)
+    {
+        return; // 클립이 없거나 비어 있으면 종료
+    }
+
+    isBrokenAnimationLocked = true; // 와해 중 idle/move 자동 재생 차단
+    brokenLockedLoopAnimationClip = clip; // 와해 중 유지할 루프 클립 저장
+    requestedManualAnimationClip = clip; // 수동 재생 요청 클립 저장
+    requestedManualAnimationLoop = true; // 루프 재생 요청 저장
+    UpdateCurrentAnimationState(); // 즉시 와해 루프 애니메이션 반영
+}
+
+public void PlayBrokenReleaseAnimation(CharacterAnimationClipSO clip) // 와해해제 애니메이션 재생
+{
+    ClearBrokenAnimationLock(); // 와해 루프 고정 해제
+    PlayOneShotAnimation(clip); // 기존 1회 재생 사용
+}
+
+public void PlayAttackSkillVictimHitLoopAnimation() // 공격기술 피격상태 애니메이션 재생
+{
+    PlayLoopAnimation(attackSkillVictimHitLoopAnimationClip); // 피격상태 루프 재생
+}
+
+public void PlayAttackSkillFixedLoopAnimation() // 공격기술 진행 전 고정상태 애니메이션 재생
+{
+    PlayLoopAnimation(attackSkillFixedLoopAnimationClip); // 고정상태 루프 재생
+}
+
+public void PlayAttackSkillBeforeFirstHitLoopAnimation() // 첫 피격 전 루프 애니메이션 재생
+{
+    PlayLoopAnimation(attackSkillBeforeFirstHitLoopAnimationClip); // 피격 전 루프 재생
+}
+
+public void PlayAttackSkillAfterFirstHitLoopAnimation() // 첫 실제공격 피격 후 루프 애니메이션 재생
+{
+    isAttackSkillAfterFirstHitLoopLocked = true; // 공격기술 종료 전까지 다른 애니메이션 변경 차단
+    PlayLoopAnimation(attackSkillAfterFirstHitLoopAnimationClip); // 피격 후 루프 재생
+}
+
+public void SpawnAttackSkillHitEffect(AttackSkillDefinitionSO.AttackEffectSpawnData effectData) // 공격기술 적중 이펙트 생성
+{
+    if (effectData == null || effectData.EffectPrefab == null)
+    {
+        return; // 이펙트 설정이 없으면 종료
+    }
+
+    Transform parentRoot = effectParentRoot != null ? effectParentRoot : transform; // 생성 부모 결정
+    CharacterEffectInstance spawnedEffect = Instantiate(effectData.EffectPrefab, parentRoot); // 이펙트 생성
+
+    bool isFacingLeft = IsCurrentFacingLeft(); // 현재 방향 확인
+
+    spawnedEffect.transform.localPosition = isFacingLeft
+        ? effectData.SpawnPositionOffsetWhenFacingLeft
+        : effectData.SpawnPositionOffsetWhenFacingRight; // 방향별 위치 적용
+
+    spawnedEffect.transform.localRotation = Quaternion.Euler(
+        isFacingLeft
+            ? effectData.SpawnRotationOffsetWhenFacingLeft
+            : effectData.SpawnRotationOffsetWhenFacingRight); // 방향별 회전 적용
+
+    spawnedEffect.transform.localScale = isFacingLeft
+        ? effectData.SpawnScaleWhenFacingLeft
+        : effectData.SpawnScaleWhenFacingRight; // 방향별 스케일 적용
+
+    spawnedEffect.InitializeEffectInstance(
+        effectData.EffectStartTimelineTime,
+        effectData.EffectLifetime,
+        effectData.EffectPlaySpeedMultiplier); // 이펙트 설정 적용
+}
+
+private Vector3 GetDuelEffectDirectionalScale(
+    DuelSkillDefinitionSO.DuelEffectSpawnData spawnData) // 현재 방향 기준 스케일값 반환
+{
+    if (spawnData == null)
+    {
+        return Vector3.one; // 데이터가 없으면 기본 스케일 반환
+    }
+
+    if (IsCurrentFacingLeft())
+    {
+        return spawnData.SpawnScaleWhenFacingLeft; // X- 방향 스케일 반환
+    }
+
+    return spawnData.SpawnScaleWhenFacingRight; // X+ 방향 스케일 반환
+}
+
+public void ClearAttackSkillAfterFirstHitLoopLock() // 첫 피격 후 루프 애니메이션 잠금 해제
+{
+    isAttackSkillAfterFirstHitLoopLocked = false; // 피격 후 루프 잠금 해제
+}
+
+public void SetAfterimageSpawnBlocked(bool isBlocked) // 잔상 생성 금지 상태 설정
+{
+    isAfterimageSpawnBlocked = isBlocked; // 잔상 생성 금지 여부 저장
+
+    if (isAfterimageSpawnBlocked)
+    {
+        wasDashingLastFrame = false; // 잔상 시작 상태 초기화
+        afterimageSpawnTimer = 0f; // 잔상 타이머 초기화
+    }
+}
+
+public void ClearBrokenAnimationLock() // 와해 애니메이션 잠금 해제
+{
+    CharacterAnimationClipSO previousBrokenClip = brokenLockedLoopAnimationClip; // 해제 전 와해 클립 저장
+
+    isBrokenAnimationLocked = false; // 와해 애니메이션 잠금 해제
+    brokenLockedLoopAnimationClip = null; // 와해 루프 클립 참조 제거
+
+    if (requestedManualAnimationClip == previousBrokenClip)
+    {
+        requestedManualAnimationClip = null; // 와해 루프 요청 제거
+        requestedManualAnimationLoop = false; // 루프 요청 해제
+    }
+
+    UpdateCurrentAnimationState(); // 현재 상태 기준 애니메이션 갱신
+}
+
+
+
+
+
+
+
+
+
+
+
 }
