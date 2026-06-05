@@ -437,7 +437,7 @@ GameObject:
   - component: {fileID: 7527602865422996801}
   - component: {fileID: 3163533196339008844}
   m_Layer: 0
-  m_Name: Character1
+  m_Name: Character2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -566,8 +566,8 @@ MonoBehaviour:
   attackPower: 11
   defenseValue: 0
   bodySize: 1
-  maxHealth: 300
-  currentHealth: 300
+  maxHealth: 11
+  currentHealth: 11
   speedStat: 40
   baseMoveSpeed: 5
   moveSpeedPercent: 100

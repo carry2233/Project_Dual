@@ -220,9 +220,15 @@ private void CreateCharacterManagementSlots() // 현재 소유 캐릭터 목록 
 GameObject slotObject = Instantiate(slotPrefab, characterSlotParent); // 슬롯 생성
 
 CharacterManagementSlot managementSlot = slotObject.GetComponent<CharacterManagementSlot>(); // 슬롯 스크립트 참조
+
 if (managementSlot != null)
 {
-    managementSlot.Initialize(this, ownedData.firstRowID, ownedData.secondRowID, ownedData.individualID); // 슬롯 담당 캐릭터 정보 전달
+    managementSlot.Initialize(
+        this,
+        ownedData.firstRowID,
+        ownedData.secondRowID,
+        ownedData.individualID,
+        ownedData.isDead); // 슬롯 담당 캐릭터 정보와 사망 여부 전달
 }
 
 tempSlotList.Add(slotObject); // 임시 목록에 추가

@@ -178,28 +178,32 @@ private void ApplyEnemyLevel(GameObject enemyObject) // 적 레벨 적용
     /// 생성된 적 등록
     /// </summary>
     /// <param name="enemyObject">생성된 적 오브젝트</param>
-    private void RegisterSpawnedEnemy(GameObject enemyObject)
+private void RegisterSpawnedEnemy(GameObject enemyObject) // 생성된 적 등록
+{
+    if (enemyObject == null)
     {
-        if (enemyObject == null)
-        {
-            return;
-        }
-
-        if (globalCharacterManager == null)
-        {
-            return;
-        }
-
-        CharacterDuelAI duelAI =
-            enemyObject.GetComponent<CharacterDuelAI>();
-
-        if (duelAI == null)
-        {
-            return;
-        }
-
-        globalCharacterManager.RegisterCharacter(duelAI);
+        return; // 대상이 없으면 종료
     }
+
+    if (globalCharacterManager == null)
+    {
+        globalCharacterManager = GlobalCharacterManager.Instance; // 글로벌 캐릭터 매니저 재참조
+    }
+
+    if (globalCharacterManager == null)
+    {
+        return; // 매니저가 없으면 종료
+    }
+
+    CharacterDuelAI duelAI = enemyObject.GetComponent<CharacterDuelAI>(); // 적 캐릭터 AI 참조
+
+    if (duelAI == null)
+    {
+        return; // 캐릭터 AI가 없으면 종료
+    }
+
+    globalCharacterManager.RegisterCharacter(duelAI, GlobalCharacterManager.CharacterFactionType.Enemy); // 적군 타입으로 등록
+}
 
     /// <summary>
     /// 전투 데이터 초기화

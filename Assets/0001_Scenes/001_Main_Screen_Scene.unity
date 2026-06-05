@@ -1672,7 +1672,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 85058624}
   m_HandleRect: {fileID: 85058623}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -5773,33 +5773,8 @@ MonoBehaviour:
   saveFileName: save_data.json
   maxSaveCount: 3
   tileLayoutSaveFilePrefix: HexTilePlacementSave_
-  currentOwnedCharacterList:
-  - firstRowID: 0
-    secondRowID: 0
-    individualID: 0
-  currentOwnedCharacterStatList:
-  - characterName: 
-    firstRowID: 0
-    secondRowID: 0
-    individualID: 0
-    levelstats: 0
-    baseMoveSpeed: 0
-    moveSpeedPercent: 0
-    finalMoveSpeed: 0
-    attackPower: 0
-    defenseValue: 0
-    maxHealth: 0
-    currentHealth: 0
-    bodySize: 0
-    speedStat: 0
-    powerRatePercent: 0
-    maxStaggerAmount: 0
-    currentStaggerAmount: 0
-    staggerResistancePercent: 0
-    maxHunger: 0
-    currentHunger: 0
-    isStarving: 0
-    overweightDebuffStackCount: 0
+  currentOwnedCharacterList: []
+  currentOwnedCharacterStatList: []
   currentOwnedCharacterInventoryList: []
   currentFriendlyNigrumSaveList: []
   currentSoundVolumeSaveData:
@@ -5965,9 +5940,11 @@ MonoBehaviour:
   - firstRowID: 1
     secondRowID: 1
     individualID: 11
+    isDead: 0
   - firstRowID: 1
     secondRowID: 2
     individualID: 22
+    isDead: 0
   startingOwnedCharacterStatList:
   - characterName: "\uC554\uBBF8"
     firstRowID: 1
@@ -6001,8 +5978,8 @@ MonoBehaviour:
     finalMoveSpeed: 0
     attackPower: 0
     defenseValue: 0
-    maxHealth: 350
-    currentHealth: 144
+    maxHealth: 11
+    currentHealth: 11
     bodySize: 0
     speedStat: 222
     powerRatePercent: 100

@@ -15,6 +15,11 @@ public class CharacterManagementSlot : MonoBehaviour
     [Header("클릭 버튼 참조")]
 [SerializeField] private Button slotButton; // 슬롯 클릭을 인식할 버튼 컴포넌트
 
+[Header("사망 표시 UI")]
+[SerializeField] private GameObject deathMarkUIObject; // 사망한 캐릭터임을 표시할 UI 오브젝트
+
+private bool isDead; // 슬롯 담당 캐릭터 사망 여부
+
 private CharacterManagementManager characterManagementManager; // 캐릭터 관리창 매니저 참조
 private int firstRowID; // 슬롯이 담당하는 캐릭터 첫 번째 행 ID
 private int secondRowID; // 슬롯이 담당하는 캐릭터 두 번째 행 ID
@@ -38,12 +43,15 @@ private void OnDestroy() // 삭제 시 버튼 이벤트 해제
     }
 }
 
-public void Initialize(CharacterManagementManager newManager, int newFirstRowID, int newSecondRowID, int newIndividualID) // 슬롯 담당 캐릭터 정보 초기화
+public void Initialize(CharacterManagementManager newManager, int newFirstRowID, int newSecondRowID, int newIndividualID, bool newIsDead) // 슬롯 담당 캐릭터 정보 초기화
 {
     characterManagementManager = newManager; // 관리창 매니저 저장
     firstRowID = newFirstRowID; // 첫 번째 행 ID 저장
     secondRowID = newSecondRowID; // 두 번째 행 ID 저장
     individualID = newIndividualID; // 개체별 고유 ID 저장
+    isDead = newIsDead; // 사망 여부 저장
+
+    RefreshDeathMarkUI(); // 사망 표시 UI 갱신
 }
 
 private void OnClickSlotButton() // 슬롯 버튼 클릭 처리
@@ -57,5 +65,19 @@ private void OnClickSlotButton() // 슬롯 버튼 클릭 처리
 
     characterManagementManager.OpenCharacterDetailUI(firstRowID, secondRowID, individualID); // 상세 UI 생성 요청
 }
+
+private void RefreshDeathMarkUI() // 사망 표시 UI 갱신
+{
+    if (deathMarkUIObject == null)
+    {
+        return; // 사망 표시 UI가 없으면 종료
+    }
+
+    deathMarkUIObject.SetActive(isDead); // 사망 상태면 활성화, 아니면 비활성화
+}
+
+
+
+
 
 }

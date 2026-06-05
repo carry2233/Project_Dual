@@ -67,6 +67,23 @@ public int StaggerResistancePercent => staggerResistancePercent; // 와해 저�
 
 [SerializeField] private NavigationMovementSystem NavigationMovementSystem; // 이동속도를 적용하고 와해 중 이동을 정지할 네비 이동 시스템
 
+[SerializeField] private int deathBrokenClearFrameCount = 5; // 사망 직후 와해상태를 반복 해제할 프레임 수
+
+private Coroutine deathBrokenClearCoroutine; // 사망 직후 와해상태 반복 해제 코루틴
+
+
+[Header("________________________________________________________________________________")]
+
+
+[Header("사망 상태")]
+[SerializeField] private bool isDead; // 현재 사망 여부
+
+public bool IsDead => isDead; // 사망 여부 반환
+
+[SerializeField] private GlobalCharacterManager globalCharacterManager; // 사망 상태를 전달할 전역 캐릭터 매니저
+[SerializeField] private CharacterDuelAI characterDuelAI; // 본인 캐릭터 AI 참조
+
+
 private Coroutine brokenStateCoroutine; // 와해상태 진행 코루틴
 
 public bool IsBrokenState => isBrokenState; // 와해상태 여부 반환
@@ -107,7 +124,23 @@ private void Awake() // 시작 시 현재값 범위 보정
         characterAnimationPlayer = GetComponent<CharacterAnimationPlayer>(); // 캐릭터 애니메이션 재생기 자동 참조
     }
 
+    if (characterDuelAI == null)
+    {
+        characterDuelAI = GetComponent<CharacterDuelAI>(); // 캐릭터 AI 자동 참조
+    }
+
+    if (globalCharacterManager == null)
+    {
+        globalCharacterManager = GlobalCharacterManager.Instance; // 전역 캐릭터 매니저 참조
+    }
+
     RefreshFinalMoveSpeed(); // 최종 이동속도 계산 및 적용
+    CheckDeathState(); // 시작 시 체력이 0이면 사망 처리
+}
+
+private void Update() // 매 프레임 사망 상태 확인
+{
+    CheckDeathState(); // 현재 체력 기반 사망 상태 확인
 }
 
     private void NotifyStatusValueChanged() // UI 즉시 갱신 알림 전달
@@ -127,6 +160,11 @@ public void SetBattleSpeed(int newBattleSpeed) // 현재 결투용 전투속도 
 
 public int ApplyHealthDamage(int rawDamage) // 방어력 퍼센트를 반영한 최종 체력 피해 적용
 {
+    if (isDead)
+    {
+        return 0; // 이미 사망했으면 피해 적용 중단
+    }
+
     int safeRawDamage = Mathf.Max(0, rawDamage); // 음수 피해 방지
     int clampedDefensePercent = Mathf.Clamp(defenseValue, 0, 100); // 방어력 퍼센트 범위 제한
 
@@ -137,8 +175,11 @@ public int ApplyHealthDamage(int rawDamage) // 방어력 퍼센트를 반영한 
         return 0; // 최종 피해가 없으면 종료
     }
 
-    currentHealth = Mathf.Max(0, currentHealth - finalDamage); // 현재 체력 차감
-    NotifyStatusValueChanged(); // 체력 UI 즉시 갱신 알림
+currentHealth = Mathf.Max(0, currentHealth - finalDamage); // 현재 체력 차감
+
+NotifyStatusValueChanged(); // 체력 UI 즉시 갱신 알림
+
+CheckDeathState(); // 체력이 0 이하가 되었는지 즉시 확인
 
     return finalDamage; // 실제 적용된 최종 피해 반환
 }
@@ -227,6 +268,7 @@ private IEnumerator BrokenReleaseRoutine() // 와해해제 애니메이션 후 �
     }
 
     isBrokenState = false; // 와해상태 해제
+    currentStaggerAmount = 0; // 와해상태 해제 후 현재 와해량 초기화
     SetActionLocked(false); // 행동 잠금 해제
 
     if (characterAnimationPlayer != null)
@@ -295,6 +337,81 @@ private IEnumerator BrokenStateRoutine() // 와해상태 유지 및 해제 처�
     }
 
     ReleaseBrokenState(); // 와해 해제 실행
+}
+
+private void CheckDeathState() // 체력 기준 사망 상태 확인
+{
+    if (currentHealth > 0)
+    {
+        return; // 체력이 남아있으면 종료
+    }
+
+    ExecuteDeath(); // 사망 처리 실행
+}
+
+public void ExecuteDeath() // 사망 처리
+{
+    if (isDead)
+    {
+        return; // 중복 사망 방지
+    }
+
+    isDead = true; // 사망 여부 체크
+    StartDeathBrokenClearRoutine(); // 사망 직후 설정 프레임 동안 와해상태 반복 해제
+    SetActionLocked(true); // 모든 행동 잠금
+
+    if (navigationMovementSystem != null)
+    {
+        navigationMovementSystem.StopMove(); // 이동 정지
+    }
+
+    if (characterAnimationPlayer != null)
+    {
+characterAnimationPlayer.PlayDeathLoopAnimation(); // 사망 애니메이션 루프 재생
+    }
+
+    NotifyStatusValueChanged(); // UI 갱신
+}
+
+private void StartDeathBrokenClearRoutine() // 사망 직후 와해상태 반복 해제 시작
+{
+    if (deathBrokenClearCoroutine != null)
+    {
+        StopCoroutine(deathBrokenClearCoroutine); // 기존 반복 해제 코루틴 정리
+        deathBrokenClearCoroutine = null; // 코루틴 참조 초기화
+    }
+
+    deathBrokenClearCoroutine = StartCoroutine(DeathBrokenClearRoutine()); // 사망 직후 와해상태 반복 해제 시작
+}
+
+private IEnumerator DeathBrokenClearRoutine() // 설정한 프레임 동안 와해상태 반복 해제
+{
+    int safeFrameCount = Mathf.Max(1, deathBrokenClearFrameCount); // 최소 1프레임 보장
+
+    for (int i = 0; i < safeFrameCount; i++)
+    {
+        ForceClearBrokenStateByDeath(); // 사망 상태 기준 와해상태 강제 해제
+        yield return null; // 다음 프레임까지 대기
+    }
+
+    deathBrokenClearCoroutine = null; // 반복 해제 완료
+}
+
+private void ForceClearBrokenStateByDeath() // 사망 상태에서 와해상태 강제 해제
+{
+    if (brokenStateCoroutine != null)
+    {
+        StopCoroutine(brokenStateCoroutine); // 와해 유지 코루틴 정지
+        brokenStateCoroutine = null; // 코루틴 참조 초기화
+    }
+
+    isBrokenState = false; // 와해상태 해제
+    currentBrokenTimer = 0f; // 와해 유지 타이머 초기화
+
+    if (characterAnimationPlayer != null)
+    {
+        characterAnimationPlayer.ClearBrokenAnimationLock(); // 와해 애니메이션 잠금 해제
+    }
 }
 
 

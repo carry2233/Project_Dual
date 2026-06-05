@@ -163,8 +163,8 @@ MonoBehaviour:
   attackPower: 11
   defenseValue: 0
   bodySize: 1
-  maxHealth: 300
-  currentHealth: 300
+  maxHealth: 55
+  currentHealth: 55
   speedStat: 40
   baseMoveSpeed: 5
   moveSpeedPercent: 100
@@ -175,7 +175,7 @@ MonoBehaviour:
   maximumSpeedRatePercent: 144
   powerRatePercent: 100
   currentStaggerAmount: 0
-  maxStaggerAmount: 20
+  maxStaggerAmount: 5
   staggerResistancePercent: 0
   isActionLocked: 0
   characterAnimationPlayer: {fileID: 4721317008947267112}
@@ -186,6 +186,10 @@ MonoBehaviour:
   isBrokenState: 0
   currentBrokenTimer: 0
   NavigationMovementSystem: {fileID: 1415452274839756729}
+  deathBrokenClearFrameCount: 5
+  isDead: 0
+  globalCharacterManager: {fileID: 0}
+  characterDuelAI: {fileID: 0}
 --- !u!114 &1415452274839756729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -549,6 +553,9 @@ MonoBehaviour:
   isAfterimageSpawnBlocked: 0
   isBrokenAnimationLocked: 0
   brokenLockedLoopAnimationClip: {fileID: 11400000, guid: 2465f28c85d789f4bb650d440c902606, type: 2}
+  characterStatSystem: {fileID: 7995397536527646193}
+  deathAnimationClip: {fileID: 11400000, guid: 95f92a1622693564c896d3ad8739f1cb, type: 2}
+  isDeathAnimationPlaying: 0
 --- !u!1 &171446446684834104
 GameObject:
   m_ObjectHideFlags: 0

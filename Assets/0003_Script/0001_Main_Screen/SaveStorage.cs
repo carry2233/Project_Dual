@@ -54,6 +54,7 @@ public class OwnedCharacterData
     public int firstRowID; // 캐릭터 첫 번째 행 ID
     public int secondRowID; // 캐릭터 두 번째 행 ID
     public int individualID; // 캐릭터 개체별 고유 ID
+    public bool isDead; // 캐릭터 사망 여부
 }
 
 [Serializable] 
@@ -522,6 +523,7 @@ private List<OwnedCharacterData> GetOwnedCharacterListCopy(List<OwnedCharacterDa
         copy.firstRowID = source.firstRowID; // 첫 번째 행 ID 복사
         copy.secondRowID = source.secondRowID; // 두 번째 행 ID 복사
         copy.individualID = source.individualID; // 개체별 고유 ID 복사
+        copy.isDead = source.isDead; // 사망 여부 복사
 
         copyList.Add(copy); // 복사본 추가
     }
@@ -1427,6 +1429,69 @@ public float GetUISoundFinalVolume01(float baseVolume) // UI 사운드 최종 �
 
     return safeBaseVolume * masterRate * uiRate; // 최종 UI 사운드 볼륨 반환
 }
+
+public bool SetOwnedCharacterDeadState(int firstRowID, int secondRowID, int individualID, bool deadState) // 현재 소유 캐릭터 사망 상태 설정
+{
+    for (int i = 0; i < currentOwnedCharacterList.Count; i++)
+    {
+        OwnedCharacterData ownedData = currentOwnedCharacterList[i]; // 현재 소유 캐릭터 데이터
+
+        if (ownedData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (ownedData.firstRowID != firstRowID)
+        {
+            continue; // 첫 번째 행 ID가 다르면 건너뜀
+        }
+
+        if (ownedData.secondRowID != secondRowID)
+        {
+            continue; // 두 번째 행 ID가 다르면 건너뜀
+        }
+
+        if (ownedData.individualID != individualID)
+        {
+            continue; // 개체별 ID가 다르면 건너뜀
+        }
+
+        ownedData.isDead = deadState; // 사망 상태 저장
+        SaveCurrentOwnedCharacterListToSelectedSave(); // 현재 선택 저장본에 반영
+        return true; // 처리 성공
+    }
+
+    return false; // 대상 없음
+}
+
+public bool SaveCurrentOwnedCharacterListToSelectedSave() // 현재 소유 캐릭터 목록을 선택 저장본에 저장
+{
+    if (currentSelectedSaveId < 0)
+    {
+        return false; // 선택된 저장본이 없으면 실패
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        entry.ownedCharacterList = GetOwnedCharacterListCopy(currentOwnedCharacterList); // 현재 소유 캐릭터 목록 저장본에 반영
+        SaveToFile(); // 파일 저장
+        return true; // 저장 성공
+    }
+
+    return false; // 대상 저장본 없음
+}
+
+
+
+
+
 
 
 

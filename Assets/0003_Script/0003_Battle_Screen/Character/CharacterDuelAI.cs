@@ -386,6 +386,16 @@ private void Update() // 매 프레임 결투 상태 처리
         return; // 필수 참조가 없으면 종료
     }
 
+    if (characterStatSystem.IsDead)
+    {
+        if (navigationMovementSystem != null)
+        {
+            navigationMovementSystem.StopMove(); // 사망 상태면 이동 정지 유지
+        }
+
+        return; // 사망 상태면 결투/공격기술/추적 전부 중단
+    }
+
     if (isAttackSkillCasting || isAttackSkillHitState)
     {
         return; // 공격기술 진행/피격 중이면 일반 결투 AI 행동 정지
@@ -473,6 +483,11 @@ public bool IsDirectionLinkedRotationLocked
 
 private void TryStartDuel() // 현재 타겟 기준 결투 또는 와해 대상 공격기술 돌진 시작 시도
 {
+    if (characterStatSystem != null && characterStatSystem.IsDead)
+    {
+        return; // 사망 상태면 결투 시작 금지
+    }
+
     if (isAttackSkillCasting || isAttackSkillHitState)
     {
         return; // 공격기술 시전/피격 중이면 시작 차단
@@ -693,25 +708,35 @@ private CharacterDuelAI FindNearestAttacker()
         return nearestTarget; // 최종 탐색 결과 반환
     }
 
-    public bool CanDuelWith(CharacterDuelAI otherAI) // 특정 대상과 결투 가능한지 판정
+public bool CanDuelWith(CharacterDuelAI otherAI) // 특정 대상과 결투 가능한지 판정
+{
+    if (otherAI == null)
     {
-        if (otherAI == null)
-        {
-            return false; // 대상이 없으면 불가
-        }
-
-        if (otherAI == this)
-        {
-            return false; // 자기 자신과는 불가
-        }
-
-        if (otherAI.TeamNumber == teamNumber)
-        {
-            return false; // 같은 팀 번호면 결투 불가
-        }
-
-        return true; // 결투 가능
+        return false; // 대상이 없으면 불가
     }
+
+    if (otherAI == this)
+    {
+        return false; // 자기 자신과는 불가
+    }
+
+    if (characterStatSystem != null && characterStatSystem.IsDead)
+    {
+        return false; // 본인이 사망 상태면 결투 불가
+    }
+
+    if (IsDeadCharacter(otherAI))
+    {
+        return false; // 사망한 캐릭터는 결투/공격기술 대상으로 삼지 않음
+    }
+
+    if (otherAI.TeamNumber == teamNumber)
+    {
+        return false; // 같은 팀 번호면 결투 불가
+    }
+
+    return true; // 결투 가능
+}
 
     public bool IsTargetingMe(CharacterDuelAI otherAI) // 특정 대상이 자신을 타겟으로 잡았는지 확인
     {
@@ -908,6 +933,13 @@ public void ClearPriorityTarget() // 직접 지정 공격 대상 해제
 
 private void UpdateDashToDuel() // 결투 대상에게 돌진 처리
 {
+
+    if (IsDeadCharacter(currentDuelTarget))
+    {
+        EndDuel(); // 돌진 중 대상이 사망하면 결투 종료
+        return;
+    }
+
     if (currentDuelTarget == null)
     {
         EndDuel(); // 결투 대상이 없으면 종료
@@ -1854,6 +1886,15 @@ private void ApplyResolvedDuelOutcome(
 }
 private void UpdateRecoveryInterruptTarget() // 후딜 중 새 결투 인터럽트용 타겟 갱신
 {
+
+    if (IsDeadCharacter(currentTarget))
+    {
+        SetCurrentTarget(null); // 사망한 대상이면 현재 타겟 해제
+        navigationMovementSystem.StopMove(); // 추적 이동 정지
+        isAutoChasingCurrentTarget = false; // 자동 추적 해제
+        return;
+    }
+
     CharacterDuelAI interruptTarget = null; // 이번 프레임 인터럽트 대상으로 사용할 캐릭터
 
     if (priorityTarget != null && CanDuelWith(priorityTarget))
@@ -2097,6 +2138,12 @@ private void ApplyCurrentDuelSkillOverrideSettings() // 현재 결투기술의 A
 
 private bool TryStartAttackSkillDashToBrokenTarget(float distanceToTarget) // 와해 대상에게 공격기술 돌진 시작 시도
 {
+    if (IsDeadCharacter(currentTarget))
+    {
+    SetCurrentTarget(null); // 사망한 대상이면 공격기술 대상 해제
+    return false;
+    }
+
     AttackSkillDefinitionSO selectedAttackSkill = GetCurrentSelectedAttackSkill(); // 현재 선택 공격기술 가져오기
 
     if (selectedAttackSkill == null)
@@ -2404,7 +2451,12 @@ private void ApplyAttackSkillDamage(AttackSkillDefinitionSO.AttackExecutionData 
         characterStatSystem.AttackPower,
         characterStatSystem.PowerRatePercent); // 최종위력률 * 공격력 / 100 계산
 
-    targetStatSystem.ApplyHealthDamage(damage); // 체력 피해 적용
+int finalHealthDamage = targetStatSystem.ApplyHealthDamage(damage); // 방어력 반영 최종 체력 피해 적용
+
+if (finalHealthDamage > 0 && targetAnimationPlayer != null)
+{
+    targetAnimationPlayer.ShowHealthDamageFloater(finalHealthDamage); // 공격기술 체력피해 숫자 표시
+}
 
     if (!hasAttackSkillFirstHitOccurred)
     {
@@ -2738,7 +2790,22 @@ private void ApplyTargetOppositeFacingAfterAttackSkillCorrection(CharacterDuelAI
     target.moveCommandController?.ApplyDirectionLinkedRotationImmediatelyFromCurrentFacing(); // 피격자 오브젝트 회전 즉시 반영
 }
 
+private bool IsDeadCharacter(CharacterDuelAI targetAI) // 대상 캐릭터 사망 여부 확인
+{
+    if (targetAI == null)
+    {
+        return true; // 대상이 없으면 죽은 대상으로 취급
+    }
 
+    CharacterStatSystem targetStat = targetAI.GetCharacterStatSystem(); // 대상 스탯 참조
+
+    if (targetStat == null)
+    {
+        return true; // 스탯이 없으면 대상 불가
+    }
+
+    return targetStat.IsDead; // 사망 여부 반환
+}
 
 
 

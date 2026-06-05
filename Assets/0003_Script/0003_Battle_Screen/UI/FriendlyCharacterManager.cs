@@ -75,10 +75,11 @@ public class FriendlyCharacterManager : MonoBehaviour
 [SerializeField] private bool isFriendlyBattleSetupCompleted; // 아군 생성, 목록 구성, 평균 레벨 계산 완료 여부
 
 
-[Header("결투기술 선택 UI")]
-[SerializeField] private GameObject duelSkillListParentPanel; // 결투기술 목록 부모 패널
+[Header("결투/공격기술 선택 UI")]
+[SerializeField] private GameObject duelSkillListParentPanel; // 결투/공격기술 목록 부모 패널
 [SerializeField] private Transform duelSkillSlotListPanel; // 결투기술 슬롯들이 생성될 부모
-[SerializeField] private List<DuelSkillSlot> spawnedDuelSkillSlotList = new List<DuelSkillSlot>(); // 생성된 결투기술 슬롯 목록
+[SerializeField] private Transform attackSkillSlotListPanel; // 공격기술 슬롯들이 생성될 부모
+[SerializeField] private List<DuelSkillSlot> spawnedDuelSkillSlotList = new List<DuelSkillSlot>(); // 생성된 기술 슬롯 목록
 
 [Header("결투기술 선택 상태")]
 [SerializeField] private CharacterDuelAI currentDuelSkillMenuOwner; // 현재 결투기술 목록을 연 캐릭터
@@ -535,6 +536,11 @@ private void SpawnFriendlyCharactersFromSaveStorage() // 저장된 소유 캐릭
             continue; // 비어 있으면 건너뜀
         }
 
+        if (ownedCharacter.isDead)
+        {
+            continue; // 사망한 아군은 전투씬에서 캐릭터/UI 생성 제외
+        }
+
         GlobalCharacterDefinition definition = characterInfoManager.FindDefinitionByID(
             ownedCharacter.firstRowID,
             ownedCharacter.secondRowID); // 캐릭터 정의 탐색
@@ -646,14 +652,14 @@ public void RefreshFriendlyAverageLevel() // 아군 평균 레벨 계산
     friendlyAverageLevel = validCount > 0 ? Mathf.Max(1, totalLevel / validCount) : 1; // 평균 레벨 저장
 }
 
-public void OpenDuelSkillMenu(CharacterDuelAI targetCharacter, Vector3 targetWorldPosition) // 결투기술 목록 열기
+public void OpenDuelSkillMenu(CharacterDuelAI targetCharacter, Vector3 targetWorldPosition) // 결투/공격기술 목록 열기
 {
     if (targetCharacter == null)
     {
         return; // 대상 캐릭터가 없으면 종료
     }
 
-    if (duelSkillListParentPanel == null || duelSkillSlotListPanel == null)
+    if (duelSkillListParentPanel == null || duelSkillSlotListPanel == null || attackSkillSlotListPanel == null)
     {
         return; // UI 참조가 없으면 종료
     }
@@ -666,26 +672,8 @@ public void OpenDuelSkillMenu(CharacterDuelAI targetCharacter, Vector3 targetWor
     duelSkillListParentPanel.transform.position = targetWorldPosition; // 호버 이미지 위치로 패널 이동
     duelSkillListParentPanel.SetActive(true); // 부모 패널 활성화
 
-    IReadOnlyList<DuelSkillDefinitionSO> skillList = targetCharacter.DuelSkillList; // 캐릭터 보유 결투기술 목록 가져오기
-
-    if (skillList == null)
-    {
-        return; // 기술 목록이 없으면 종료
-    }
-
-    for (int i = 0; i < skillList.Count; i++)
-    {
-        DuelSkillDefinitionSO skill = skillList[i]; // 현재 생성할 결투기술
-
-        if (skill == null || skill.DuelSkillSlotPrefab == null)
-        {
-            continue; // 기술 또는 프리팹이 없으면 건너뜀
-        }
-
-        DuelSkillSlot spawnedSlot = Instantiate(skill.DuelSkillSlotPrefab, duelSkillSlotListPanel); // 슬롯 생성
-        spawnedSlot.Initialize(this, skill, i); // 슬롯 초기화
-        spawnedDuelSkillSlotList.Add(spawnedSlot); // 생성 목록에 등록
-    }
+    SpawnDuelSkillSlots(targetCharacter); // 결투기술 슬롯 생성
+    SpawnAttackSkillSlots(targetCharacter); // 공격기술 슬롯 생성
 }
 
 public void SetHoveredDuelSkillSlot(DuelSkillSlot targetSlot) // 현재 호버 중인 결투기술 슬롯 설정
@@ -792,7 +780,53 @@ private void ClearDuelSkillSlots() // 생성된 결투기술 슬롯 삭제
     spawnedDuelSkillSlotList.Clear(); // 생성 슬롯 목록 초기화
 }
 
+private void SpawnDuelSkillSlots(CharacterDuelAI targetCharacter) // 결투기술 슬롯 생성
+{
+    IReadOnlyList<DuelSkillDefinitionSO> skillList = targetCharacter.DuelSkillList; // 캐릭터 보유 결투기술 목록
 
+    if (skillList == null)
+    {
+        return; // 목록이 없으면 종료
+    }
+
+    for (int i = 0; i < skillList.Count; i++)
+    {
+        DuelSkillDefinitionSO skill = skillList[i]; // 현재 결투기술
+
+        if (skill == null || skill.DuelSkillSlotPrefab == null)
+        {
+            continue; // 기술 또는 프리팹이 없으면 건너뜀
+        }
+
+        DuelSkillSlot spawnedSlot = Instantiate(skill.DuelSkillSlotPrefab, duelSkillSlotListPanel); // 결투기술 슬롯 생성
+        spawnedSlot.Initialize(this, skill, i); // 결투기술 타입으로 초기화
+        spawnedDuelSkillSlotList.Add(spawnedSlot); // 생성 목록에 등록
+    }
+}
+
+private void SpawnAttackSkillSlots(CharacterDuelAI targetCharacter) // 공격기술 슬롯 생성
+{
+    IReadOnlyList<AttackSkillDefinitionSO> skillList = targetCharacter.AttackSkillList; // 캐릭터 보유 공격기술 목록
+
+    if (skillList == null)
+    {
+        return; // 목록이 없으면 종료
+    }
+
+    for (int i = 0; i < skillList.Count; i++)
+    {
+        AttackSkillDefinitionSO skill = skillList[i]; // 현재 공격기술
+
+        if (skill == null || skill.AttackSkillSlotPrefab == null)
+        {
+            continue; // 기술 또는 프리팹이 없으면 건너뜀
+        }
+
+        DuelSkillSlot spawnedSlot = Instantiate(skill.AttackSkillSlotPrefab, attackSkillSlotListPanel); // 공격기술 슬롯 생성
+        spawnedSlot.Initialize(this, skill, i); // 공격기술 타입으로 초기화
+        spawnedDuelSkillSlotList.Add(spawnedSlot); // 생성 목록에 등록
+    }
+}
 
 
 

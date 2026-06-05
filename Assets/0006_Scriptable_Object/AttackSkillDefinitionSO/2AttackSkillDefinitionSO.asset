@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0d3147d9ae80b7d48ace3532ea8730e3, type: 3}
-  m_Name: 1AttackSkillDefinitionSO
+  m_Name: 2AttackSkillDefinitionSO
   m_EditorClassIdentifier: Assembly-CSharp::AttackSkillDefinitionSO
   attackSkillName: "\uACF5\uACA9!!!"
   firstRowID: 0
   secondRowID: 1
-  attackSkillSlotPrefab: {fileID: 7606801988712462910, guid: fba9e14074c484e49a72a6dfa614cb1d, type: 3}
+  attackSkillSlotPrefab: {fileID: 7606801988712462910, guid: e5d6a136949ab2d4d9aab21599960f5a, type: 3}
   attackSkillHitboxPrefab: {fileID: 5267774157645631315, guid: ca07f8d7b627b2949997853021ad4df8, type: 3}
-  dashSoundClip: {fileID: 8300000, guid: 657e5a51669c97546b0061ab9c051224, type: 3}
+  dashSoundClip: {fileID: 8300000, guid: 11ccfe860d0f4ca4ba4915471741db13, type: 3}
   dashSoundVolume: 1
   dashSoundGroupType: 1
   attackSkillCastDistance: 1.5
@@ -47,7 +47,7 @@ MonoBehaviour:
   - animationListIndex: 3
     attackStartDelay: 0
     usePowerRateCorrection: 1
-    powerRateCorrectionValue: 300
+    powerRateCorrectionValue: 100
     useFixedPowerRate: 0
     fixedPowerRateValue: 0
     useHitEffect: 1

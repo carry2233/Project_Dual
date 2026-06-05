@@ -133,6 +133,14 @@ public class DamageFloaterSpawnSettings
 [SerializeField] private CharacterAnimationClipSO brokenLockedLoopAnimationClip; // 와해 중 강제로 유지할 루프 애니메이션
 
 
+[Header("______________________________________________________________________________-")]
+
+[Header("사망 애니메이션 설정")]
+[SerializeField] private CharacterStatSystem characterStatSystem; // 사망 상태 확인용 스탯 시스템 참조
+[SerializeField] private CharacterAnimationClipSO deathAnimationClip; // 사망 시 루프 재생할 애니메이션
+[SerializeField] private bool isDeathAnimationPlaying; // 사망 애니메이션 적용 여부
+
+
 public Transform EffectParentRoot => effectParentRoot; // 일반 이펙트 생성 부모 반환
 
 private readonly List<DamageFloaterCanvasObject> healthDamageFloaterPoolList
@@ -154,6 +162,11 @@ private bool requestedManualAnimationLoop; // 외부에서 요청한 수동 애�
 
 private void Awake() // 시작 시 참조 자동 연결
 {
+    if (characterStatSystem == null)
+    {
+        characterStatSystem = GetComponent<CharacterStatSystem>(); // 같은 오브젝트에서 스탯 시스템 자동 참조
+    }
+
     if (perObjectTextureOverride == null)
     {
         perObjectTextureOverride = GetComponent<PerObjectTextureOverride>(); // 같은 오브젝트에서 자동 참조
@@ -198,8 +211,21 @@ private void Awake() // 시작 시 참조 자동 연결
     CreateDamageFloaterPoolRootIfNeeded(); // 데미지 플로터 풀 부모 오브젝트 준비
 }
 
+
 private void Update() // 매 프레임 애니메이션 상태 처리
 {
+    if (characterStatSystem != null && characterStatSystem.IsDead)
+    {
+        PlayDeathLoopAnimation(); // 사망 상태면 사망 애니메이션 루프 유지
+        UpdateAnimationPlayback(); // 사망 애니메이션 프레임 재생
+        return;
+    }
+
+    if (isDeathAnimationPlaying)
+    {
+        return; // 사망 애니메이션 적용 후 일반 애니메이션 차단
+    }
+
     if (isImageFrozen)
     {
         return; // 이미지 고정 중이면 현재 출력 이미지 유지
@@ -210,8 +236,18 @@ private void Update() // 매 프레임 애니메이션 상태 처리
     UpdateAfterimageGeneration(); // 돌진 잔상 생성 처리
 }
 
+private bool IsDeathStateActive() // 사망 애니메이션 보호 상태 확인
+{
+    return isDeathAnimationPlaying || (characterStatSystem != null && characterStatSystem.IsDead); // 사망 상태 또는 사망 애니메이션 적용 중이면 true
+}
+
 public void PlayLoopAnimation(CharacterAnimationClipSO clip) // 루프 수동 애니메이션 재생 요청
 {
+    if (IsDeathStateActive())
+    {
+        return; // 사망 상태면 다른 루프 애니메이션 차단
+    }
+
     if (clip == null || clip.FrameCount == 0)
     {
         return; // 클립이 없거나 비어 있으면 종료
@@ -224,6 +260,11 @@ public void PlayLoopAnimation(CharacterAnimationClipSO clip) // 루프 수동 �
 
 public void PlayOneShotAnimation(CharacterAnimationClipSO clip) // 1회 수동 애니메이션 재생 요청
 {
+    if (IsDeathStateActive())
+    {
+        return; // 사망 상태면 다른 1회 애니메이션 차단
+    }
+
     if (clip == null || clip.FrameCount == 0)
     {
         return; // 클립이 없거나 비어 있으면 종료
@@ -411,7 +452,14 @@ private float GetCurrentBaseInterval() // 현재 상태에 따른 기본 주기 
 
 private void UpdateCurrentAnimationState() // 현재 상태 기준으로 재생할 클립 결정 및 즉시 반영
 {
+    if (IsDeathStateActive())
+    {
+        PlayDeathLoopAnimation(); // 사망 상태면 자동/수동 상태 계산 대신 사망 애니메이션 유지
+        return;
+    }
+
     CharacterAnimationClipSO targetClip = idleAnimationClip; // 기본은 대기 애니메이션
+
     bool shouldUseManualState = false; // 수동 애니메이션 사용 여부
     bool targetManualLoop = false; // 수동 애니메이션 루프 여부
 
@@ -1182,10 +1230,42 @@ public void ClearBrokenAnimationLock() // 와해 애니메이션 잠금 해제
         requestedManualAnimationLoop = false; // 루프 요청 해제
     }
 
+    if (IsDeathStateActive())
+    {
+        PlayDeathLoopAnimation(); // 사망 상태면 idle 복귀 대신 사망 애니메이션 유지
+        return;
+    }
+
     UpdateCurrentAnimationState(); // 현재 상태 기준 애니메이션 갱신
 }
 
+public void PlayDeathLoopAnimation() // 사망 애니메이션 루프 재생
+{
+    if (deathAnimationClip == null || deathAnimationClip.FrameCount == 0)
+    {
+        return; // 사망 애니메이션이 없으면 종료
+    }
 
+    if (isDeathAnimationPlaying && currentAnimationClip == deathAnimationClip)
+    {
+        return; // 이미 사망 애니메이션이면 중복 초기화 방지
+    }
+
+    isDeathAnimationPlaying = true; // 사망 애니메이션 상태 체크
+
+    requestedManualAnimationClip = null; // 수동 애니메이션 요청 제거
+    requestedManualAnimationLoop = false; // 수동 루프 요청 제거
+
+    isAttackSkillAnimationLocked = false; // 공격기술 애니메이션 잠금 해제
+    isAttackSkillAfterFirstHitLoopLocked = false; // 피격 후 루프 잠금 해제
+    isBrokenAnimationLocked = false; // 와해 애니메이션 잠금 해제
+    brokenLockedLoopAnimationClip = null; // 와해 루프 클립 제거
+
+    isManualAnimationPlaying = true; // 사망 애니메이션을 수동 루프 상태로 취급
+    isManualAnimationLoop = true; // 사망 애니메이션 루프 처리
+
+    SetAnimationClip(deathAnimationClip); // 사망 애니메이션 클립 적용
+}
 
 
 
