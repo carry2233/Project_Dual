@@ -414,7 +414,53 @@ private void ForceClearBrokenStateByDeath() // 사망 상태에서 와해상태 
     }
 }
 
+public void ApplyOwnedCharacterStatData(SaveStorage.OwnedCharacterStatData statData) // 저장된 캐릭터 스탯 적용
+{
+    if (statData == null)
+    {
+        return; // 데이터가 없으면 종료
+    }
 
+    levelstats = Mathf.Max(1, statData.levelstats); // 레벨 적용
+    attackPower = statData.attackPower; // 공격력 적용
+    defenseValue = statData.defenseValue; // 방어율 적용
+    bodySize = statData.bodySize; // 체급 적용
+
+    maxHealth = Mathf.Max(0, statData.maxHealth); // 최대체력 적용
+    currentHealth = Mathf.Clamp(statData.currentHealth, 0, maxHealth); // 현재체력 적용
+
+    speedStat = statData.speedStat; // 속도 적용
+    powerRatePercent = statData.powerRatePercent; // 위력률 적용
+
+    baseMoveSpeed = statData.baseMoveSpeed; // 기본 이동속도 적용
+    moveSpeedPercent = statData.moveSpeedPercent; // 이동속도율 적용
+
+    maxStaggerAmount = Mathf.Max(0, statData.maxStaggerAmount); // 최대와해량 적용
+    currentStaggerAmount = Mathf.Clamp(statData.currentStaggerAmount, 0, maxStaggerAmount); // 현재와해량 적용
+    staggerResistancePercent = statData.staggerResistancePercent; // 와해 저항률 적용
+
+    RefreshFinalMoveSpeed(); // 최종 이동속도 재계산
+    NotifyStatusValueChanged(); // UI 갱신 알림
+}
+
+public void ApplyCalculatedStatsFromDefinition(
+    GlobalCharacterDefinition definition,
+    int targetLevel) // 캐릭터 정의와 레벨 기준 계산 스탯 적용
+{
+    if (definition == null)
+    {
+        return; // 정의가 없으면 종료
+    }
+
+    SaveStorage.OwnedCharacterStatData calculatedData = definition.CreateCalculatedStatData(
+        0,
+        0,
+        0,
+        targetLevel,
+        0); // 전투용 계산 스탯 생성
+
+    ApplyOwnedCharacterStatData(calculatedData); // 계산된 스탯 적용
+}
 
 
 

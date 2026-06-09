@@ -142,10 +142,6 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [Header("____________________________________________________________")]
 
 
-[Header("공격기술 판정 콜라이더 설정")]
-[SerializeField] private Transform attackSkillHitboxParentRoot; // 공격기술 2D 박스콜라이더 부모 오브젝트
-[SerializeField] private LayerMask attackSkillWallLayerMask; // 공격기술 콜라이더가 벽으로 감지할 레이어
-
 [Header("공격기술 목록")]
 [SerializeField] private List<AttackSkillDefinitionSO> attackSkillList = new List<AttackSkillDefinitionSO>(); // 보유한 공격기술 목록
 [SerializeField] private int currentSelectedAttackSkillIndex; // 현재 사용할 공격기술 리스트 인덱스
@@ -156,11 +152,11 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [SerializeField] private bool hasAttackSkillFirstHitOccurred; // 첫 실제공격 피격 여부
 [SerializeField] private CharacterDuelAI currentAttackSkillTarget; // 현재 공격기술 대상
 [SerializeField] private AttackSkillDefinitionSO currentAttackSkillDefinition; // 현재 실행 중인 공격기술 정의
-[SerializeField] private AttackSkillHitbox currentAttackSkillHitbox; // 현재 생성된 공격기술 판정 콜라이더
+
 [SerializeField] private NavigationMovementSystem.FacingXDirectionType currentAttackSkillFacingDirection; // 현재 시전할 공격기술 방향상태
 [SerializeField] private Vector3 attackSkillTargetCorrectionLocalPosition; // 본인 위치, 방향 기준 피격자 보정 위치값
 [SerializeField] private float attackSkillTargetCorrectionMoveSpeed = 5f; // 피격자 위치보정 이동속도
-[SerializeField] private float attackSkillWallEscapeMoveDistance = 0.25f; // 벽 접촉 해제용 1회 이동 거리
+
 
 
 [Header("____________________________________________________________")]
@@ -173,6 +169,17 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [Header("현재 결투/공격기술 시전 금지 상태")]
 [SerializeField] private bool isSkillCastBlocked; // 현재 결투/공격기술 시전 금지 여부
 [SerializeField] private float currentSkillCastBlockTimer; // 현재 남은 시전 금지 시간
+
+
+[Header("____________________________________________________________")]
+
+
+[Header("공격기술 벽 감지 설정")]
+[SerializeField] private LayerMask attackSkillWallLayerMask; // 공격기술 방향 반전 판단용 벽 레이어
+
+[Header("공격기술 물리 접촉 트리거 상태")]
+[SerializeField] private bool hasStoredPhysicalContactTriggerState; // 물리접촉 콜라이더 원래 트리거 상태 저장 여부
+[SerializeField] private bool storedPhysicalContactTriggerState; // 물리접촉 콜라이더 원래 트리거 상태
 
 private Coroutine skillCastBlockCoroutine; // 시전 금지 타이머 코루틴
 
@@ -361,10 +368,6 @@ private void Awake() // 초기 참조 자동 연결
         physicalContactCollider = GetComponent<Collider2D>(); // 물리접촉 전용 콜라이더 자동 참조
     }
 
-    if (attackSkillHitboxParentRoot == null)
-    {
-        attackSkillHitboxParentRoot = transform; // 히트박스 부모가 없으면 자기 자신 사용
-    }
 }
 
 private void Start() // 시작 시 필요한 매니저 자동 참조
@@ -589,54 +592,65 @@ public void UnregisterAttacker(CharacterDuelAI attacker)
     attackingMeList.Remove(attacker);
 }
 
-private void UpdatePlayerControlledTarget()
+private void UpdatePlayerControlledTarget() // 플레이어 조작형 현재 타겟 갱신
 {
     if (moveCommandController != null && moveCommandController.HasMoveDestination)
     {
-        return;
+        return; // 이동 명령 중이면 자동 타겟 갱신 안 함
+    }
+
+    if (currentTarget != null && !CanDuelWith(currentTarget))
+    {
+        SetCurrentTarget(null); // 현재 타겟이 사망/불가 상태면 해제
+    }
+
+    if (priorityTarget != null && !CanDuelWith(priorityTarget))
+    {
+        priorityTarget = null; // 직접 지정 대상이 사망/불가 상태면 제거
     }
 
     if (priorityTarget != null && CanDuelWith(priorityTarget))
     {
-        currentTarget = priorityTarget;
+        SetCurrentTarget(priorityTarget); // 직접 지정 대상 우선
         return;
     }
 
-    CharacterDuelAI nearestThreat = FindNearestAttacker();
+    CharacterDuelAI nearestThreat = FindNearestAttacker(); // 자신을 노리는 생존 적 탐색
 
     if (nearestThreat != null)
     {
-        currentTarget = nearestThreat;
+        SetCurrentTarget(nearestThreat); // 생존 공격자 타겟 설정
         return;
     }
 
-    currentTarget = FindNearestEnemy();
+    SetCurrentTarget(FindNearestEnemy()); // 가장 가까운 생존 적 설정
 }
 
-private CharacterDuelAI FindNearestAttacker()
+private CharacterDuelAI FindNearestAttacker() // 자신을 공격 대상으로 삼은 가장 가까운 생존 적 탐색
 {
-    float nearestDistance = float.MaxValue;
-    CharacterDuelAI nearest = null;
+    float nearestDistance = float.MaxValue; // 최소 거리
+    CharacterDuelAI nearest = null; // 가장 가까운 공격자
 
-    for (int i = 0; i < attackingMeList.Count; i++)
+    for (int i = attackingMeList.Count - 1; i >= 0; i--)
     {
-        CharacterDuelAI attacker = attackingMeList[i];
+        CharacterDuelAI attacker = attackingMeList[i]; // 현재 공격자
 
-        if (attacker == null)
+        if (!CanDuelWith(attacker))
         {
+            attackingMeList.RemoveAt(i); // 사망/불가 공격자는 목록에서 제거
             continue;
         }
 
-        float distance = Vector2.Distance(transform.position, attacker.transform.position);
+        float distance = Vector2.Distance(transform.position, attacker.transform.position); // 거리 계산
 
         if (distance < nearestDistance)
         {
-            nearestDistance = distance;
-            nearest = attacker;
+            nearestDistance = distance; // 최소 거리 갱신
+            nearest = attacker; // 가장 가까운 생존 공격자 저장
         }
     }
 
-    return nearest;
+    return nearest; // 최종 생존 공격자 반환
 }
 
     private CharacterDuelAI FindEnemyTargetingMe() // 자신을 타겟팅 중인 적 탐색
@@ -752,7 +766,13 @@ public void SetCurrentTarget(CharacterDuelAI newTarget) // 현재 공격 대상 
 {
     if (newTarget != null && !CanDuelWith(newTarget))
     {
-        return; // 결투 불가능한 대상이면 설정 차단
+        if (currentTarget != null && !CanDuelWith(currentTarget))
+        {
+            UnregisterFromCurrentTarget(); // 기존 타겟 등록 해제
+            currentTarget = null; // 사망/불가 기존 타겟 제거
+        }
+
+        return; // 사망/불가 대상은 새 타겟으로 설정하지 않음
     }
 
     if (currentTarget == newTarget)
@@ -855,6 +875,25 @@ private void UpdatePlayerControlledAction() // 플레이어 조작형 행동 우
 
 private void UpdateAutoChaseToCurrentTarget() // 현재 공격 대상으로 자동 추적 이동
 {
+        if (currentTarget != null && !CanDuelWith(currentTarget))
+    {
+        SetCurrentTarget(null); // 사망/불가 타겟이면 즉시 해제
+        isAutoChasingCurrentTarget = false; // 자동 추적 해제
+
+        if (navigationMovementSystem != null)
+        {
+            navigationMovementSystem.StopMove(); // 이동 정지
+        }
+
+        return;
+    }
+
+    if (currentTarget == null || navigationMovementSystem == null)
+    {
+        isAutoChasingCurrentTarget = false;
+        return;
+    }
+
     if (currentTarget == null || navigationMovementSystem == null)
     {
         isAutoChasingCurrentTarget = false; // 자동 추적 불가 상태 저장
@@ -2256,6 +2295,11 @@ private IEnumerator AttackSkillCastRoutine(CharacterDuelAI target, AttackSkillDe
     attackSkillTargetCorrectionLocalPosition = attackSkillDefinition.TargetLocalCorrectionPosition; // 위치보정값 저장
     hasAttackSkillFirstHitOccurred = false; // 첫 피격 상태 초기화
 
+    ReverseAttackSkillFacingDirectionIfWallAhead(attackSkillDefinition); // 벽 감지 시 공격기술 방향 반전
+
+    BeginAttackSkillPhysicalContactTriggerState(); // 공격자 물리접촉 콜라이더 트리거 적용
+    target.BeginAttackSkillPhysicalContactTriggerState(); // 피격자 물리접촉 콜라이더 트리거 적용
+
     target.ReceiveAttackSkillHitState(this, currentAttackSkillFacingDirection); // 피격자 공격기술 피격상태 시작
 
     LockAttackSkillFacingDirection(this); // 공격자 방향 고정
@@ -2263,10 +2307,6 @@ private IEnumerator AttackSkillCastRoutine(CharacterDuelAI target, AttackSkillDe
 
     characterAnimationPlayer?.PlayAttackSkillFixedLoopAnimation(); // 공격자 고정 루프 애니메이션
     target.characterAnimationPlayer?.PlayAttackSkillFixedLoopAnimation(); // 피격자 고정 루프 애니메이션
-
-    currentAttackSkillHitbox = CreateAttackSkillHitbox(attackSkillDefinition); // 공격기술 히트박스 생성
-
-    yield return MoveUntilAttackSkillHitboxFreeFromWall(target); // 벽 접촉 해제 위치까지 이동
 
     navigationMovementSystem?.StopMove(); // 공격자 이동 정지
     target.navigationMovementSystem?.StopMove(); // 피격자 이동 정지
@@ -2282,44 +2322,6 @@ private IEnumerator AttackSkillCastRoutine(CharacterDuelAI target, AttackSkillDe
     yield return PlayAttackSkillAnimationSequence(attackSkillDefinition); // 공격자 공격기술 애니메이션 순차 재생
 
     EndAttackSkillCast(target); // 공격기술 종료
-}
-
-private AttackSkillHitbox CreateAttackSkillHitbox(AttackSkillDefinitionSO attackSkillDefinition) // 공격기술 판정 콜라이더 생성
-{
-    if (attackSkillDefinition == null || attackSkillDefinition.AttackSkillHitboxPrefab == null)
-    {
-        return null; // 프리팹이 없으면 null
-    }
-
-    Transform parentRoot = attackSkillHitboxParentRoot != null ? attackSkillHitboxParentRoot : transform; // 부모 결정
-    AttackSkillHitbox spawnedHitbox = Instantiate(attackSkillDefinition.AttackSkillHitboxPrefab, parentRoot); // 히트박스 생성
-    spawnedHitbox.transform.localPosition = Vector3.zero; // 부모 기준 위치 초기화
-    spawnedHitbox.transform.localRotation = Quaternion.identity; // 회전 초기화
-    spawnedHitbox.Initialize(attackSkillWallLayerMask); // 벽 레이어 초기화
-
-    return spawnedHitbox; // 생성된 히트박스 반환
-}
-
-private IEnumerator MoveUntilAttackSkillHitboxFreeFromWall(CharacterDuelAI target) // 히트박스가 벽과 겹치지 않을 때까지 이동
-{
-    if (currentAttackSkillHitbox == null)
-    {
-        yield break; // 히트박스가 없으면 보정 없음
-    }
-
-    yield return null; // 트리거 접촉 갱신 대기
-
-    while (currentAttackSkillHitbox != null && currentAttackSkillHitbox.IsTouchingWall)
-    {
-        Vector2 escapeDirection = GetAttackSkillBackwardDirection(); // 시전 방향 반대 방향 계산
-        Vector2 selfDestination = (Vector2)transform.position + escapeDirection * attackSkillWallEscapeMoveDistance; // 공격자 이동 위치
-        Vector2 targetDestination = (Vector2)target.transform.position + escapeDirection * attackSkillWallEscapeMoveDistance; // 피격자 이동 위치
-
-        navigationMovementSystem?.SetMoveDestination(selfDestination); // 공격자 이동
-        target.navigationMovementSystem?.SetMoveDestination(targetDestination); // 피격자도 같은 방향 이동
-
-        yield return null; // 다음 프레임에서 접촉 재확인
-    }
 }
 
 private IEnumerator MoveAttackSkillTargetToCorrectionPosition(CharacterDuelAI target) // 피격자 위치 보정
@@ -2616,6 +2618,8 @@ private void FlipAttackSkillFacingDirection(CharacterDuelAI targetAI) // 현재 
 
 private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
 {
+    RestoreAttackSkillPhysicalContactTriggerState(); // 공격자 물리접촉 콜라이더 상태 복원
+
     isAttackSkillCasting = false; // 시전상태 해제
     isAttackSkillHitState = false; // 피격상태 해제
     hasAttackSkillFirstHitOccurred = false; // 첫 피격 상태 초기화
@@ -2624,6 +2628,7 @@ private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
 
     if (target != null)
     {
+        target.RestoreAttackSkillPhysicalContactTriggerState(); // 피격자 물리접촉 콜라이더 상태 복원
         target.isAttackSkillHitState = false; // 피격자 피격상태 해제
         target.hasAttackSkillFirstHitOccurred = false; // 피격자 첫 피격 상태 초기화
         target.StartSkillCastBlock(target.skillCastBlockDurationAfterAttackSkill); // 피격자도 공격기술 종료 후 시전 금지 시작
@@ -2655,12 +2660,6 @@ private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
         moveCommandController.SetMoveCommandLocked(false); // 이동 명령 잠금 해제
     }
 
-    if (currentAttackSkillHitbox != null)
-    {
-        Destroy(currentAttackSkillHitbox.gameObject); // 생성된 히트박스 제거
-    }
-
-    currentAttackSkillHitbox = null; // 히트박스 참조 초기화
     currentAttackSkillTarget = null; // 공격기술 대상 초기화
     currentAttackSkillDefinition = null; // 공격기술 정의 초기화
     attackSkillCoroutine = null; // 코루틴 참조 초기화
@@ -2674,10 +2673,11 @@ private void CancelAttackSkillState() // 공격기술 상태 강제 정리
         attackSkillCoroutine = null; // 코루틴 참조 초기화
     }
 
-    if (currentAttackSkillHitbox != null)
+    RestoreAttackSkillPhysicalContactTriggerState(); // 자신의 물리접촉 콜라이더 상태 복원
+
+    if (currentAttackSkillTarget != null)
     {
-        Destroy(currentAttackSkillHitbox.gameObject); // 히트박스 제거
-        currentAttackSkillHitbox = null; // 참조 초기화
+        currentAttackSkillTarget.RestoreAttackSkillPhysicalContactTriggerState(); // 대상 물리접촉 콜라이더 상태 복원
     }
 
     if (currentAttackSkillTarget != null && currentAttackSkillTarget.characterAnimationPlayer != null)
@@ -2807,7 +2807,76 @@ private bool IsDeadCharacter(CharacterDuelAI targetAI) // 대상 캐릭터 사�
     return targetStat.IsDead; // 사망 여부 반환
 }
 
+private void ReverseAttackSkillFacingDirectionIfWallAhead(AttackSkillDefinitionSO attackSkillDefinition) // 벽 감지 시 공격기술 방향 반전
+{
+    if (attackSkillDefinition == null)
+    {
+        return; // 공격기술 정보가 없으면 종료
+    }
 
+    float rayDistance = Mathf.Max(0f, attackSkillDefinition.AttackSkillDirectionWallCheckDistance); // 레이캐스트 거리 보정
+
+    if (rayDistance <= 0f)
+    {
+        return; // 거리값이 없으면 벽 확인 안 함
+    }
+
+    Vector2 rayOrigin = transform.position; // 공격자가 위치할 현재 위치 기준
+    Vector2 rayDirection = GetAttackSkillForwardDirection(); // 공격기술 시전 방향
+
+    RaycastHit2D hit = Physics2D.Raycast(
+        rayOrigin,
+        rayDirection,
+        rayDistance,
+        attackSkillWallLayerMask); // 시전 방향 벽 감지
+
+    if (hit.collider == null)
+    {
+        return; // 벽이 없으면 방향 유지
+    }
+
+    currentAttackSkillFacingDirection =
+        currentAttackSkillFacingDirection == NavigationMovementSystem.FacingXDirectionType.XNegative
+            ? NavigationMovementSystem.FacingXDirectionType.XPositive
+            : NavigationMovementSystem.FacingXDirectionType.XNegative; // 시전 방향 반전
+}
+
+private Vector2 GetAttackSkillForwardDirection() // 공격기술 시전 방향 반환
+{
+    if (currentAttackSkillFacingDirection == NavigationMovementSystem.FacingXDirectionType.XNegative)
+    {
+        return Vector2.left; // X- 방향
+    }
+
+    return Vector2.right; // X+ 방향
+}
+
+private void BeginAttackSkillPhysicalContactTriggerState() // 공격기술 중 물리접촉 콜라이더를 트리거로 전환
+{
+    if (physicalContactCollider == null)
+    {
+        return; // 콜라이더가 없으면 종료
+    }
+
+    if (!hasStoredPhysicalContactTriggerState)
+    {
+        storedPhysicalContactTriggerState = physicalContactCollider.isTrigger; // 원래 트리거 상태 저장
+        hasStoredPhysicalContactTriggerState = true; // 저장 완료 표시
+    }
+
+    physicalContactCollider.isTrigger = true; // 공격기술 중 트리거 적용
+}
+
+private void RestoreAttackSkillPhysicalContactTriggerState() // 공격기술 종료 후 물리접촉 콜라이더 상태 복원
+{
+    if (physicalContactCollider == null || !hasStoredPhysicalContactTriggerState)
+    {
+        return; // 복원할 상태가 없으면 종료
+    }
+
+    physicalContactCollider.isTrigger = storedPhysicalContactTriggerState; // 원래 트리거 상태 복원
+    hasStoredPhysicalContactTriggerState = false; // 저장 상태 초기화
+}
 
 
 

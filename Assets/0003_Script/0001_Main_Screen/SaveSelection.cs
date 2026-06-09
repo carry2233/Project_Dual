@@ -17,6 +17,15 @@ public class StartingFriendlyNigrumSetting
     public int startCurrentNigrumCapacity; // 시작 현재 흑체 수용량
 }
 
+[System.Serializable]
+public class StartingOwnedCharacterHungerSetting
+{
+    public int firstRowID; // 캐릭터 첫 번째 행 ID
+    public int secondRowID; // 캐릭터 두 번째 행 ID
+    public int individualID; // 캐릭터 개체별 고유 ID
+    public int startCurrentHunger; // 시작 현재 허기값
+}
+
 public class SaveSelection : MonoBehaviour
 {
 
@@ -25,11 +34,18 @@ public class SaveSelection : MonoBehaviour
     [Header("씬 이동 설정")]
     [SerializeField] private string worldMapSceneName = "WorldMap"; // 저장본 선택 후 이동할 월드맵 씬 이름
 
+
+    [Header("캐릭터 정보 참조")]
+    [SerializeField] private CharacterInfoManager characterInfoManager; // 캐릭터 정의 탐색 매니저
+
     [Header("저장 참조")]
     [SerializeField] private SaveStorage saveStorage; // 저장 데이터 관리 스크립트
     [SerializeField] private SaveSlotButton saveSlotButtonPrefab; // 저장본 버튼 프리팹
     [SerializeField] private RectTransform contentRectTransform; // Scroll View Content
     [SerializeField] private GridLayoutGroup targetGridLayoutGroup; // Content에 적용된 Grid Layout Group
+
+    [Header("흑체 복용 관리자")]
+    [SerializeField] private FriendlyNigrumIntakeManager friendlyNigrumIntakeManager; // 시작 흑체값 생성 관리자
 
     [Header("저장본 생성 UI")]
     [SerializeField] private Button createSaveButton; // 세이브 생성 버튼
@@ -63,6 +79,9 @@ public class SaveSelection : MonoBehaviour
 [Header("시작 소유 캐릭터 인벤토리 목록")]
 [SerializeField] private List<SaveStorage.OwnedCharacterInventorySaveData> startingOwnedCharacterInventoryList = new List<SaveStorage.OwnedCharacterInventorySaveData>(); // 새 세이브 생성 시 시작으로 저장할 캐릭터 인벤토리 목록
 
+[Header("시작 소유 캐릭터 허기 목록")]
+[SerializeField] private List<StartingOwnedCharacterHungerSetting> startingOwnedCharacterHungerSettingList = new List<StartingOwnedCharacterHungerSetting>(); // 새 세이브 시작 현재 허기 목록
+
 [Header("시작 아군 흑체 수용량 목록")]
 [SerializeField] private List<StartingFriendlyNigrumSetting> startingFriendlyNigrumSettingList = new List<StartingFriendlyNigrumSetting>(); // 새 세이브 시작 흑체 수용량 목록
 
@@ -76,11 +95,30 @@ public class SaveSelection : MonoBehaviour
 [Header("시작 시간 설정")]
 [SerializeField, Range(0, 23)] private int startHour = 0; // 새 세이브 시작 시간
 [SerializeField, Range(0, 59)] private int startMinute = 0; // 새 세이브 시작 분
+
+
+
+
+
 private void Awake() // 시작 전 기본 UI 상태 초기화
 {
     if (saveStorage == null)
     {
         saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // SaveStorage 자동 참조
+    }
+
+    if (characterInfoManager == null)
+    {
+    characterInfoManager = CharacterInfoManager.Instance != null
+        ? CharacterInfoManager.Instance
+        : FindFirstObjectByType<CharacterInfoManager>(); // 캐릭터 정보 매니저 자동 참조
+    }
+
+    if (friendlyNigrumIntakeManager == null)
+    {
+    friendlyNigrumIntakeManager = FriendlyNigrumIntakeManager.Instance != null
+        ? FriendlyNigrumIntakeManager.Instance
+        : FindFirstObjectByType<FriendlyNigrumIntakeManager>(); // 흑체 관리자 자동 참조
     }
 
     SetInitialUIState(); // 기본 UI 상태 적용
@@ -304,14 +342,14 @@ private void TryCreateSave() // 저장본 생성 시도
 bool createResult = saveStorage.CreateSave(
     inputName,
     startingOwnedCharacterList,
-    startingOwnedCharacterStatList,
+    CreateStartingOwnedCharacterStatList(),
     startingOwnedCharacterInventoryList,
     GetStartingFriendlyNigrumSaveList(),
     GetStartingSoundVolumeSaveData(),
     startHour,
     startMinute,
     0
-); // 시작 시간/분/0일차/흑체 수용량/소리 설정 포함 생성
+); // 이름/허기값이 반영된 시작 스탯 목록으로 세이브 생성
 
     if (!createResult) return; // 생성 실패 시 종료
 
@@ -442,31 +480,19 @@ private void UpdateBlockedButtonsState() // 모달 UI 상태에 따라 버튼 �
 
 private List<SaveStorage.FriendlyNigrumSaveData> GetStartingFriendlyNigrumSaveList() // 시작 흑체 설정을 저장 데이터로 변환
 {
-    List<SaveStorage.FriendlyNigrumSaveData> resultList = new List<SaveStorage.FriendlyNigrumSaveData>(); // 반환용 리스트
-
-    for (int i = 0; i < startingFriendlyNigrumSettingList.Count; i++)
+    if (friendlyNigrumIntakeManager == null)
     {
-        StartingFriendlyNigrumSetting setting = startingFriendlyNigrumSettingList[i]; // 현재 시작 설정 참조
-
-        if (setting == null)
-        {
-            continue; // 비어 있으면 건너뜀
-        }
-
-        if (setting.friendlyCharacterDefinition == null)
-        {
-            continue; // 대상 아군이 없으면 건너뜀
-        }
-
-        SaveStorage.FriendlyNigrumSaveData saveData = new SaveStorage.FriendlyNigrumSaveData(); // 저장 데이터 생성
-        saveData.friendlyCharacterDefinition = setting.friendlyCharacterDefinition; // 대상 아군 저장
-        saveData.currentNigrumCapacity = Mathf.Max(0, setting.startCurrentNigrumCapacity); // 시작 현재 흑체 수용량 저장
-        saveData.nigrumDecreaseRemainMinute = 0; // 시작 시 잔여값은 0
-
-        resultList.Add(saveData); // 변환 데이터 추가
+        friendlyNigrumIntakeManager = FriendlyNigrumIntakeManager.Instance != null
+            ? FriendlyNigrumIntakeManager.Instance
+            : FindFirstObjectByType<FriendlyNigrumIntakeManager>(); // 흑체 관리자 재탐색
     }
 
-    return resultList; // 변환된 리스트 반환
+    if (friendlyNigrumIntakeManager != null)
+    {
+        return friendlyNigrumIntakeManager.CreateStartingFriendlyNigrumSaveList(); // 관리자 리스트 기준 시작 흑체값 생성
+    }
+
+    return new List<SaveStorage.FriendlyNigrumSaveData>(); // 관리자 없으면 빈 목록 반환
 }
 
 private SaveStorage.SoundVolumeSaveData GetStartingSoundVolumeSaveData() // 시작 소리 설정을 저장 데이터로 변환
@@ -482,9 +508,114 @@ private SaveStorage.SoundVolumeSaveData GetStartingSoundVolumeSaveData() // 시�
     return soundData; // 변환된 소리 설정 반환
 }
 
+private List<SaveStorage.OwnedCharacterStatData> CreateStartingOwnedCharacterStatList() // 시작 캐릭터 스탯정보 목록 생성
+{
+    List<SaveStorage.OwnedCharacterStatData> resultList = new List<SaveStorage.OwnedCharacterStatData>(); // 결과 리스트
 
+    for (int i = 0; i < startingOwnedCharacterStatList.Count; i++)
+    {
+        SaveStorage.OwnedCharacterStatData sourceStatData = startingOwnedCharacterStatList[i]; // 시작 스탯 원본
 
+        if (sourceStatData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
 
+        GlobalCharacterDefinition definition = CharacterInfoManager.Instance.FindDefinitionByID(
+            sourceStatData.firstRowID,
+            sourceStatData.secondRowID); // 캐릭터 정의 탐색
+
+        if (definition == null)
+        {
+            continue; // 정의가 없으면 건너뜀
+        }
+
+        int startLevel = Mathf.Max(1, sourceStatData.levelstats); // 시작 레벨 보정
+        int startExperience = Mathf.Max(0, sourceStatData.currentExperience); // 시작 경험치 보정
+
+        SaveStorage.OwnedCharacterStatData calculatedData = definition.CreateCalculatedStatData(
+            sourceStatData.firstRowID,
+            sourceStatData.secondRowID,
+            sourceStatData.individualID,
+            startLevel,
+            startExperience); // GlobalCharacterDefinition 기준 스탯 계산
+
+        ApplyDefinitionNameAndHungerToStartingStatData(calculatedData); // 이름/허기값 적용
+
+        resultList.Add(calculatedData); // 결과 추가
+    }
+
+    return resultList; // 시작 스탯 목록 반환
+}
+
+private SaveStorage.OwnedCharacterStatData FindStartingStatTemplate(
+    int firstRowID,
+    int secondRowID,
+    int individualID) // 시작 스탯 템플릿 탐색
+{
+    for (int i = 0; i < startingOwnedCharacterStatList.Count; i++)
+    {
+        SaveStorage.OwnedCharacterStatData statData = startingOwnedCharacterStatList[i]; // 현재 템플릿
+
+        if (statData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (statData.firstRowID == firstRowID &&
+            statData.secondRowID == secondRowID &&
+            statData.individualID == individualID)
+        {
+            return statData; // 일치 템플릿 반환
+        }
+    }
+
+    return null; // 없으면 null
+}
+
+private void ApplyDefinitionNameAndHungerToStartingStatData(SaveStorage.OwnedCharacterStatData statData) // 캐릭터 정의 기준 이름/허기 적용
+{
+    if (statData == null)
+    {
+        return; // 스탯 데이터가 없으면 종료
+    }
+
+    GlobalCharacterDefinition definition = CharacterInfoManager.Instance.FindDefinitionByID(statData.firstRowID, statData.secondRowID); // 캐릭터 정의 탐색
+
+    if (definition == null)
+    {
+        return; // 정의가 없으면 종료
+    }
+
+    statData.characterName = definition.CharacterName; // 캐릭터 이름 저장
+    statData.maxHunger = Mathf.Max(0, definition.BaseMaxHunger); // 최대 허기 저장
+
+    int startCurrentHunger = FindStartingCurrentHunger(statData.firstRowID, statData.secondRowID, statData.individualID); // 시작 현재 허기 탐색
+    statData.currentHunger = Mathf.Clamp(startCurrentHunger, 0, statData.maxHunger); // 최대 허기를 넘지 않게 적용
+    statData.isStarving = statData.currentHunger <= 0; // 공복 여부 적용
+}
+
+private int FindStartingCurrentHunger(int firstRowID, int secondRowID, int individualID) // 시작 현재 허기값 탐색
+{
+    for (int i = 0; i < startingOwnedCharacterHungerSettingList.Count; i++)
+    {
+        StartingOwnedCharacterHungerSetting setting = startingOwnedCharacterHungerSettingList[i]; // 현재 허기 설정
+
+        if (setting == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (setting.firstRowID == firstRowID &&
+            setting.secondRowID == secondRowID &&
+            setting.individualID == individualID)
+        {
+            return setting.startCurrentHunger; // 일치하는 시작 허기 반환
+        }
+    }
+
+    return 0; // 설정이 없으면 0
+}
 
 
 

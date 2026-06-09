@@ -14,12 +14,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GlobalCharacterDefinition
   firstRowID: 1
   secondRowID: 3
+  hungerDecreaseIntervalMinute: 1
+  hungerDecreaseAmount: 1
   inGameCharacterPrefab: {fileID: 42997402686422953, guid: 2727bafa8e9b3fa4b9da2d8b7cb44330, type: 3}
   displayPriority: 0
   detailUIPrefab: {fileID: 0}
   battleCharacterListUIPrefab: {fileID: 0}
   managementCharacterSlotPrefab: {fileID: 0}
   characterInventorySlotPrefab: {fileID: 0}
+  characterName: 
+  baseMaxHunger: 100
+  baseMaxHealth: 1
+  baseAttackPower: 3
+  baseDefenseValue: 20
+  baseBodySize: 4
+  baseSpeedStat: 18
+  basePowerRatePercent: 100
+  baseMoveSpeed: 5
+  baseMoveSpeedPercent: 100
+  baseMaxStaggerAmount: 1
+  baseStaggerResistancePercent: 50
+  increaseMaxHealthPerLevel: 3
+  increaseAttackPowerPerLevel: 5
+  increaseDefenseValuePerLevel: 5
+  increaseBodySizePerLevel: 0
+  increaseSpeedStatPerLevel: 1
+  increasePowerRatePercentPerLevel: 0
+  increaseMoveSpeedPerLevel: 0
+  increaseMoveSpeedPercentPerLevel: 0
+  increaseMaxStaggerAmountPerLevel: 0
+  increaseStaggerResistancePercentPerLevel: 2
+  baseRequiredExperience: 10
+  requiredExperienceLevelMultiplier: 5
   characterUIImageList:
   - displaySprite: {fileID: 21300000, guid: 87200599fefb43b43a4ab7c657d757ef, type: 3}
     anchoredPosition: {x: 0, y: 10}

@@ -567,7 +567,7 @@ private void SpawnFriendlyCharactersFromSaveStorage() // 저장된 소유 캐릭
                 ownedCharacter.individualID); // 저장된 식별 ID 적용
         }
 
-        ApplySavedLevelToFriendlyCharacter(spawnedObject, ownedCharacter); // 저장된 레벨 적용
+        ApplySavedStatToFriendlyCharacter(spawnedObject, ownedCharacter); // 저장된 스탯 적용
     }
 }
 
@@ -579,7 +579,7 @@ private Vector3 GetRandomFriendlySpawnPosition() // 아군 생성 랜덤 위치 
     return centerPosition + new Vector3(randomCircle.x, randomCircle.y, 0f); // XY 평면 기준 위치 반환
 }
 
-private void ApplySavedLevelToFriendlyCharacter(GameObject characterObject, SaveStorage.OwnedCharacterData ownedCharacter) // 저장 레벨 적용
+private void ApplySavedStatToFriendlyCharacter(GameObject characterObject, SaveStorage.OwnedCharacterData ownedCharacter) // 저장 스탯 적용
 {
     if (characterObject == null || ownedCharacter == null)
     {
@@ -593,35 +593,17 @@ private void ApplySavedLevelToFriendlyCharacter(GameObject characterObject, Save
         return; // 스탯 시스템이 없으면 종료
     }
 
-    IReadOnlyList<SaveStorage.OwnedCharacterStatData> statList = saveStorage.CurrentOwnedCharacterStatList; // 저장된 스탯 목록
+    SaveStorage.OwnedCharacterStatData statData = saveStorage.FindCurrentOwnedCharacterStatData(
+        ownedCharacter.firstRowID,
+        ownedCharacter.secondRowID,
+        ownedCharacter.individualID); // 저장된 스탯 탐색
 
-    for (int i = 0; i < statList.Count; i++)
+    if (statData == null)
     {
-        SaveStorage.OwnedCharacterStatData statData = statList[i]; // 현재 스탯 데이터
-
-        if (statData == null)
-        {
-            continue; // 비어 있으면 건너뜀
-        }
-
-        if (statData.firstRowID != ownedCharacter.firstRowID)
-        {
-            continue; // 1열 ID가 다르면 건너뜀
-        }
-
-        if (statData.secondRowID != ownedCharacter.secondRowID)
-        {
-            continue; // 2열 ID가 다르면 건너뜀
-        }
-
-        if (statData.individualID != ownedCharacter.individualID)
-        {
-            continue; // 개체별 ID가 다르면 건너뜀
-        }
-
-        statSystem.SetLevelStats(statData.levelstats); // 저장된 레벨 적용
-        return; // 적용 완료 후 종료
+        return; // 저장 스탯이 없으면 종료
     }
+
+    statSystem.ApplyOwnedCharacterStatData(statData); // 저장된 스탯 그대로 적용
 }
 
 public void RefreshFriendlyAverageLevel() // 아군 평균 레벨 계산
@@ -828,7 +810,37 @@ private void SpawnAttackSkillSlots(CharacterDuelAI targetCharacter) // 공격기
     }
 }
 
+public void SaveAllCurrentFriendlyCharacterBattleStateToSaveStorage() // 현재 전투 아군 상태를 SaveStorage에 저장
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance; // 저장소 재참조
+    }
 
+    if (saveStorage == null)
+    {
+        return; // 저장소가 없으면 종료
+    }
+
+    for (int i = 0; i < friendlyCharacterEntryList.Count; i++)
+    {
+        FriendlyCharacterEntry entry = friendlyCharacterEntryList[i]; // 현재 아군 엔트리
+
+        if (entry == null || entry.CharacterDuelAI == null)
+        {
+            continue; // 캐릭터가 없으면 건너뜀
+        }
+
+        CharacterDuelAI duelAI = entry.CharacterDuelAI; // 아군 AI 참조
+        CharacterStatSystem statSystem = duelAI.GetComponent<CharacterStatSystem>(); // 스탯 시스템 참조
+
+        saveStorage.ApplyBattleCharacterStatToCurrentSave(
+            duelAI.FirstRowID,
+            duelAI.SecondRowID,
+            duelAI.IndividualID,
+            statSystem); // 현재 전투 스탯 저장
+    }
+}
 
 
 

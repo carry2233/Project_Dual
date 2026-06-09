@@ -183,7 +183,7 @@ RectTransform:
   m_Father: {fileID: 737319683}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2989,7 +2989,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &981126152
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3206,7 +3206,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1070817877
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3662,6 +3662,7 @@ MonoBehaviour:
   nigrumIntakeRuleList:
   - friendlyCharacterDefinition: {fileID: 11400000, guid: 7ce4b19c46c892f4f94d58aca2830b4e, type: 2}
     maxNigrumCapacity: 100
+    startCurrentNigrumCapacity: 40
     decreaseIntervalMinute: 3
     nigrumDecreaseAmountPerInterval: 1
 --- !u!4 &1201474656
@@ -5919,10 +5920,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveSelection
   worldMapSceneName: 002_World_Map_Scene
+  characterInfoManager: {fileID: 649652973}
   saveStorage: {fileID: 1871097357}
   saveSlotButtonPrefab: {fileID: 5423430083317666909, guid: e0e2592958555084d90180cf249f9e15, type: 3}
   contentRectTransform: {fileID: 770366914}
   targetGridLayoutGroup: {fileID: 770366915}
+  friendlyNigrumIntakeManager: {fileID: 1201474655}
   createSaveButton: {fileID: 1823580857}
   saveNameInputUI: {fileID: 1750526044}
   saveNameInputField: {fileID: 899796105}
@@ -5950,7 +5953,9 @@ MonoBehaviour:
     firstRowID: 1
     secondRowID: 1
     individualID: 11
-    levelstats: 55
+    currentExperience: 0
+    levelUpRequiredExperience: 0
+    levelstats: 3
     baseMoveSpeed: 10
     moveSpeedPercent: 100
     finalMoveSpeed: 0
@@ -5972,7 +5977,9 @@ MonoBehaviour:
     firstRowID: 1
     secondRowID: 2
     individualID: 22
-    levelstats: 66
+    currentExperience: 0
+    levelUpRequiredExperience: 0
+    levelstats: 6
     baseMoveSpeed: 5
     moveSpeedPercent: 200
     finalMoveSpeed: 0
@@ -6011,6 +6018,15 @@ MonoBehaviour:
     - itemAID: 1
       itemBID: 3
       count: 9
+  startingOwnedCharacterHungerSettingList:
+  - firstRowID: 1
+    secondRowID: 1
+    individualID: 11
+    startCurrentHunger: 80
+  - firstRowID: 1
+    secondRowID: 2
+    individualID: 22
+    startCurrentHunger: 60
   startingFriendlyNigrumSettingList:
   - friendlyCharacterDefinition: {fileID: 11400000, guid: 7ce4b19c46c892f4f94d58aca2830b4e, type: 2}
     startCurrentNigrumCapacity: 20
@@ -6052,7 +6068,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1951559499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6220,7 +6236,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1966415359
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6847,7 +6863,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2123406776
 RectTransform:
   m_ObjectHideFlags: 0

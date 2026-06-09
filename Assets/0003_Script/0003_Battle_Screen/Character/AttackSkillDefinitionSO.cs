@@ -14,8 +14,8 @@ public class AttackSkillDefinitionSO : ScriptableObject
     [Header("공격기술 선택 UI")]
     [SerializeField] private DuelSkillSlot attackSkillSlotPrefab; // 공격기술 슬롯 프리팹
 
-    [Header("공격기술 판정 콜라이더")]
-    [SerializeField] private AttackSkillHitbox attackSkillHitboxPrefab; // 공격기술 2D 박스콜라이더 프리팹
+    [Header("공격기술 벽 확인 레이캐스트")]
+    [SerializeField] private float attackSkillDirectionWallCheckDistance = 1f; // 공격기술 시전 방향 벽 확인 거리
 
     [Header("공격기술 돌진 사운드")]
     [SerializeField] private AudioClip dashSoundClip; // 돌진 시 재생할 효과음
@@ -45,7 +45,7 @@ public class AttackSkillDefinitionSO : ScriptableObject
     public int FirstRowID => firstRowID; // A ID 반환
     public int SecondRowID => secondRowID; // B ID 반환
     public DuelSkillSlot AttackSkillSlotPrefab => attackSkillSlotPrefab; // 공격기술 슬롯 프리팹 반환
-    public AttackSkillHitbox AttackSkillHitboxPrefab => attackSkillHitboxPrefab; // 공격기술 히트박스 프리팹 반환
+    public float AttackSkillDirectionWallCheckDistance => attackSkillDirectionWallCheckDistance; // 공격기술 시전 방향 벽 확인 거리 반환
     public AudioClip DashSoundClip => dashSoundClip; // 돌진 효과음 반환
     public float DashSoundVolume => dashSoundVolume; // 돌진 효과음 크기 반환
     public BattleAudioSettings.AudioGroupType DashSoundGroupType => dashSoundGroupType; // 돌진 효과음 그룹 반환

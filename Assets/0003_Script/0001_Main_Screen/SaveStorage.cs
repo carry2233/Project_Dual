@@ -68,6 +68,11 @@ public class OwnedCharacterStatData
     public int secondRowID; // 캐릭터 두 번째 행 ID
     public int individualID; // 캐릭터 개체별 고유 ID
     
+
+    [Header("경험치")]
+    public int currentExperience; // 현재 경험치
+    public int levelUpRequiredExperience; // 레벨업 충족 경험치
+
     [Header("레벨")]
     public int levelstats; // 레벨 수치
 
@@ -524,6 +529,7 @@ private List<OwnedCharacterData> GetOwnedCharacterListCopy(List<OwnedCharacterDa
         copy.secondRowID = source.secondRowID; // 두 번째 행 ID 복사
         copy.individualID = source.individualID; // 개체별 고유 ID 복사
         copy.isDead = source.isDead; // 사망 여부 복사
+        
 
         copyList.Add(copy); // 복사본 추가
     }
@@ -629,7 +635,10 @@ private List<OwnedCharacterStatData> GetOwnedCharacterStatListCopy(List<OwnedCha
         copy.secondRowID = source.secondRowID; // 두 번째 행 ID 복사
         copy.individualID = source.individualID; // 개체별 고유 ID 복사
 
+        copy.currentExperience = source.currentExperience; // 현재 경험치 복사
+        copy.levelUpRequiredExperience = source.levelUpRequiredExperience; // 레벨업 충족 경험치 복사
         copy.levelstats = source.levelstats; // 레벨 복사
+
         copy.baseMoveSpeed = source.baseMoveSpeed; // 기본 이동속도 복사
         copy.moveSpeedPercent = source.moveSpeedPercent; // 이동속도 퍼센트 복사
         copy.finalMoveSpeed = source.finalMoveSpeed; // 최종 이동속도 복사
@@ -648,10 +657,9 @@ private List<OwnedCharacterStatData> GetOwnedCharacterStatListCopy(List<OwnedCha
         copy.characterName = source.characterName; // 캐릭터 이름 복사
         copy.maxHunger = source.maxHunger; // 최대 허기 복사
         copy.currentHunger = source.currentHunger; // 현재 허기 복사
-        copy.maxHunger = source.maxHunger; // 최대 허기 복사
-        copy.currentHunger = source.currentHunger; // 현재 허기 복사
         copy.isStarving = source.isStarving; // 공복 여부 복사
         copy.overweightDebuffStackCount = source.overweightDebuffStackCount; // 무게 디버프 중첩값 복사
+        
         
 
         copyList.Add(copy); // 복사본 추가
@@ -1093,6 +1101,9 @@ public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저�
         entry.currentHour = remainMinute / 60; // 시간 갱신
         entry.currentMinute = remainMinute % 60; // 분 갱신
 
+        ApplyHungerDecreaseByPassedMinute(passedMinute); // 흐른 시간만큼 허기 감소 적용
+        SaveCurrentOwnedCharacterStatListToSelectedSave(); // 변경된 허기값을 선택 저장본과 JSON에 저장
+
         FriendlyNigrumIntakeManager nigrumIntakeManager =
             FriendlyNigrumIntakeManager.Instance != null
                 ? FriendlyNigrumIntakeManager.Instance
@@ -1103,7 +1114,7 @@ public bool AddMinutesToCurrentSelectedTime(int addMinute) // 현재 선택 저�
             nigrumIntakeManager.ApplyPassedMinute(passedMinute); // 흐른 시간만큼 흑체 수용량 감소 적용
         }
 
-        SaveToFile(); // 파일 저장
+        SaveToFile(); // 시간 변경값까지 파일 저장
         return true; // 성공 반환
     }
 
@@ -1488,7 +1499,42 @@ public bool SaveCurrentOwnedCharacterListToSelectedSave() // 현재 소유 캐�
     return false; // 대상 저장본 없음
 }
 
+public bool ApplyBattleCharacterStatToCurrentSave(
+    int firstRowID,
+    int secondRowID,
+    int individualID,
+    CharacterStatSystem statSystem) // 전투 캐릭터 현재 스탯을 저장 데이터에 반영
+{
+    if (statSystem == null)
+    {
+        return false; // 스탯 시스템이 없으면 실패
+    }
 
+    OwnedCharacterStatData statData = FindCurrentOwnedCharacterStatData(firstRowID, secondRowID, individualID); // 저장 스탯 탐색
+
+    if (statData == null)
+    {
+        return false; // 저장 데이터가 없으면 실패
+    }
+
+    statData.levelstats = statSystem.LevelStats; // 레벨 저장
+    statData.attackPower = statSystem.AttackPower; // 공격력 저장
+    statData.defenseValue = statSystem.DefenseValue; // 방어율 저장
+    statData.maxHealth = statSystem.MaxHealth; // 최대체력 저장
+    statData.currentHealth = statSystem.CurrentHealth; // 현재체력 저장
+    statData.bodySize = statSystem.BodySize; // 체급 저장
+    statData.speedStat = statSystem.SpeedStat; // 속도 저장
+    statData.powerRatePercent = statSystem.PowerRatePercent; // 위력률 저장
+    statData.baseMoveSpeed = statSystem.BaseMoveSpeed; // 기본 이동속도 저장
+    statData.moveSpeedPercent = statSystem.MoveSpeedPercent; // 이동속도율 저장
+    statData.finalMoveSpeed = statSystem.FinalMoveSpeed; // 최종 이동속도 저장
+    statData.currentStaggerAmount = statSystem.CurrentStaggerAmount; // 현재 와해량 저장
+
+    SetOwnedCharacterDeadState(firstRowID, secondRowID, individualID, statSystem.IsDead); // 사망 여부 저장
+    SaveCurrentOwnedCharacterStatListToSelectedSave(); // 스탯 목록 저장
+
+    return true; // 저장 성공
+}
 
 
 

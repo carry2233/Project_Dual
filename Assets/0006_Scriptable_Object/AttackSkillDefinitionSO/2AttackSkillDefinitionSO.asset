@@ -16,7 +16,7 @@ MonoBehaviour:
   firstRowID: 0
   secondRowID: 1
   attackSkillSlotPrefab: {fileID: 7606801988712462910, guid: e5d6a136949ab2d4d9aab21599960f5a, type: 3}
-  attackSkillHitboxPrefab: {fileID: 5267774157645631315, guid: ca07f8d7b627b2949997853021ad4df8, type: 3}
+  attackSkillDirectionWallCheckDistance: 5
   dashSoundClip: {fileID: 8300000, guid: 11ccfe860d0f4ca4ba4915471741db13, type: 3}
   dashSoundVolume: 1
   dashSoundGroupType: 1

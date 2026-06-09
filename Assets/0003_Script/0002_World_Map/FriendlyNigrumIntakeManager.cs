@@ -16,6 +16,9 @@ public class FriendlyNigrumIntakeManager : MonoBehaviour
         [Header("흑체 수용량 설정")]
         public int maxNigrumCapacity; // 최대 흑체 수용량
 
+        [Header("시작 흑체 수용량")]
+        public int startCurrentNigrumCapacity; // 새 세이브 생성 시 시작 현재 흑체 수용량
+
         [Header("흑체 감소 설정")]
         public int decreaseIntervalMinute = 1; // 몇 분마다 감소할지
         public int nigrumDecreaseAmountPerInterval = 1; // 주기마다 감소할 흑체 수용량
@@ -146,7 +149,29 @@ public bool HasNigrumIntakeRule(FriendlyCharacterDefinition friendlyCharacterDef
     return false; // 규칙 목록에 없으면 false 반환
 }
 
+public List<SaveStorage.FriendlyNigrumSaveData> CreateStartingFriendlyNigrumSaveList() // 시작 흑체 저장 목록 생성
+{
+    List<SaveStorage.FriendlyNigrumSaveData> resultList = new List<SaveStorage.FriendlyNigrumSaveData>(); // 결과 리스트
 
+    for (int i = 0; i < nigrumIntakeRuleList.Count; i++)
+    {
+        FriendlyNigrumIntakeRule rule = nigrumIntakeRuleList[i]; // 현재 흑체 규칙
+
+        if (rule == null || rule.friendlyCharacterDefinition == null)
+        {
+            continue; // 규칙이 비어있으면 건너뜀
+        }
+
+        SaveStorage.FriendlyNigrumSaveData saveData = new SaveStorage.FriendlyNigrumSaveData(); // 흑체 저장 데이터 생성
+        saveData.friendlyCharacterDefinition = rule.friendlyCharacterDefinition; // 대상 아군 정의 저장
+        saveData.currentNigrumCapacity = Mathf.Clamp(rule.startCurrentNigrumCapacity, 0, Mathf.Max(0, rule.maxNigrumCapacity)); // 시작값 저장
+        saveData.nigrumDecreaseRemainMinute = 0; // 시작 잔여 분 초기화
+
+        resultList.Add(saveData); // 목록에 추가
+    }
+
+    return resultList; // 시작 흑체 저장 목록 반환
+}
 
 
 

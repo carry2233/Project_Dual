@@ -48,6 +48,13 @@ private void Update() // 매 프레임 AI 명령 처리
     {
         return; // 필수 참조가 없으면 종료
     }
+    
+    if (characterStatSystem.IsDead)
+    {
+        characterDuelAI.SetCurrentTarget(null); // 사망 시 현재 타겟 해제
+        navigationMovementSystem.StopMove(); // 이동 정지
+        return; // 사망 상태면 AI 행동 중단
+    }
 
     if (duelSandbagTarget != null && duelSandbagTarget.IsSandbagTarget)
     {
@@ -81,6 +88,19 @@ private void Update() // 매 프레임 AI 명령 처리
 
 private void UpdateChaseTarget(CharacterDuelAI target) // 현재 타겟 추적 처리
 {
+        if (target != null && !characterDuelAI.CanDuelWith(target))
+    {
+        characterDuelAI.SetCurrentTarget(null); // 사망/불가 타겟 해제
+        navigationMovementSystem.StopMove(); // 이동 정지
+        return;
+    }
+
+    if (target == null)
+    {
+        navigationMovementSystem.StopMove();
+        return;
+    }
+    
     if (target == null)
     {
         navigationMovementSystem.StopMove(); // 타겟이 없으면 이동 정지
@@ -115,4 +135,16 @@ private void UpdateChaseTarget(CharacterDuelAI target) // 현재 타겟 추적 �
 
     navigationMovementSystem.SetMoveDestination(target.transform.position); // 타겟 위치로 이동
 }
+
+
+
+
+
+
+
+
+
+
+
+
 }

@@ -1,6 +1,10 @@
 using System.Collections; // 코루틴 사용
 using System.Collections.Generic; // 리스트 사용
 using UnityEngine; // Unity 기본 네임스페이스
+using UnityEngine.SceneManagement; // 씬 이동 사용
+
+
+
 
 /// <summary>
 /// 적 생성 관리자
@@ -46,6 +50,18 @@ public bool isEnemyLevelCalculated; // 적 적용 레벨 계산 완료 여부
     public FriendlyCharacterManager friendlyCharacterManager; // 아군 관리자 참조
 
     public GlobalCharacterManager globalCharacterManager; // 글로벌 캐릭터 관리자 참조
+
+
+    [Header("________________________________________________________________________")]
+
+
+    [Header("전투 종료 설정")]
+[SerializeField] private float battleEndSceneMoveDelay = 2f; // 모든 적 사망 후 씬 이동 대기 시간
+[SerializeField] private string battleEndSceneName; // 전투 종료 후 이동할 씬 이름
+
+[Header("생성된 적 목록")]
+[SerializeField] private List<CharacterStatSystem> spawnedEnemyStatSystemList = new List<CharacterStatSystem>(); // 생성된 적 스탯 목록
+[SerializeField] private bool isBattleEndRoutineRunning; // 전투 종료 처리 중 여부
 
 private void Start() // 시작 시 전투 데이터 수신 후 적 생성 준비
 {
@@ -110,7 +126,8 @@ private void Start() // 시작 시 전투 데이터 수신 후 적 생성 준비
             yield return new WaitForSeconds(randomDelay);
         }
 
-        isSpawning = false;
+        isSpawning = false; // 생성 종료
+        StartCoroutine(CheckAllSpawnedEnemyDeadCoroutine()); // 모든 적 사망 감지 시작
     }
 
     /// <summary>
@@ -143,25 +160,28 @@ private void SpawnSingleEnemy() // 적 1명 생성
             randomSpawnPoint.position,
             Quaternion.identity); // 적 생성
 
-    ApplyEnemyLevel(spawnedEnemy); // 적 레벨 적용
+    ApplyEnemyCalculatedStats(spawnedEnemy, randomEnemyDefinition); // 적 레벨 기준 계산 스탯 적용
 
     RegisterSpawnedEnemy(spawnedEnemy); // 글로벌 캐릭터 매니저 등록
+    RegisterSpawnedEnemyStatSystem(spawnedEnemy); // 생성된 적 사망 감지 목록 등록
 }
 
     /// <summary>
     /// 적 레벨 적용
     /// </summary>
     /// <param name="enemyObject">생성된 적 오브젝트</param>
-private void ApplyEnemyLevel(GameObject enemyObject) // 적 레벨 적용
+private void ApplyEnemyCalculatedStats(
+    GameObject enemyObject,
+    GlobalCharacterDefinition enemyDefinition) // 적 계산 스탯 적용
 {
-    if (enemyObject == null)
+    if (enemyObject == null || enemyDefinition == null)
     {
-        return; // 대상이 없으면 종료
+        return; // 대상 또는 정의가 없으면 종료
     }
 
     if (!isEnemyLevelCalculated)
     {
-        CalculateCurrentEnemyLevel(); // 혹시 계산 전이면 즉시 계산
+        CalculateCurrentEnemyLevel(); // 계산 전이면 적 레벨 계산
     }
 
     CharacterStatSystem statSystem = enemyObject.GetComponent<CharacterStatSystem>(); // 스탯 시스템 참조
@@ -171,7 +191,9 @@ private void ApplyEnemyLevel(GameObject enemyObject) // 적 레벨 적용
         return; // 스탯 시스템이 없으면 종료
     }
 
-    statSystem.SetLevelStats(currentCalculatedEnemyLevel); // 계산 완료된 적 레벨 적용
+    statSystem.ApplyCalculatedStatsFromDefinition(
+        enemyDefinition,
+        currentCalculatedEnemyLevel); // 적 정의값과 레벨 기준으로 스탯 적용
 }
 
     /// <summary>
@@ -296,8 +318,79 @@ private void CalculateCurrentEnemyLevel() // 이번 전투에서 사용할 최�
     isEnemyLevelCalculated = true; // 적 레벨 계산 완료 표시
 }
 
+private void RegisterSpawnedEnemyStatSystem(GameObject enemyObject) // 생성된 적 스탯 등록
+{
+    if (enemyObject == null)
+    {
+        return; // 대상이 없으면 종료
+    }
 
+    CharacterStatSystem statSystem = enemyObject.GetComponent<CharacterStatSystem>(); // 적 스탯 시스템 참조
 
+    if (statSystem == null)
+    {
+        return; // 스탯 시스템이 없으면 종료
+    }
+
+    spawnedEnemyStatSystemList.Add(statSystem); // 사망 감지 목록에 추가
+}
+
+private IEnumerator CheckAllSpawnedEnemyDeadCoroutine() // 모든 생성 적 사망 감지
+{
+    while (!AreAllSpawnedEnemiesDead())
+    {
+        yield return null; // 모든 적 사망 전까지 대기
+    }
+
+    if (isBattleEndRoutineRunning)
+    {
+        yield break; // 이미 종료 처리 중이면 중단
+    }
+
+    isBattleEndRoutineRunning = true; // 종료 처리 시작
+
+    float safeDelay = Mathf.Max(0f, battleEndSceneMoveDelay); // 대기 시간 보정
+
+    if (safeDelay > 0f)
+    {
+        yield return new WaitForSeconds(safeDelay); // 설정 시간 대기
+    }
+
+    if (friendlyCharacterManager != null)
+    {
+        friendlyCharacterManager.SaveAllCurrentFriendlyCharacterBattleStateToSaveStorage(); // 모든 아군 전투 결과 저장
+    }
+
+    if (!string.IsNullOrEmpty(battleEndSceneName))
+    {
+        SceneManager.LoadScene(battleEndSceneName); // 설정 씬으로 이동
+    }
+}
+
+private bool AreAllSpawnedEnemiesDead() // 생성된 모든 적 사망 여부 확인
+{
+    if (spawnedEnemyStatSystemList.Count <= 0)
+    {
+        return false; // 생성된 적이 없으면 전투 종료로 보지 않음
+    }
+
+    for (int i = 0; i < spawnedEnemyStatSystemList.Count; i++)
+    {
+        CharacterStatSystem statSystem = spawnedEnemyStatSystemList[i]; // 현재 적 스탯
+
+        if (statSystem == null)
+        {
+            continue; // 오브젝트가 사라졌으면 죽은 것으로 간주
+        }
+
+        if (!statSystem.IsDead)
+        {
+            return false; // 하나라도 살아있으면 false
+        }
+    }
+
+    return true; // 모두 사망
+}
 
 
 

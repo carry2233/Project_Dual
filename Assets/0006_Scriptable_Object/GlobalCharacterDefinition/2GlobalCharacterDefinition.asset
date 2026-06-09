@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GlobalCharacterDefinition
   firstRowID: 1
   secondRowID: 2
-  hungerDecreaseIntervalMinute: 1
+  hungerDecreaseIntervalMinute: 3
   hungerDecreaseAmount: 1
   inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 48265d171824f02438a23458ccfc1f09, type: 3}
   displayPriority: 0
@@ -22,6 +22,30 @@ MonoBehaviour:
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 6573314813019425848, guid: dec19dd9c3cf68f4aa7c2b132a6045e0, type: 3}
   characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: fc57d870e08194246b89abb89e745009, type: 3}
+  characterName: 
+  baseMaxHunger: 100
+  baseMaxHealth: 1111
+  baseAttackPower: 10
+  baseDefenseValue: 0
+  baseBodySize: 4
+  baseSpeedStat: 10
+  basePowerRatePercent: 100
+  baseMoveSpeed: 5
+  baseMoveSpeedPercent: 100
+  baseMaxStaggerAmount: 100
+  baseStaggerResistancePercent: 0
+  increaseMaxHealthPerLevel: 5
+  increaseAttackPowerPerLevel: 1
+  increaseDefenseValuePerLevel: 10
+  increaseBodySizePerLevel: 0
+  increaseSpeedStatPerLevel: 5
+  increasePowerRatePercentPerLevel: 0
+  increaseMoveSpeedPerLevel: 0
+  increaseMoveSpeedPercentPerLevel: 5
+  increaseMaxStaggerAmountPerLevel: 1
+  increaseStaggerResistancePercentPerLevel: 1
+  baseRequiredExperience: 10
+  requiredExperienceLevelMultiplier: 5
   characterUIImageList:
   - displaySprite: {fileID: 21300000, guid: 87200599fefb43b43a4ab7c657d757ef, type: 3}
     anchoredPosition: {x: 0, y: 10}
