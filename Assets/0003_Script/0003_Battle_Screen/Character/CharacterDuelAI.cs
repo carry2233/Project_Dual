@@ -181,6 +181,14 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [SerializeField] private bool hasStoredPhysicalContactTriggerState; // 물리접촉 콜라이더 원래 트리거 상태 저장 여부
 [SerializeField] private bool storedPhysicalContactTriggerState; // 물리접촉 콜라이더 원래 트리거 상태
 
+[Header("____________________________________________________________")]
+
+
+[Header("치명타 처리 참조")]
+[SerializeField] private CharacterInfoManager characterInfoManager; // 치명타 캐릭터 정의 참조
+[SerializeField] private SaveStorage saveStorage; // 치명타 경험치 저장 참조
+[SerializeField] private FriendlyCharacterManager friendlyCharacterManager; // 레벨업 후 현재 아군 스탯 재적용 참조
+
 private Coroutine skillCastBlockCoroutine; // 시전 금지 타이머 코루틴
 
 private Coroutine attackSkillCoroutine; // 공격기술 진행 코루틴
@@ -375,6 +383,21 @@ private void Start() // 시작 시 필요한 매니저 자동 참조
     if (globalGameRuleManager == null)
     {
         globalGameRuleManager = FindFirstObjectByType<GlobalGameRuleManager>(); // 씬에서 전역 게임 룰 매니저 탐색
+    }
+
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = CharacterInfoManager.Instance;
+    }
+
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance;
+    }
+
+    if (friendlyCharacterManager == null)
+    {
+        friendlyCharacterManager = FindFirstObjectByType<FriendlyCharacterManager>();
     }
 }
 
@@ -2438,38 +2461,60 @@ private void ApplyAttackSkillDamage(AttackSkillDefinitionSO.AttackExecutionData 
 {
     if (attackData == null || currentAttackSkillTarget == null)
     {
-        return; // 필수 정보 없으면 종료
+        return;
     }
 
-    CharacterStatSystem targetStatSystem = currentAttackSkillTarget.GetCharacterStatSystem(); // 피격자 스탯
-    CharacterAnimationPlayer targetAnimationPlayer = currentAttackSkillTarget.GetCharacterAnimationPlayer(); // 피격자 애니메이션
+    CharacterStatSystem targetStatSystem = currentAttackSkillTarget.GetCharacterStatSystem();
+    CharacterAnimationPlayer targetAnimationPlayer = currentAttackSkillTarget.GetCharacterAnimationPlayer();
 
     if (characterStatSystem == null || targetStatSystem == null)
     {
-        return; // 스탯이 없으면 종료
+        return;
     }
 
     int damage = attackData.CalculateAttackDamage(
         characterStatSystem.AttackPower,
-        characterStatSystem.PowerRatePercent); // 최종위력률 * 공격력 / 100 계산
+        characterStatSystem.PowerRatePercent);
 
-int finalHealthDamage = targetStatSystem.ApplyHealthDamage(damage); // 방어력 반영 최종 체력 피해 적용
+    bool isCriticalAttack = characterStatSystem.ConsumeNextAttackSkillCriticalDamageState();
 
-if (finalHealthDamage > 0 && targetAnimationPlayer != null)
-{
-    targetAnimationPlayer.ShowHealthDamageFloater(finalHealthDamage); // 공격기술 체력피해 숫자 표시
-}
+    if (isCriticalAttack)
+    {
+        if (characterInfoManager == null)
+            characterInfoManager = CharacterInfoManager.Instance;
+
+        int criticalDamagePercent = characterInfoManager != null
+            ? characterInfoManager.GetCriticalAttackDamagePercent(firstRowID, secondRowID)
+            : 100;
+
+        damage = Mathf.Max(0, (damage * criticalDamagePercent) / 100);
+    }
+
+    int finalHealthDamage = targetStatSystem.ApplyHealthDamage(damage);
+
+    if (finalHealthDamage > 0 && targetAnimationPlayer != null)
+    {
+        if (isCriticalAttack)
+            targetAnimationPlayer.ShowCriticalHealthDamageFloater(finalHealthDamage);
+        else
+            targetAnimationPlayer.ShowHealthDamageFloater(finalHealthDamage);
+    }
+
+    if (finalHealthDamage > 0 && characterStatSystem.ConsumeNextAttackSkillCriticalExperienceState())
+    {
+        ApplyCriticalHitExperienceReward();
+    }
 
     if (!hasAttackSkillFirstHitOccurred)
     {
-        hasAttackSkillFirstHitOccurred = true; // 첫 실제공격 피격 완료
-        currentAttackSkillTarget.hasAttackSkillFirstHitOccurred = true; // 피격자에도 첫 피격 기록
-        targetAnimationPlayer?.PlayAttackSkillAfterFirstHitLoopAnimation(); // 첫 피격 후 루프 애니메이션 재생 및 변경 잠금
+        hasAttackSkillFirstHitOccurred = true;
+        currentAttackSkillTarget.hasAttackSkillFirstHitOccurred = true;
+        targetAnimationPlayer?.PlayAttackSkillAfterFirstHitLoopAnimation();
     }
 
     if (attackData.UseHitEffect)
     {
-        targetAnimationPlayer?.SpawnAttackSkillHitEffect(attackData.HitEffectData); // 피격자 effectParentRoot 기준 이펙트 생성
+        targetAnimationPlayer?.SpawnAttackSkillHitEffect(attackData.HitEffectData);
     }
 }
 
@@ -2878,8 +2923,48 @@ private void RestoreAttackSkillPhysicalContactTriggerState() // 공격기술 종
     hasStoredPhysicalContactTriggerState = false; // 저장 상태 초기화
 }
 
+private void ApplyCriticalHitExperienceReward() // 치명타 적중 경험치 지급
+{
+    if (characterInfoManager == null)
+        characterInfoManager = CharacterInfoManager.Instance;
 
+    if (saveStorage == null)
+        saveStorage = SaveStorage.Instance;
 
+    if (characterInfoManager == null || saveStorage == null)
+        return;
+
+    int rewardExperience = characterInfoManager.GetCriticalHitExperienceReward(firstRowID, secondRowID);
+
+    if (rewardExperience <= 0)
+        return;
+
+    SaveStorage.OwnedCharacterStatData refreshedStatData;
+    bool isLevelUp = saveStorage.AddCriticalHitExperienceToCurrentOwnedCharacter(
+        firstRowID,
+        secondRowID,
+        individualID,
+        rewardExperience,
+        out refreshedStatData);
+
+    if (!isLevelUp)
+        return;
+
+    if (friendlyCharacterManager == null)
+        friendlyCharacterManager = FindFirstObjectByType<FriendlyCharacterManager>();
+
+    if (friendlyCharacterManager != null)
+    {
+        friendlyCharacterManager.RefreshFriendlyCharacterStatFromSaveStorage(
+            firstRowID,
+            secondRowID,
+            individualID);
+    }
+    else if (refreshedStatData != null && characterStatSystem != null)
+    {
+        characterStatSystem.ApplyOwnedCharacterStatData(refreshedStatData);
+    }
+}
 
 
 

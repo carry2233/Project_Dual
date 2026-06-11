@@ -169,7 +169,11 @@ private void SyncOverweightStackCountToSaveStorage() // 현재 무게 디버프 
         overweightStackCount); // 현재 캐릭터 저장 스탯에 무게 디버프 중첩값 저장
 }
 
-
+public void ClearAllItems() // 모든 아이템 삭제
+{
+    storedItems.Clear();
+    RefreshTotalWeight();
+}
 
 
 

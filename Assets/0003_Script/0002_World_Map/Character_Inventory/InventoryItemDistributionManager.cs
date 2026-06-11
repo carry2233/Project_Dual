@@ -85,6 +85,20 @@ private bool isDragDropped; // 정상 드롭 완료 여부
     private CharacterInventory selectedCharacterInventory; // 현재 선택된 캐릭터 인벤토리
     private List<InventoryDisplaySlotData> currentDisplaySlotItems = new List<InventoryDisplaySlotData>(); // 현재 선택 캐릭터의 슬롯 단위 표시 아이템 목록
 
+
+    [Header("__________________________________________________________")]
+
+
+    [Header("선택 캐릭터 상태 UI")]
+public Slider healthGaugeSlider; // 체력 게이지 슬라이더
+public Slider hungerGaugeSlider; // 허기 게이지 슬라이더
+public Slider nigrumGaugeSlider; // 흑체 게이지 슬라이더
+
+public TMP_Text characterNameText; // 이름 표시 텍스트
+public TMP_Text currentHealthText; // 현재 체력 표시 텍스트
+public TMP_Text currentHungerText; // 현재 허기 표시 텍스트
+public TMP_Text currentNigrumText; // 현재 흑체 표시 텍스트
+
     private int currentPageIndex; // 현재 페이지 인덱스
     private int totalPageCount; // 총 페이지 수
 
@@ -261,20 +275,35 @@ private void CreateCharacterInventoriesFromSave() // 세이브 데이터 기준 
     if (saveStorage == null || characterInventoryPrefab == null || characterInventoryPrefabParent == null)
         return;
 
-    List<SaveStorage.OwnedCharacterInventorySaveData> saveInventoryList = saveStorage.GetCurrentOwnedCharacterInventoryList();
+    List<SaveStorage.OwnedCharacterInventorySaveData> saveInventoryList =
+        saveStorage.GetCurrentOwnedCharacterInventoryList();
 
     for (int i = 0; i < saveInventoryList.Count; i++)
     {
         SaveStorage.OwnedCharacterInventorySaveData saveInventoryData = saveInventoryList[i];
 
+        if (saveInventoryData == null)
+            continue;
+
+        if (!saveStorage.IsCurrentOwnedCharacter(
+            saveInventoryData.firstRowID,
+            saveInventoryData.secondRowID,
+            saveInventoryData.individualID))
+        {
+            continue; // 소유한 아군이 아니면 characterInventoryPrefab 생성 안 함
+        }
+
         CharacterInventory newInventory = Instantiate(characterInventoryPrefab, characterInventoryPrefabParent);
+
         newInventory.SetCharacterID(
             saveInventoryData.firstRowID,
             saveInventoryData.secondRowID,
             saveInventoryData.individualID
         );
 
-        List<CharacterInventoryItemData> convertedItems = ConvertSaveItemsToInventoryItems(saveInventoryData.items);
+        List<CharacterInventoryItemData> convertedItems =
+            ConvertSaveItemsToInventoryItems(saveInventoryData.items);
+
         newInventory.SetItems(convertedItems);
         RefreshCharacterWeightState(newInventory);
 
@@ -377,14 +406,16 @@ private void SelectFirstCharacterInventory() // 우선순위가 가장 낮은 �
 
 public void SelectCharacterInventory(CharacterInventory characterInventory) // 캐릭터 인벤토리 선택
 {
-    CloseItemInteractionPanel(); // 다른 캐릭터 선택으로 아이템 목록이 바뀌면 상호작용 패널 닫기
+    CloseItemInteractionPanel();
 
-    selectedCharacterInventory = characterInventory; // 선택 캐릭터 인벤토리 갱신
-    currentPageIndex = 0; // 페이지를 첫 페이지로 초기화
+    selectedCharacterInventory = characterInventory;
+    currentPageIndex = 0;
 
-    RefreshCurrentSortedItems(); // 표시 아이템 목록 갱신
-    RefreshInventorySlots(); // 슬롯 UI 갱신
-    RefreshSelectedCharacterWeightInfo(); // 무게 UI 갱신
+    RefreshCurrentSortedItems();
+    RefreshInventorySlots();
+    RefreshSelectedCharacterWeightInfo();
+    RefreshSelectedCharacterStatusInfo();
+    RefreshCharacterSlotDeathDisplays();
 }
 
 private void RefreshCurrentSortedItems() // 현재 선택 캐릭터 아이템을 슬롯 단위로 분할 정렬
@@ -499,6 +530,18 @@ private void OpenPanel() // 패널 열기
     if (distributionInventoryPanel != null)
         distributionInventoryPanel.SetActive(true);
 
+    CharacterInventory previousSelectedInventory = selectedCharacterInventory;
+
+    CreateCharacterInventoriesFromSave(); // 저장 데이터 기준 런타임 인벤토리 재생성
+    CreateCharacterSlots(); // 사망 표시 포함 슬롯 재생성
+
+    selectedCharacterInventory = FindRuntimeInventoryBySameID(previousSelectedInventory);
+
+    if (selectedCharacterInventory == null)
+        SelectFirstCharacterInventory();
+    else
+        SelectCharacterInventory(selectedCharacterInventory);
+
     SetWorldInputLocked(true);
     RefreshPanelButtons();
 }
@@ -591,10 +634,17 @@ public void UpdateDragSlotPosition(Vector2 screenPosition) // 드래그 슬롯 �
 
 public void DropDraggedItemToCharacterSlot(CharacterInventorySlot targetSlot) // 캐릭터 슬롯에 아이템 드롭
 {
+
     if (!isDraggingItem || targetSlot == null)
         return;
 
     CharacterInventory targetInventory = targetSlot.TargetInventory;
+
+    if (IsCharacterInventoryDead(targetInventory))
+    {
+        CancelDrag(); // 사망 캐릭터에게 아이템 이동 방지
+        return;
+    }
 
     if (selectedCharacterInventory == null || targetInventory == null)
     {
@@ -926,6 +976,7 @@ private void ConsumeSelectedInteractionItem(ConsumableItemDefinition consumableD
     RefreshInventorySlots(); // 슬롯 UI 갱신
     RefreshSelectedCharacterWeightInfo(); // 무게 UI 갱신
     CloseItemInteractionPanel(); // 패널 닫기
+    RefreshSelectedCharacterStatusInfo(); // 소모 아이템 사용 후 상태 UI 즉시 갱신
 }
 
 private void CloseItemInteractionPanel() // 아이템 상호작용 패널 닫기
@@ -980,6 +1031,118 @@ private bool CanConsumeItemByNigrumRule(ConsumableItemDefinition consumableDefin
 
     return nigrumIntakeManager.HasNigrumIntakeRule(friendlyDefinition); // 흑체 규칙 목록에 있는 아군만 사용 가능
 }
+
+public bool IsCharacterInventoryDead(CharacterInventory characterInventory) // 캐릭터 사망 여부 확인
+{
+    if (saveStorage == null || characterInventory == null)
+        return false;
+
+    return saveStorage.IsCurrentOwnedCharacterDead(
+        characterInventory.firstRowID,
+        characterInventory.secondRowID,
+        characterInventory.individualID
+    );
+}
+
+private void RefreshSelectedCharacterStatusInfo() // 선택 캐릭터 상태 UI 갱신
+{
+    if (saveStorage == null || selectedCharacterInventory == null)
+        return;
+
+    SaveStorage.OwnedCharacterStatData statData = saveStorage.FindCurrentOwnedCharacterStatData(
+        selectedCharacterInventory.firstRowID,
+        selectedCharacterInventory.secondRowID,
+        selectedCharacterInventory.individualID
+    );
+
+    if (statData == null)
+        return;
+
+    if (characterNameText != null)
+        characterNameText.text = statData.characterName;
+
+    SetGauge(healthGaugeSlider, currentHealthText, statData.maxHealth, statData.currentHealth);
+    SetGauge(hungerGaugeSlider, currentHungerText, statData.maxHunger, statData.currentHunger);
+
+    RefreshSelectedCharacterNigrumUI();
+}
+
+private void SetGauge(Slider slider, TMP_Text valueText, int maxValue, int currentValue) // 게이지와 텍스트 적용
+{
+    int safeMax = Mathf.Max(0, maxValue);
+    int safeCurrent = Mathf.Clamp(currentValue, 0, safeMax);
+
+    if (slider != null)
+    {
+        slider.maxValue = safeMax;
+        slider.value = safeCurrent;
+    }
+
+    if (valueText != null)
+        valueText.text = $"{safeMax} / {safeCurrent}";
+}
+
+private void RefreshSelectedCharacterNigrumUI() // 선택 캐릭터 흑체 UI 갱신
+{
+    FriendlyCharacterDefinition friendlyDefinition = GetFriendlyDefinition(selectedCharacterInventory);
+    FriendlyNigrumIntakeManager nigrumManager = FriendlyNigrumIntakeManager.Instance != null
+        ? FriendlyNigrumIntakeManager.Instance
+        : FindFirstObjectByType<FriendlyNigrumIntakeManager>();
+
+    bool hasNigrum = nigrumManager != null && nigrumManager.HasNigrumIntakeRule(friendlyDefinition);
+
+    if (nigrumGaugeSlider != null)
+        nigrumGaugeSlider.gameObject.SetActive(hasNigrum);
+
+    if (currentNigrumText != null)
+        currentNigrumText.gameObject.SetActive(hasNigrum);
+
+    if (hasNigrum == false)
+        return;
+
+    int maxNigrum = nigrumManager.GetMaxNigrumCapacity(friendlyDefinition);
+    SaveStorage.FriendlyNigrumSaveData nigrumData = saveStorage.FindCurrentFriendlyNigrumSaveData(friendlyDefinition);
+    int currentNigrum = nigrumData != null ? nigrumData.currentNigrumCapacity : maxNigrum;
+
+    SetGauge(nigrumGaugeSlider, currentNigrumText, maxNigrum, currentNigrum);
+}
+
+private void RefreshCharacterSlotDeathDisplays() // 캐릭터 슬롯 사망 표시 전체 갱신
+{
+    CharacterInventorySlot[] slots = FindObjectsOfType<CharacterInventorySlot>(true);
+
+    for (int i = 0; i < slots.Length; i++)
+    {
+        if (slots[i] != null)
+            slots[i].RefreshDeathDisplay();
+    }
+}
+
+private CharacterInventory FindRuntimeInventoryBySameID(CharacterInventory targetInventory) // 같은 ID의 런타임 인벤토리 찾기
+{
+    if (targetInventory == null)
+        return null;
+
+    for (int i = 0; i < characterInventories.Count; i++)
+    {
+        CharacterInventory inventory = characterInventories[i];
+
+        if (inventory == null)
+            continue;
+
+        if (inventory.IsSameCharacter(
+            targetInventory.firstRowID,
+            targetInventory.secondRowID,
+            targetInventory.individualID))
+        {
+            return inventory;
+        }
+    }
+
+    return null;
+}
+
+
 
 
 

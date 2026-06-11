@@ -46,7 +46,7 @@ MonoBehaviour:
     isFinishingAttack: 0
   - animationListIndex: 3
     attackStartDelay: 0
-    usePowerRateCorrection: 1
+    usePowerRateCorrection: 0
     powerRateCorrectionValue: 300
     useFixedPowerRate: 0
     fixedPowerRateValue: 0

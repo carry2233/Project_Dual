@@ -100,6 +100,13 @@ public class DamageFloaterSpawnSettings
 [SerializeField] private DamageFloaterCanvasObject staggerDamageFloaterPrefab; // 와해피해 표시용 월드 캔버스 프리팹
 [SerializeField] private DamageFloaterSpawnSettings staggerDamageFloaterSettings = new DamageFloaterSpawnSettings(); // 와해피해 표시 설정
 
+[Header("치명타 체력피해 플로터 설정")]
+[SerializeField] private DamageFloaterCanvasObject criticalHealthDamageFloaterPrefab; // 치명타 체력피해 표시용 플로터 프리팹
+[SerializeField] private DamageFloaterSpawnSettings criticalHealthDamageFloaterSettings = new DamageFloaterSpawnSettings(); // 치명타 체력피해 표시 설정
+[SerializeField] private int pooledCriticalHealthDamageFloaterCount; // 현재 생성된 치명타 플로터 수
+
+
+
 [Header("데미지 플로터 풀링 상태")]
 [SerializeField] private Transform damageFloaterPoolRoot; // 데미지 플로터 풀 부모 오브젝트
 [SerializeField] private int pooledHealthDamageFloaterCount; // 현재 생성된 체력피해 플로터 수
@@ -148,6 +155,9 @@ private readonly List<DamageFloaterCanvasObject> healthDamageFloaterPoolList
 
 private readonly List<DamageFloaterCanvasObject> staggerDamageFloaterPoolList
     = new List<DamageFloaterCanvasObject>(); // 와해피해 플로터 풀 리스트
+
+private readonly List<DamageFloaterCanvasObject> criticalHealthDamageFloaterPoolList
+    = new List<DamageFloaterCanvasObject>(); // 치명타 체력피해 플로터 풀 리스트
 
 public Transform DuelEffectParentRoot => duelEffectParentRoot; // 본인 결투 이펙트 부모 오브젝트 반환
 
@@ -1267,7 +1277,34 @@ public void PlayDeathLoopAnimation() // 사망 애니메이션 루프 재생
     SetAnimationClip(deathAnimationClip); // 사망 애니메이션 클립 적용
 }
 
+public void ShowCriticalHealthDamageFloater(int finalAppliedDamage) // 치명타 체력피해 숫자 표시
+{
+    if (finalAppliedDamage <= 0)
+        return;
 
+    if (criticalHealthDamageFloaterPrefab == null)
+    {
+        ShowHealthDamageFloater(finalAppliedDamage); // 치명타 프리팹이 없으면 기본 체력피해 플로터 사용
+        return;
+    }
+
+    DamageFloaterCanvasObject floaterObject = GetPooledCriticalHealthDamageFloaterObject();
+
+    if (floaterObject == null)
+        return;
+
+    floaterObject.transform.SetParent(damageFloaterSpawnParent, false);
+    floaterObject.gameObject.SetActive(true);
+    floaterObject.InitializeFloater(finalAppliedDamage.ToString(), criticalHealthDamageFloaterSettings);
+}
+
+private DamageFloaterCanvasObject GetPooledCriticalHealthDamageFloaterObject() // 치명타 플로터 가져오기
+{
+    return GetPooledDamageFloaterObject(
+        criticalHealthDamageFloaterPrefab,
+        criticalHealthDamageFloaterPoolList,
+        ref pooledCriticalHealthDamageFloaterCount);
+}
 
 
 

@@ -1,5 +1,11 @@
 using UnityEngine;
 
+
+/// <summary>
+/// 이 스크립트는 현재 전혀사용하지 않기에 수정대상으로 삼지않아야해
+/// </summary>
+
+
 [RequireComponent(typeof(BoxCollider2D))]
 public class AttackSkillHitbox : MonoBehaviour
 {

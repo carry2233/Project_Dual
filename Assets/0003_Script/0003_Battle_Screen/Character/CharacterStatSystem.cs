@@ -84,6 +84,17 @@ public bool IsDead => isDead; // 사망 여부 반환
 [SerializeField] private CharacterDuelAI characterDuelAI; // 본인 캐릭터 AI 참조
 
 
+[Header("________________________________________________________________________________")]
+
+
+[Header("공격기술 치명타 상태")]
+[SerializeField] private bool applyCriticalToNextAttackSkill; // 다음 공격기술에 치명타 피해 적용 여부
+[SerializeField] private bool gainCriticalExperienceOnNextAttackSkillHit; // 다음 공격기술 치명타 적중 시 경험치 획득 여부
+
+public bool ApplyCriticalToNextAttackSkill => applyCriticalToNextAttackSkill;
+public bool GainCriticalExperienceOnNextAttackSkillHit => gainCriticalExperienceOnNextAttackSkillHit;
+
+
 private Coroutine brokenStateCoroutine; // 와해상태 진행 코루틴
 
 public bool IsBrokenState => isBrokenState; // 와해상태 여부 반환
@@ -462,7 +473,25 @@ public void ApplyCalculatedStatsFromDefinition(
     ApplyOwnedCharacterStatData(calculatedData); // 계산된 스탯 적용
 }
 
+public void SetNextAttackSkillCriticalState(bool useCriticalDamage, bool gainExperience) // 다음 공격기술 치명타 상태 설정
+{
+    applyCriticalToNextAttackSkill = useCriticalDamage;
+    gainCriticalExperienceOnNextAttackSkillHit = gainExperience;
+}
 
+public bool ConsumeNextAttackSkillCriticalDamageState() // 다음 공격기술 치명타 피해 상태 1회 소비
+{
+    bool result = applyCriticalToNextAttackSkill;
+    applyCriticalToNextAttackSkill = false;
+    return result;
+}
+
+public bool ConsumeNextAttackSkillCriticalExperienceState() // 다음 공격기술 치명타 경험치 상태 1회 소비
+{
+    bool result = gainCriticalExperienceOnNextAttackSkillHit;
+    gainCriticalExperienceOnNextAttackSkillHit = false;
+    return result;
+}
 
 
 

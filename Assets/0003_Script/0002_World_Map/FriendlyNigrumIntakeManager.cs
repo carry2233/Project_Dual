@@ -61,43 +61,40 @@ public class FriendlyNigrumIntakeManager : MonoBehaviour
         saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // 인스턴스 우선 탐색
     }
 
-    public void ApplyPassedMinute(int passedMinute) // 흐른 시간만큼 흑체 수용량 감소 처리
+public void ApplyPassedMinute(int passedMinute) // 흐른 시간만큼 흑체 수용량 감소 처리
+{
+    if (passedMinute <= 0)
+        return;
+
+    FindSaveStorageIfNeeded();
+
+    if (saveStorage == null)
+        return;
+
+    List<FriendlyCharacterDefinition> deadByNigrumList = new List<FriendlyCharacterDefinition>();
+
+    for (int i = 0; i < nigrumIntakeRuleList.Count; i++)
     {
-        if (passedMinute <= 0)
-        {
-            return; // 시간이 흐르지 않았으면 종료
-        }
+        FriendlyNigrumIntakeRule rule = nigrumIntakeRuleList[i];
 
-        FindSaveStorageIfNeeded(); // SaveStorage 참조 보정
+        if (rule == null || rule.friendlyCharacterDefinition == null)
+            continue;
 
-        if (saveStorage == null)
-        {
-            return; // 저장 참조가 없으면 종료
-        }
+        bool becameDead = saveStorage.ApplyFriendlyNigrumDecrease(
+            rule.friendlyCharacterDefinition,
+            rule.maxNigrumCapacity,
+            rule.decreaseIntervalMinute,
+            rule.nigrumDecreaseAmountPerInterval,
+            passedMinute
+        );
 
-        for (int i = 0; i < nigrumIntakeRuleList.Count; i++)
-        {
-            FriendlyNigrumIntakeRule rule = nigrumIntakeRuleList[i]; // 현재 규칙 참조
-
-            if (rule == null)
-            {
-                continue; // 규칙이 비어 있으면 건너뜀
-            }
-
-            if (rule.friendlyCharacterDefinition == null)
-            {
-                continue; // 대상 아군이 없으면 건너뜀
-            }
-
-            saveStorage.ApplyFriendlyNigrumDecrease(
-                rule.friendlyCharacterDefinition,
-                rule.maxNigrumCapacity,
-                rule.decreaseIntervalMinute,
-                rule.nigrumDecreaseAmountPerInterval,
-                passedMinute
-            ); // SaveStorage의 흑체 저장값 갱신
-        }
+        if (becameDead)
+            deadByNigrumList.Add(rule.friendlyCharacterDefinition);
     }
+
+    if (deadByNigrumList.Count > 0)
+        saveStorage.ProcessNigrumDeathAndRedistributeItems(deadByNigrumList);
+}
 
     public int GetMaxNigrumCapacity(FriendlyCharacterDefinition friendlyCharacterDefinition) // 아군 최대 흑체 수용값 반환
 {

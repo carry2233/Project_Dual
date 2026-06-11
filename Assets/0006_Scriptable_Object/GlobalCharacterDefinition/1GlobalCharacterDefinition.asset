@@ -22,28 +22,32 @@ MonoBehaviour:
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 1c9d70606cdd44f43a1fc3a120a8edfb, type: 3}
   characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: d4d25fb84f0f37349818399be7d5bc03, type: 3}
+  characterName: "\uC73C\uBBF8\uC73C\uBBF8"
+  baseMaxHunger: 100
   baseMaxHealth: 1000
   baseAttackPower: 10
-  baseDefenseValue: 0
+  baseDefenseValue: 10
   baseBodySize: 4
-  baseSpeedStat: 10
+  baseSpeedStat: 50
   basePowerRatePercent: 100
   baseMoveSpeed: 5
   baseMoveSpeedPercent: 100
   baseMaxStaggerAmount: 100
   baseStaggerResistancePercent: 50
-  increaseMaxHealthPerLevel: 5
-  increaseAttackPowerPerLevel: 5
-  increaseDefenseValuePerLevel: 2
+  increaseMaxHealthPerLevel: 1
+  increaseAttackPowerPerLevel: 1
+  increaseDefenseValuePerLevel: 1
   increaseBodySizePerLevel: 0
   increaseSpeedStatPerLevel: 1
-  increasePowerRatePercentPerLevel: 10
+  increasePowerRatePercentPerLevel: 1
   increaseMoveSpeedPerLevel: 0
-  increaseMoveSpeedPercentPerLevel: 20
+  increaseMoveSpeedPercentPerLevel: 1
   increaseMaxStaggerAmountPerLevel: 1
   increaseStaggerResistancePercentPerLevel: 1
   baseRequiredExperience: 10
   requiredExperienceLevelMultiplier: 5
+  criticalAttackDamagePercent: 200
+  criticalHitExperienceReward: 20
   characterUIImageList:
   - displaySprite: {fileID: 21300000, guid: 2b2ff7c2e6d861c4a9581cfa0b88512b, type: 3}
     anchoredPosition: {x: 10, y: 0}

@@ -25,6 +25,7 @@ public class BattleEventRuntimeData
 
     public int minBattleRequiredMinute; // 최소 전투 소요 시간
     public int maxBattleRequiredMinute; // 최대 전투 소요 시간
+    public int battleRequiredMinute; // 이번 전투 실제 소요 시간
 }
 
 [Serializable]
@@ -913,26 +914,45 @@ public void SetCurrentOwnedCharacterInventoryData(OwnedCharacterInventorySaveDat
         return; // 대상이 없으면 종료
     }
 
+    if (!IsCurrentOwnedCharacter(
+        targetInventoryData.firstRowID,
+        targetInventoryData.secondRowID,
+        targetInventoryData.individualID))
+    {
+        return; // 현재 소유한 아군이 아니면 인벤토리 저장 자체를 차단
+    }
+
     for (int i = 0; i < currentOwnedCharacterInventoryList.Count; i++)
     {
-        OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[i]; // 현재 인벤토리 데이터 참조
-        if (inventoryData == null) continue; // 비어 있으면 건너뜀
+        OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[i];
+
+        if (inventoryData == null)
+            continue;
 
         bool isSameCharacter =
             inventoryData.firstRowID == targetInventoryData.firstRowID &&
             inventoryData.secondRowID == targetInventoryData.secondRowID &&
-            inventoryData.individualID == targetInventoryData.individualID; // 같은 캐릭터인지 확인
+            inventoryData.individualID == targetInventoryData.individualID;
 
         if (isSameCharacter)
         {
-            currentOwnedCharacterInventoryList[i] = GetOwnedCharacterInventoryListCopy(new List<OwnedCharacterInventorySaveData> { targetInventoryData })[0]; // 기존 데이터 교체
-            SaveCurrentOwnedCharacterInventoryListToSelectedSave(); // 현재 선택 저장본에 반영
-            return; // 갱신 종료
+            currentOwnedCharacterInventoryList[i] =
+                GetOwnedCharacterInventoryListCopy(
+                    new List<OwnedCharacterInventorySaveData> { targetInventoryData }
+                )[0];
+
+            SaveCurrentOwnedCharacterInventoryListToSelectedSave();
+            return;
         }
     }
 
-    currentOwnedCharacterInventoryList.Add(GetOwnedCharacterInventoryListCopy(new List<OwnedCharacterInventorySaveData> { targetInventoryData })[0]); // 새 데이터 추가
-    SaveCurrentOwnedCharacterInventoryListToSelectedSave(); // 현재 선택 저장본에 반영
+    currentOwnedCharacterInventoryList.Add(
+        GetOwnedCharacterInventoryListCopy(
+            new List<OwnedCharacterInventorySaveData> { targetInventoryData }
+        )[0]
+    );
+
+    SaveCurrentOwnedCharacterInventoryListToSelectedSave();
 }
 
 public bool SaveCurrentOwnedCharacterInventoryListToSelectedSave() // 현재 캐릭터 인벤토리 목록을 선택 저장본에 저장
@@ -984,30 +1004,28 @@ public void StoreBattleEventRuntimeData(BattleOccurrenceEvent battleEvent) // �
 public void SendBattleEventRuntimeDataToEnemySpawnManager(EnemySpawnManager enemySpawnManager) // 적 생성 관리자에게 전투 데이터 전달
 {
     if (enemySpawnManager == null)
-    {
-        return; // 대상이 없으면 종료
-    }
+        return;
 
     if (currentBattleEventRuntimeData == null)
-    {
-        return; // 저장된 전투 데이터가 없으면 종료
-    }
+        return;
 
-    int minMinute = Mathf.Min(currentBattleEventRuntimeData.minBattleRequiredMinute, currentBattleEventRuntimeData.maxBattleRequiredMinute); // 최소값 보정
-    int maxMinute = Mathf.Max(currentBattleEventRuntimeData.minBattleRequiredMinute, currentBattleEventRuntimeData.maxBattleRequiredMinute); // 최대값 보정
-    int battleRequiredMinute = Random.Range(minMinute, maxMinute + 1); // 전투 소요 시간 랜덤 결정
+    int minMinute = Mathf.Min(
+        currentBattleEventRuntimeData.minBattleRequiredMinute,
+        currentBattleEventRuntimeData.maxBattleRequiredMinute
+    );
 
-    AddMinutesToCurrentSelectedTime(battleRequiredMinute); // 전투 소요 시간만큼 현재 시간 증가
+    int maxMinute = Mathf.Max(
+        currentBattleEventRuntimeData.minBattleRequiredMinute,
+        currentBattleEventRuntimeData.maxBattleRequiredMinute
+    );
 
-    TimeSystemManager timeSystemManager = FindFirstObjectByType<TimeSystemManager>(); // 시간 UI 관리자 탐색
-    if (timeSystemManager != null)
-    {
-        timeSystemManager.RefreshTimeUI(); // 시간 UI 갱신
-    }
+    currentBattleEventRuntimeData.battleRequiredMinute =
+        Random.Range(minMinute, maxMinute + 1); // 이번 전투 소요 시간만 결정
 
-    enemySpawnManager.ReceiveBattleEventData(currentBattleEventRuntimeData); // 전투 데이터 전달
-    hasExecutedBattle = true; // 전투씬으로 넘어가 전투 데이터가 사용되었음을 표시
-    ClearBattleEventRuntimeData(); // 전달 후 초기화
+    enemySpawnManager.ReceiveBattleEventData(currentBattleEventRuntimeData);
+
+    hasExecutedBattle = true;
+    ClearBattleEventRuntimeData();
 }
 
 public void ClearBattleEventRuntimeData() // 전투 이벤트 임시 데이터 초기화
@@ -1297,53 +1315,53 @@ public bool SaveCurrentFriendlyNigrumSaveListToSelectedSave() // 현재 아군 �
     return false; // 대상 저장본 없음
 }
 
-public void ApplyFriendlyNigrumDecrease(
+public bool ApplyFriendlyNigrumDecrease(
     FriendlyCharacterDefinition friendlyCharacterDefinition,
     int maxNigrumCapacity,
     int decreaseIntervalMinute,
     int decreaseAmountPerInterval,
-    int passedMinute) // 아군 흑체 감소 규칙 적용
+    int passedMinute) // 흑체 감소 적용 후 사망 전환 여부 반환
 {
-    if (friendlyCharacterDefinition == null)
-    {
-        return; // 대상 아군이 없으면 종료
-    }
+    if (friendlyCharacterDefinition == null || passedMinute <= 0)
+        return false;
 
-    if (passedMinute <= 0)
-    {
-        return; // 시간이 흐르지 않았으면 종료
-    }
+    int safeMaxCapacity = Mathf.Max(0, maxNigrumCapacity);
+    int safeInterval = Mathf.Max(1, decreaseIntervalMinute);
+    int safeDecreaseAmount = Mathf.Max(0, decreaseAmountPerInterval);
 
-    int safeIntervalMinute = Mathf.Max(1, decreaseIntervalMinute); // 감소 주기 보정
-    int safeDecreaseAmount = Mathf.Max(0, decreaseAmountPerInterval); // 감소량 보정
-    int safeMaxCapacity = Mathf.Max(0, maxNigrumCapacity); // 최대 수용량 보정
-
-    FriendlyNigrumSaveData saveData = FindCurrentFriendlyNigrumSaveData(friendlyCharacterDefinition); // 저장 데이터 탐색
+    FriendlyNigrumSaveData saveData = FindCurrentFriendlyNigrumSaveData(friendlyCharacterDefinition);
 
     if (saveData == null)
     {
-        saveData = new FriendlyNigrumSaveData(); // 없으면 새 데이터 생성
-        saveData.friendlyCharacterDefinition = friendlyCharacterDefinition; // 대상 아군 저장
-        saveData.currentNigrumCapacity = safeMaxCapacity; // 기본값은 최대 수용량으로 설정
-        saveData.nigrumDecreaseRemainMinute = 0; // 잔여값 초기화
-        currentFriendlyNigrumSaveList.Add(saveData); // 현재 목록에 추가
+        saveData = new FriendlyNigrumSaveData();
+        saveData.friendlyCharacterDefinition = friendlyCharacterDefinition;
+        saveData.currentNigrumCapacity = safeMaxCapacity;
+        saveData.nigrumDecreaseRemainMinute = 0;
+        currentFriendlyNigrumSaveList.Add(saveData);
     }
 
-    int totalRemainMinute = saveData.nigrumDecreaseRemainMinute + passedMinute; // 기존 잔여값과 흐른 시간 합산
-    int decreaseCount = totalRemainMinute / safeIntervalMinute; // 감소 실행 횟수 계산
-    int newRemainMinute = totalRemainMinute % safeIntervalMinute; // 새 잔여값 계산
+    if (safeDecreaseAmount <= 0)
+    {
+        SaveCurrentFriendlyNigrumSaveListToSelectedSave();
+        return false;
+    }
 
-    int totalDecreaseAmount = decreaseCount * safeDecreaseAmount; // 총 감소량 계산
+    bool wasAlive = saveData.currentNigrumCapacity > 0;
 
-    saveData.currentNigrumCapacity = Mathf.Clamp(
-        saveData.currentNigrumCapacity - totalDecreaseAmount,
-        0,
-        safeMaxCapacity
-    ); // 현재 흑체 수용량 감소 적용
+    saveData.nigrumDecreaseRemainMinute += passedMinute;
 
-    saveData.nigrumDecreaseRemainMinute = newRemainMinute; // 감소 후 잔여값 저장
+    int decreaseCount = saveData.nigrumDecreaseRemainMinute / safeInterval;
+    saveData.nigrumDecreaseRemainMinute %= safeInterval;
 
-    SaveCurrentFriendlyNigrumSaveListToSelectedSave(); // 선택 저장본에 반영
+    if (decreaseCount > 0)
+    {
+        int totalDecreaseAmount = decreaseCount * safeDecreaseAmount;
+        saveData.currentNigrumCapacity = Mathf.Clamp(saveData.currentNigrumCapacity - totalDecreaseAmount, 0, safeMaxCapacity);
+    }
+
+    SaveCurrentFriendlyNigrumSaveListToSelectedSave();
+
+    return wasAlive && saveData.currentNigrumCapacity <= 0;
 }
 
 public void ApplyConsumableValueToCurrentOwnedCharacterStat(
@@ -1536,9 +1554,361 @@ public bool ApplyBattleCharacterStatToCurrentSave(
     return true; // 저장 성공
 }
 
+public bool IsCurrentOwnedCharacterDead(int firstRowID, int secondRowID, int individualID) // 현재 소유 캐릭터 사망 여부 반환
+{
+    for (int i = 0; i < currentOwnedCharacterList.Count; i++)
+    {
+        OwnedCharacterData ownedData = currentOwnedCharacterList[i];
 
+        if (ownedData == null)
+            continue;
 
+        if (ownedData.firstRowID == firstRowID &&
+            ownedData.secondRowID == secondRowID &&
+            ownedData.individualID == individualID)
+        {
+            return ownedData.isDead;
+        }
+    }
 
+    return false;
+}
+
+public void ClearDeadCharacterInventories() // 사망 캐릭터 인벤토리 전체 삭제
+{
+    for (int i = 0; i < currentOwnedCharacterInventoryList.Count; i++)
+    {
+        OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[i];
+
+        if (inventoryData == null)
+            continue;
+
+        bool isDead = IsCurrentOwnedCharacterDead(
+            inventoryData.firstRowID,
+            inventoryData.secondRowID,
+            inventoryData.individualID
+        );
+
+        if (isDead == true)
+            inventoryData.items.Clear();
+    }
+
+    SaveCurrentOwnedCharacterInventoryListToSelectedSave();
+}
+
+public void ProcessNigrumDeathAndRedistributeItems(List<FriendlyCharacterDefinition> deadFriendlyDefinitionList) // 흑체 사망 처리 후 아이템 재분배
+{
+    if (deadFriendlyDefinitionList == null || deadFriendlyDefinitionList.Count <= 0)
+        return;
+
+    List<OwnedCharacterInventoryItemSaveData> collectedItemList = new List<OwnedCharacterInventoryItemSaveData>();
+    List<OwnedCharacterData> deadOwnedCharacterList = new List<OwnedCharacterData>();
+
+    for (int i = 0; i < deadFriendlyDefinitionList.Count; i++)
+    {
+        FriendlyCharacterDefinition friendlyDefinition = deadFriendlyDefinitionList[i];
+
+        if (friendlyDefinition == null || friendlyDefinition.globalCharacterDefinition == null)
+            continue;
+
+        int firstRowID = friendlyDefinition.globalCharacterDefinition.FirstRowID;
+        int secondRowID = friendlyDefinition.globalCharacterDefinition.SecondRowID;
+
+        for (int j = 0; j < currentOwnedCharacterList.Count; j++)
+        {
+            OwnedCharacterData ownedData = currentOwnedCharacterList[j];
+
+            if (ownedData == null)
+                continue;
+
+            if (ownedData.firstRowID != firstRowID || ownedData.secondRowID != secondRowID)
+                continue;
+
+            ownedData.isDead = true; // 먼저 사망 확정
+            deadOwnedCharacterList.Add(ownedData);
+        }
+    }
+
+    for (int i = 0; i < deadOwnedCharacterList.Count; i++)
+    {
+        OwnedCharacterData deadData = deadOwnedCharacterList[i];
+
+        for (int j = 0; j < currentOwnedCharacterInventoryList.Count; j++)
+        {
+            OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[j];
+
+            if (inventoryData == null)
+                continue;
+
+            if (inventoryData.firstRowID != deadData.firstRowID ||
+                inventoryData.secondRowID != deadData.secondRowID ||
+                inventoryData.individualID != deadData.individualID)
+                continue;
+
+            for (int k = 0; k < inventoryData.items.Count; k++)
+            {
+                OwnedCharacterInventoryItemSaveData itemData = inventoryData.items[k];
+
+                if (itemData == null || itemData.count <= 0)
+                    continue;
+
+                collectedItemList.Add(new OwnedCharacterInventoryItemSaveData
+                {
+                    itemAID = itemData.itemAID,
+                    itemBID = itemData.itemBID,
+                    count = itemData.count
+                });
+            }
+
+            inventoryData.items.Clear(); // 죽은 캐릭터 원본 인벤토리 삭제
+            break;
+        }
+    }
+
+    List<OwnedCharacterInventorySaveData> aliveInventoryList = GetAliveCharacterInventorySaveList();
+
+    if (aliveInventoryList.Count > 0)
+        DistributeSaveItemsToAliveInventories(collectedItemList, aliveInventoryList);
+
+    SaveCurrentOwnedCharacterListToSelectedSave();
+    SaveCurrentOwnedCharacterInventoryListToSelectedSave();
+}
+
+private List<OwnedCharacterInventorySaveData> GetAliveCharacterInventorySaveList() // 살아있는 캐릭터 인벤토리 목록 반환
+{
+    List<OwnedCharacterInventorySaveData> resultList = new List<OwnedCharacterInventorySaveData>();
+
+    for (int i = 0; i < currentOwnedCharacterInventoryList.Count; i++)
+    {
+        OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[i];
+
+        if (inventoryData == null)
+            continue;
+
+        bool isDead = IsCurrentOwnedCharacterDead(
+            inventoryData.firstRowID,
+            inventoryData.secondRowID,
+            inventoryData.individualID
+        );
+
+        if (isDead)
+            continue;
+
+        resultList.Add(inventoryData);
+    }
+
+    return resultList;
+}
+
+private void DistributeSaveItemsToAliveInventories(
+    List<OwnedCharacterInventoryItemSaveData> itemList,
+    List<OwnedCharacterInventorySaveData> aliveInventoryList) // 회수 아이템을 생존 캐릭터에게 분배
+{
+    if (itemList == null || itemList.Count <= 0 || aliveInventoryList == null || aliveInventoryList.Count <= 0)
+        return;
+
+    int targetIndex = 0;
+
+    for (int i = 0; i < itemList.Count; i++)
+    {
+        OwnedCharacterInventoryItemSaveData itemData = itemList[i];
+
+        if (itemData == null || itemData.count <= 0)
+            continue;
+
+        for (int count = 0; count < itemData.count; count++)
+        {
+            OwnedCharacterInventorySaveData targetInventory = aliveInventoryList[targetIndex];
+
+            AddOrMergeSaveItem(targetInventory, itemData.itemAID, itemData.itemBID, 1);
+
+            targetIndex++;
+
+            if (targetIndex >= aliveInventoryList.Count)
+                targetIndex = 0;
+        }
+    }
+}
+
+private void AddOrMergeSaveItem(
+    OwnedCharacterInventorySaveData targetInventory,
+    int itemAID,
+    int itemBID,
+    int addCount) // 저장 인벤토리에 아이템 합치기
+{
+    if (targetInventory == null || addCount <= 0)
+        return;
+
+    if (targetInventory.items == null)
+        targetInventory.items = new List<OwnedCharacterInventoryItemSaveData>();
+
+    for (int i = 0; i < targetInventory.items.Count; i++)
+    {
+        OwnedCharacterInventoryItemSaveData itemData = targetInventory.items[i];
+
+        if (itemData == null)
+            continue;
+
+        if (itemData.itemAID == itemAID && itemData.itemBID == itemBID)
+        {
+            itemData.count += addCount;
+            return;
+        }
+    }
+
+    targetInventory.items.Add(new OwnedCharacterInventoryItemSaveData
+    {
+        itemAID = itemAID,
+        itemBID = itemBID,
+        count = addCount
+    });
+}
+
+private OwnedCharacterInventorySaveData FindOriginalCurrentOwnedCharacterInventoryData(
+    int firstRowID,
+    int secondRowID,
+    int individualID) // 원본 현재 소유 캐릭터 인벤토리 데이터 찾기
+{
+    for (int i = 0; i < currentOwnedCharacterInventoryList.Count; i++)
+    {
+        OwnedCharacterInventorySaveData inventoryData = currentOwnedCharacterInventoryList[i];
+
+        if (inventoryData == null)
+            continue;
+
+        if (inventoryData.firstRowID == firstRowID &&
+            inventoryData.secondRowID == secondRowID &&
+            inventoryData.individualID == individualID)
+        {
+            return inventoryData;
+        }
+    }
+
+    return null;
+}
+
+public bool IsCurrentOwnedCharacter(int firstRowID, int secondRowID, int individualID) // 현재 소유한 캐릭터인지 확인
+{
+    if (firstRowID == 0 && secondRowID == 0 && individualID == 0)
+    {
+        return false; // 기본값 ID 인벤토리는 가짜 데이터로 취급
+    }
+
+    for (int i = 0; i < currentOwnedCharacterList.Count; i++)
+    {
+        OwnedCharacterData ownedData = currentOwnedCharacterList[i];
+
+        if (ownedData == null)
+            continue;
+
+        if (ownedData.firstRowID == firstRowID &&
+            ownedData.secondRowID == secondRowID &&
+            ownedData.individualID == individualID)
+        {
+            return true; // 현재 세이브에 소유 중인 캐릭터
+        }
+    }
+
+    return false; // 소유 캐릭터가 아님
+}
+
+public bool AddCriticalHitExperienceToCurrentOwnedCharacter(
+    int firstRowID,
+    int secondRowID,
+    int individualID,
+    int addExperience,
+    out OwnedCharacterStatData refreshedStatData) // 치명타 경험치 지급 및 레벨업 처리
+{
+    refreshedStatData = null;
+
+    if (addExperience <= 0)
+        return false;
+
+    OwnedCharacterStatData statData = FindCurrentOwnedCharacterStatData(firstRowID, secondRowID, individualID);
+
+    if (statData == null)
+        return false;
+
+    CharacterInfoManager characterInfoManager = CharacterInfoManager.Instance;
+
+    if (characterInfoManager == null)
+        return false;
+
+    GlobalCharacterDefinition definition = characterInfoManager.FindDefinitionByID(firstRowID, secondRowID);
+
+    if (definition == null)
+        return false;
+
+    int currentExperience = Mathf.Max(0, statData.currentExperience) + addExperience;
+    int currentLevel = Mathf.Max(1, statData.levelstats);
+    bool isLevelUp = false;
+
+    int requiredExperience = definition.CalculateRequiredExperience(currentLevel);
+
+    while (requiredExperience > 0 && currentExperience >= requiredExperience)
+    {
+        currentExperience -= requiredExperience;
+        currentLevel++;
+        isLevelUp = true;
+        requiredExperience = definition.CalculateRequiredExperience(currentLevel);
+    }
+
+    if (isLevelUp)
+    {
+        int previousCurrentHealth = statData.currentHealth;
+        int previousCurrentStagger = statData.currentStaggerAmount;
+
+        OwnedCharacterStatData calculatedData = definition.CreateCalculatedStatData(
+            firstRowID,
+            secondRowID,
+            individualID,
+            currentLevel,
+            currentExperience);
+
+        calculatedData.characterName = statData.characterName;
+        calculatedData.currentHealth = Mathf.Clamp(previousCurrentHealth, 0, calculatedData.maxHealth);
+        calculatedData.currentStaggerAmount = Mathf.Clamp(previousCurrentStagger, 0, calculatedData.maxStaggerAmount);
+
+        calculatedData.maxHunger = statData.maxHunger;
+        calculatedData.currentHunger = statData.currentHunger;
+        calculatedData.isStarving = statData.isStarving;
+        calculatedData.overweightDebuffStackCount = statData.overweightDebuffStackCount;
+
+        statData.levelstats = calculatedData.levelstats;
+        statData.currentExperience = calculatedData.currentExperience;
+        statData.levelUpRequiredExperience = calculatedData.levelUpRequiredExperience;
+
+        statData.maxHealth = calculatedData.maxHealth;
+        statData.currentHealth = calculatedData.currentHealth;
+        statData.attackPower = calculatedData.attackPower;
+        statData.defenseValue = calculatedData.defenseValue;
+        statData.bodySize = calculatedData.bodySize;
+        statData.speedStat = calculatedData.speedStat;
+        statData.powerRatePercent = calculatedData.powerRatePercent;
+
+        statData.baseMoveSpeed = calculatedData.baseMoveSpeed;
+        statData.moveSpeedPercent = calculatedData.moveSpeedPercent;
+        statData.finalMoveSpeed = calculatedData.finalMoveSpeed;
+
+        statData.maxStaggerAmount = calculatedData.maxStaggerAmount;
+        statData.currentStaggerAmount = calculatedData.currentStaggerAmount;
+        statData.staggerResistancePercent = calculatedData.staggerResistancePercent;
+    }
+    else
+    {
+        statData.currentExperience = currentExperience;
+        statData.levelUpRequiredExperience = definition.CalculateRequiredExperience(currentLevel);
+    }
+
+    SaveCurrentOwnedCharacterStatListToSelectedSave();
+
+    List<OwnedCharacterStatData> copyList = GetOwnedCharacterStatListCopy(
+        new List<OwnedCharacterStatData> { statData });
+
+    refreshedStatData = copyList.Count > 0 ? copyList[0] : null;
+
+    return isLevelUp;
+}
 
 
 

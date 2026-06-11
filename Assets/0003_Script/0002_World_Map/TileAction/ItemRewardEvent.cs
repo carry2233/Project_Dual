@@ -193,15 +193,27 @@ public class ItemRewardEvent : MonoBehaviour
         }
     }
 
-    private List<CharacterInventory> FindSortedFriendlyInventories() // 아군 인벤토리 정렬 목록 찾기
-    {
-        CharacterInventory[] inventories = FindObjectsOfType<CharacterInventory>(true); // 비활성 포함 인벤토리 탐색
+private List<CharacterInventory> FindSortedFriendlyInventories() // 살아있는 아군 인벤토리 정렬 목록 찾기
+{
+    CharacterInventory[] inventories = FindObjectsOfType<CharacterInventory>(true);
 
-        return inventories
-            .Where(inventory => inventory != null)
-            .OrderBy(inventory => GetCharacterPriority(inventory))
-            .ToList();
-    }
+    return inventories
+        .Where(inventory =>
+            inventory != null &&
+            saveStorage != null &&
+            saveStorage.IsCurrentOwnedCharacter(
+                inventory.firstRowID,
+                inventory.secondRowID,
+                inventory.individualID
+            ) &&
+            !saveStorage.IsCurrentOwnedCharacterDead(
+                inventory.firstRowID,
+                inventory.secondRowID,
+                inventory.individualID
+            ))
+        .OrderBy(inventory => GetCharacterPriority(inventory))
+        .ToList();
+}
 
     private int GetCharacterPriority(CharacterInventory inventory) // 캐릭터 지급 우선순위 가져오기
     {
@@ -269,4 +281,21 @@ public class ItemRewardEvent : MonoBehaviour
 
     GiveRewardsToFriendlyInventories(rewardResults); // 아군 인벤토리에 아이템 지급
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

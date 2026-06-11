@@ -842,6 +842,52 @@ public void SaveAllCurrentFriendlyCharacterBattleStateToSaveStorage() // 현재 
     }
 }
 
+public bool RefreshFriendlyCharacterStatFromSaveStorage(
+    int firstRowID,
+    int secondRowID,
+    int individualID) // 저장소 기준으로 현재 씬 아군 스탯 재적용
+{
+    if (saveStorage == null)
+        saveStorage = SaveStorage.Instance;
 
+    if (saveStorage == null)
+        return false;
+
+    SaveStorage.OwnedCharacterStatData statData = saveStorage.FindCurrentOwnedCharacterStatData(
+        firstRowID,
+        secondRowID,
+        individualID);
+
+    if (statData == null)
+        return false;
+
+    for (int i = 0; i < friendlyCharacterEntryList.Count; i++)
+    {
+        FriendlyCharacterEntry entry = friendlyCharacterEntryList[i];
+
+        if (entry == null || entry.CharacterDuelAI == null)
+            continue;
+
+        CharacterDuelAI duelAI = entry.CharacterDuelAI;
+
+        if (duelAI.FirstRowID != firstRowID ||
+            duelAI.SecondRowID != secondRowID ||
+            duelAI.IndividualID != individualID)
+        {
+            continue;
+        }
+
+        CharacterStatSystem statSystem = duelAI.GetComponent<CharacterStatSystem>();
+
+        if (statSystem == null)
+            return false;
+
+        statSystem.ApplyOwnedCharacterStatData(statData);
+        RefreshFriendlyAverageLevel();
+        return true;
+    }
+
+    return false;
+}
 
 }

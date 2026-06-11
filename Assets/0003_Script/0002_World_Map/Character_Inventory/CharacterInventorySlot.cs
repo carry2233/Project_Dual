@@ -18,24 +18,29 @@ public Image highlightImage; // 드래그 중 마우스가 올라왔을 때 색�
 public Color normalColor = Color.white; // 기본 색
 public Color dragHoverColor = Color.yellow; // 드래그 중 마우스가 올라왔을 때 색
 
+[Header("사망 표시")]
+public GameObject deathDisplayObject; // 사망 캐릭터 표시 오브젝트
+
 public CharacterInventory TargetInventory => targetInventory; // 담당 캐릭터 인벤토리 반환
 
     private CharacterInventory targetInventory; // 이 슬롯이 담당하는 캐릭터 인벤토리
     private InventoryItemDistributionManager inventoryManager; // 인벤토리 분포 매니저 참조
     public int DisplayPriority => displayPriority; // 슬롯 나열 우선순위값 반환
 
-    public void Initialize(CharacterInventory newTargetInventory, InventoryItemDistributionManager newInventoryManager, int newDisplayPriority) // 슬롯 초기화
-    {
-        targetInventory = newTargetInventory;
-        inventoryManager = newInventoryManager;
-        displayPriority = newDisplayPriority;
+public void Initialize(CharacterInventory newTargetInventory, InventoryItemDistributionManager newInventoryManager, int newDisplayPriority) // 슬롯 초기화
+{
+    targetInventory = newTargetInventory;
+    inventoryManager = newInventoryManager;
+    displayPriority = newDisplayPriority;
 
-        if (selectButton != null)
-        {
-            selectButton.onClick.RemoveListener(OnClickSlot);
-            selectButton.onClick.AddListener(OnClickSlot);
-        }
+    if (selectButton != null)
+    {
+        selectButton.onClick.RemoveListener(OnClickSlot);
+        selectButton.onClick.AddListener(OnClickSlot);
     }
+
+    RefreshDeathDisplay(); // 사망 표시 갱신
+}
 
 private void OnClickSlot() // 슬롯 클릭 처리
 {
@@ -75,4 +80,21 @@ private void SetHighlightColor(Color targetColor) // 강조 이미지 색상 적
     if (highlightImage != null)
         highlightImage.color = targetColor;
 }
+
+public void RefreshDeathDisplay() // 사망 표시 갱신
+{
+    if (deathDisplayObject == null || inventoryManager == null || targetInventory == null)
+        return;
+
+    deathDisplayObject.SetActive(inventoryManager.IsCharacterInventoryDead(targetInventory));
+}
+
+
+
+
+
+
+
+
+
 }

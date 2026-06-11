@@ -16,6 +16,26 @@ public class CharacterInfoManager : MonoBehaviour
 
     public IReadOnlyList<GlobalCharacterDefinition> GlobalCharacterDefinitionList => globalCharacterDefinitionList; // 전역 정의 리스트 반환
 
+    public int GetCriticalAttackDamagePercent(int firstRowID, int secondRowID) // 캐릭터 치명타 피해 퍼센트 반환
+{
+    GlobalCharacterDefinition definition = FindDefinitionByID(firstRowID, secondRowID);
+
+    if (definition == null)
+        return 100;
+
+    return Mathf.Max(0, definition.CriticalAttackDamagePercent);
+}
+
+public int GetCriticalHitExperienceReward(int firstRowID, int secondRowID) // 캐릭터 치명타 경험치 반환
+{
+    GlobalCharacterDefinition definition = FindDefinitionByID(firstRowID, secondRowID);
+
+    if (definition == null)
+        return 0;
+
+    return Mathf.Max(0, definition.CriticalHitExperienceReward);
+}
+
     private void Awake() // 싱글톤 초기화 및 씬 유지 설정
     {
         if (Instance != null && Instance != this)

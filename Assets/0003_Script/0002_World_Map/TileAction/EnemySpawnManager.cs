@@ -31,6 +31,8 @@ public class EnemySpawnManager : MonoBehaviour
     public float currentMinSpawnDelay; // 최소 생성 딜레이
     public float currentMaxSpawnDelay; // 최대 생성 딜레이
 
+    public int currentBattleRequiredMinute; // 이번 전투 실제 소요 시간
+
     public List<GlobalCharacterDefinition> currentSpawnableEnemyList =
         new List<GlobalCharacterDefinition>(); // 생성 가능한 적 리스트
 
@@ -258,6 +260,7 @@ private void RegisterSpawnedEnemy(GameObject enemyObject) // 생성된 적 등�
     currentEnemyLevelCorrection = battleData.enemyLevelCorrectionValue; // 레벨 보정값 저장
     currentMinSpawnDelay = battleData.minEnemySpawnDelay; // 최소 딜레이 저장
     currentMaxSpawnDelay = battleData.maxEnemySpawnDelay; // 최대 딜레이 저장
+    currentBattleRequiredMinute = battleData.battleRequiredMinute; // 이번 전투 소요 시간 저장
     currentSpawnableEnemyList = new List<GlobalCharacterDefinition>(battleData.spawnableEnemyList); // 적 목록 복사
 }
 
@@ -360,6 +363,13 @@ private IEnumerator CheckAllSpawnedEnemyDeadCoroutine() // 모든 생성 적 사
     {
         friendlyCharacterManager.SaveAllCurrentFriendlyCharacterBattleStateToSaveStorage(); // 모든 아군 전투 결과 저장
     }
+    
+    ApplyBattlePassedTime(); // 전투 종료 후 시간 경과 처리
+
+    if (SaveStorage.Instance != null)
+    {
+        SaveStorage.Instance.ClearDeadCharacterInventories(); // 사망 아군 인벤토리 삭제
+    }
 
     if (!string.IsNullOrEmpty(battleEndSceneName))
     {
@@ -392,7 +402,25 @@ private bool AreAllSpawnedEnemiesDead() // 생성된 모든 적 사망 여부 �
     return true; // 모두 사망
 }
 
+private void ApplyBattlePassedTime() // 전투 종료 후 전투 소요 시간 적용
+{
+    if (currentBattleRequiredMinute <= 0)
+        return;
 
+    if (SaveStorage.Instance != null)
+    {
+        SaveStorage.Instance.AddMinutesToCurrentSelectedTime(currentBattleRequiredMinute);
+    }
+
+    TimeSystemManager timeSystemManager = FindFirstObjectByType<TimeSystemManager>();
+
+    if (timeSystemManager != null)
+    {
+        timeSystemManager.RefreshTimeUI();
+    }
+
+    currentBattleRequiredMinute = 0; // 중복 적용 방지
+}
 
 
 

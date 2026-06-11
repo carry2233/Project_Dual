@@ -190,6 +190,8 @@ MonoBehaviour:
   isDead: 0
   globalCharacterManager: {fileID: 0}
   characterDuelAI: {fileID: 0}
+  applyCriticalToNextAttackSkill: 0
+  gainCriticalExperienceOnNextAttackSkillHit: 0
 --- !u!114 &1415452274839756729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -317,10 +319,6 @@ MonoBehaviour:
   assignedFriendlySelectionOrder: 0
   approachStopDistanceWhenTargetInExternalForce: 3
   isInterruptibleByNewDuelDuringRecovery: 1
-  attackSkillHitboxParentRoot: {fileID: 5585033741951860609}
-  attackSkillWallLayerMask:
-    serializedVersion: 2
-    m_Bits: 64
   attackSkillList:
   - {fileID: 11400000, guid: d5791ae18dd26da4a990b319c4362652, type: 2}
   currentSelectedAttackSkillIndex: 0
@@ -329,15 +327,21 @@ MonoBehaviour:
   hasAttackSkillFirstHitOccurred: 0
   currentAttackSkillTarget: {fileID: 0}
   currentAttackSkillDefinition: {fileID: 0}
-  currentAttackSkillHitbox: {fileID: 0}
   currentAttackSkillFacingDirection: 0
   attackSkillTargetCorrectionLocalPosition: {x: 0, y: 0, z: 0}
   attackSkillTargetCorrectionMoveSpeed: 5
-  attackSkillWallEscapeMoveDistance: 0.25
   skillCastBlockDurationAfterDuelSkill: 0.5
   skillCastBlockDurationAfterAttackSkill: 0.5
   isSkillCastBlocked: 0
   currentSkillCastBlockTimer: 0
+  attackSkillWallLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  hasStoredPhysicalContactTriggerState: 0
+  storedPhysicalContactTriggerState: 0
+  characterInfoManager: {fileID: 0}
+  saveStorage: {fileID: 0}
+  friendlyCharacterManager: {fileID: 0}
 --- !u!114 &5682521965813233513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -541,6 +545,64 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+  criticalHealthDamageFloaterPrefab: {fileID: 5872442240948868380, guid: 7a2eb94822a1ab6459dac0addbc12b9b, type: 3}
+  criticalHealthDamageFloaterSettings:
+    lifetime: 1
+    fadeStartTime: 0.2
+    minimumAlphaPercent: 0
+    fadeDurationToMinimumAlpha: 0.3
+    fadeCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    moveDirection: {x: 0.5, y: 1, z: 0}
+    moveStartTime: 0
+    moveDuration: 0.5
+    moveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  pooledCriticalHealthDamageFloaterCount: 0
   damageFloaterPoolRoot: {fileID: 0}
   pooledHealthDamageFloaterCount: 0
   pooledStaggerDamageFloaterCount: 0

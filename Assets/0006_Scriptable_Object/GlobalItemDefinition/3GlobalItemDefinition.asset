@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GlobalItemDefinition
   itemAID: 1
   itemBID: 3
-  itemName: "2\uC9D1"
+  itemName: "\uC774\uC9D1"
   itemImage: {fileID: 21300000, guid: 0cccfe29b2372244f867338bbf9b9198, type: 3}
   rewardItemDisplaySlotPrefab: {fileID: 6528388091847737991, guid: 108667848a8fef54f88a5acd23fa2319, type: 3}
   maxDurability: 5

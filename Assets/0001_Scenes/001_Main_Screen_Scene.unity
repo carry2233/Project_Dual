@@ -3664,7 +3664,7 @@ MonoBehaviour:
     maxNigrumCapacity: 100
     startCurrentNigrumCapacity: 40
     decreaseIntervalMinute: 3
-    nigrumDecreaseAmountPerInterval: 1
+    nigrumDecreaseAmountPerInterval: 0
 --- !u!4 &1201474656
 Transform:
   m_ObjectHideFlags: 0
@@ -5794,6 +5794,7 @@ MonoBehaviour:
     spawnableEnemyList: []
     minBattleRequiredMinute: 0
     maxBattleRequiredMinute: 0
+    battleRequiredMinute: 0
   lastExecutedEventID: -1
   hasExecutedBattle: 0
 --- !u!4 &1871097358
@@ -5955,7 +5956,7 @@ MonoBehaviour:
     individualID: 11
     currentExperience: 0
     levelUpRequiredExperience: 0
-    levelstats: 3
+    levelstats: 1
     baseMoveSpeed: 10
     moveSpeedPercent: 100
     finalMoveSpeed: 0
@@ -5979,7 +5980,7 @@ MonoBehaviour:
     individualID: 22
     currentExperience: 0
     levelUpRequiredExperience: 0
-    levelstats: 6
+    levelstats: 1
     baseMoveSpeed: 5
     moveSpeedPercent: 200
     finalMoveSpeed: 0
@@ -6004,20 +6005,14 @@ MonoBehaviour:
     items:
     - itemAID: 1
       itemBID: 1
-      count: 30
-    - itemAID: 1
-      itemBID: 3
-      count: 6
+      count: 4
   - firstRowID: 1
     secondRowID: 2
     individualID: 22
     items:
     - itemAID: 1
       itemBID: 2
-      count: 12
-    - itemAID: 1
-      itemBID: 3
-      count: 9
+      count: 3
   startingOwnedCharacterHungerSettingList:
   - firstRowID: 1
     secondRowID: 1

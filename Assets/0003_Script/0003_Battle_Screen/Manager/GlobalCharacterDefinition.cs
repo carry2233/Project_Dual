@@ -140,6 +140,17 @@ public int HungerDecreaseAmount => hungerDecreaseAmount; // 주기당 허기 감
 [Header("레벨 경험치 계수")]
 [SerializeField] private int requiredExperienceLevelMultiplier; // 레벨에 곱해질 계수
 
+
+[Header("________________________________________________________________________________")]
+
+
+[Header("공격기술 치명타 설정")]
+[SerializeField] private int criticalAttackDamagePercent = 150; // 치명타 공격 시 적용될 피해 퍼센트
+[SerializeField] private int criticalHitExperienceReward = 1; // 치명타 적중 시 획득 경험치
+
+public int CriticalAttackDamagePercent => criticalAttackDamagePercent;
+public int CriticalHitExperienceReward => criticalHitExperienceReward;
+
 public CharacterInventorySlot CharacterInventorySlotPrefab => characterInventorySlotPrefab; // 인벤토리 캐릭터 슬롯 프리팹 반환
 
 public List<CharacterUIImageData> characterUIImageList = new List<CharacterUIImageData>();
