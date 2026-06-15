@@ -14,6 +14,16 @@ using UnityEngine.SceneManagement; // 씬 이동 사용
 /// </summary>
 public class EnemySpawnManager : MonoBehaviour
 {
+    [System.Serializable]
+public class TileBattleMapObjectEntry
+{
+    [Header("해당 타일 종류 ID")]
+    public int tilePrefabNumber = -1;
+
+    [Header("활성화될 맵 오브젝트")]
+    public GameObject mapObject;
+}
+
     [Header("적 생성 위치 목록")]
 
     public List<Transform> enemySpawnPointList =
@@ -37,8 +47,8 @@ public class EnemySpawnManager : MonoBehaviour
         new List<GlobalCharacterDefinition>(); // 생성 가능한 적 리스트
 
         [Header("계산된 적 레벨")]
-public int currentCalculatedEnemyLevel = 1; // 이번 전투에서 적에게 적용할 최종 레벨
-public bool isEnemyLevelCalculated; // 적 적용 레벨 계산 완료 여부
+    public int currentCalculatedEnemyLevel = 1; // 이번 전투에서 적에게 적용할 최종 레벨
+    public bool isEnemyLevelCalculated; // 적 적용 레벨 계산 완료 여부
 
     [Header("생성 상태")]
 
@@ -64,6 +74,17 @@ public bool isEnemyLevelCalculated; // 적 적용 레벨 계산 완료 여부
 [Header("생성된 적 목록")]
 [SerializeField] private List<CharacterStatSystem> spawnedEnemyStatSystemList = new List<CharacterStatSystem>(); // 생성된 적 스탯 목록
 [SerializeField] private bool isBattleEndRoutineRunning; // 전투 종료 처리 중 여부
+
+
+[Header("_______________________________________________________________")]
+
+
+[Header("타일 종류별 전투 맵 오브젝트")]
+[SerializeField] private List<TileBattleMapObjectEntry> tileBattleMapObjectList = new List<TileBattleMapObjectEntry>();
+
+[Header("이번 전투 맵 오브젝트 상태")]
+[SerializeField] private GameObject currentActiveMapObject; // 이번에 활성화된 오브젝트
+[SerializeField] private int receivedTilePrefabNumber = -1; // SaveStorage에서 전달받은 타일 종류 ID
 
 private void Start() // 시작 시 전투 데이터 수신 후 적 생성 준비
 {
@@ -262,6 +283,8 @@ private void RegisterSpawnedEnemy(GameObject enemyObject) // 생성된 적 등�
     currentMaxSpawnDelay = battleData.maxEnemySpawnDelay; // 최대 딜레이 저장
     currentBattleRequiredMinute = battleData.battleRequiredMinute; // 이번 전투 소요 시간 저장
     currentSpawnableEnemyList = new List<GlobalCharacterDefinition>(battleData.spawnableEnemyList); // 적 목록 복사
+    receivedTilePrefabNumber = battleData.battleTilePrefabNumber; // 전투 발생 타일 종류 ID 수신
+    ActivateBattleMapObjectByTilePrefabNumber(receivedTilePrefabNumber); // 타일 종류에 맞는 맵 오브젝트 활성화
 }
 
 private IEnumerator InitializeAndStartEnemySpawnCoroutine() // 적 생성 전 필요한 데이터와 레벨 계산을 먼저 완료
@@ -422,7 +445,29 @@ private void ApplyBattlePassedTime() // 전투 종료 후 전투 소요 시간 �
     currentBattleRequiredMinute = 0; // 중복 적용 방지
 }
 
+private void ActivateBattleMapObjectByTilePrefabNumber(int tilePrefabNumber) // 타일 종류 ID에 맞는 맵 오브젝트만 활성화
+{
+    currentActiveMapObject = null;
 
+    for (int i = 0; i < tileBattleMapObjectList.Count; i++)
+    {
+        TileBattleMapObjectEntry entry = tileBattleMapObjectList[i];
+
+        if (entry == null || entry.mapObject == null)
+        {
+            continue;
+        }
+
+        bool shouldActivate = entry.tilePrefabNumber == tilePrefabNumber;
+
+        entry.mapObject.SetActive(shouldActivate);
+
+        if (shouldActivate)
+        {
+            currentActiveMapObject = entry.mapObject;
+        }
+    }
+}
 
 
 

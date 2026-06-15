@@ -54,6 +54,11 @@ public class BattleAudioSettings : MonoBehaviour
         Instance = this; // 싱글톤 인스턴스 저장
     }
 
+    private void Start() // 씬 시작 시 전역 소리 설정 반영
+    {
+        ApplySoundVolumeFromSaveStorage();
+    }
+
     public float GetMasterVolume01() // 전체 볼륨을 0~1로 반환
     {
         return masterVolume / 100f; // 정수 볼륨값 정규화
@@ -173,5 +178,35 @@ public float CalculateZoomAdjustedBaseVolumePercent(AudioGroupType groupType, fl
 
     return Mathf.Lerp(clampedCurrentBaseVolumePercent, minimumBaseVolumePercent, smoothT); // 줌 반영 기본강도 반환
 }
+
+private void ApplySoundVolumeFromSaveStorage() // SaveStorage의 현재 소리 설정으로 전투 사운드 설정 덮어쓰기
+{
+    if (SaveStorage.Instance == null)
+    {
+        return;
+    }
+
+    SaveStorage.Instance.LoadGlobalSoundVolumeSaveData();
+
+    SaveStorage.SoundVolumeSaveData soundData = SaveStorage.Instance.CurrentSoundVolumeSaveData;
+
+    if (soundData == null)
+    {
+        return;
+    }
+
+    masterVolume = Mathf.Clamp(soundData.masterVolume, 0, 100);
+    sfxVolume = Mathf.Clamp(soundData.effectVolume, 0, 100);
+    voiceVolume = Mathf.Clamp(soundData.voiceVolume, 0, 100);
+    bgmVolume = Mathf.Clamp(soundData.bgmVolume, 0, 100);
+    uiVolume = Mathf.Clamp(soundData.uiSoundVolume, 0, 100);
+}
+
+
+
+
+
+
+
 
 }

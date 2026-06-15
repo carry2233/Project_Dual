@@ -83,6 +83,11 @@ public class TileActionManager : MonoBehaviour
 [SerializeField] private GameObject tileMoveExecuteUI; // 타일 이동 실행 UI
 [SerializeField] private Button tileMoveButton; // 최종 타일 이동 버튼
 
+[Header("=======================================================")]
+
+[SerializeField] private Button finalTileMoveCancelButton; // 최종 타일 이동 취소 버튼
+[SerializeField] private Button moveTileSelectionCancelButton; // 이동 타일 선택 중단 버튼
+
 
 [Header("=======================================================")]
 
@@ -136,6 +141,12 @@ private readonly HashSet<TilePrefab> movableTileSet = new HashSet<TilePrefab>();
 
         if (tileMoveButton != null)
             tileMoveButton.onClick.AddListener(ExecuteTileMove); // 최종 타일 이동 버튼 이벤트 연결
+
+        if (finalTileMoveCancelButton != null)
+            finalTileMoveCancelButton.onClick.AddListener(CancelSelectedMoveTargetTile); // 최종 이동 취소 버튼 이벤트 연결
+
+        if (moveTileSelectionCancelButton != null)
+            moveTileSelectionCancelButton.onClick.AddListener(CancelMoveSelectionMode); // 이동 타일 선택 중단 버튼 이벤트 연결
     }
 
 private void Start() // 씬 시작 시 초기화
@@ -169,7 +180,12 @@ private void Start() // 씬 시작 시 초기화
 
     if (eventInfoManager == null)
     {
-    eventInfoManager = EventInfoManager.Instance; // 씬 시작 시 이벤트 정보 관리자 참조
+        eventInfoManager = EventInfoManager.Instance; // 씬 시작 시 이벤트 정보 관리자 참조
+    }
+
+    if (moveTileSelectionCancelButton != null)
+    {
+        moveTileSelectionCancelButton.gameObject.SetActive(false); // 씬 시작 시 이동 타일 선택 중단 버튼 비활성화
     }
 }
 
@@ -194,6 +210,12 @@ private void Start() // 씬 시작 시 초기화
 
         if (tileMoveButton != null)
             tileMoveButton.onClick.RemoveListener(ExecuteTileMove); // 최종 타일 이동 버튼 이벤트 해제
+
+        if (finalTileMoveCancelButton != null)
+            finalTileMoveCancelButton.onClick.RemoveListener(CancelSelectedMoveTargetTile); // 최종 이동 취소 버튼 이벤트 해제
+
+        if (moveTileSelectionCancelButton != null)
+            moveTileSelectionCancelButton.onClick.RemoveListener(CancelMoveSelectionMode); // 이동 타일 선택 중단 버튼 이벤트 해제
     }
 
 private void LateUpdate() // 매 프레임 UI 위치 갱신
@@ -495,6 +517,11 @@ private void StartMoveSelectionMode() // 이동 선택 모드 시작
     selectedMoveTargetTile = null; // 선택 타일 초기화
     isMoveSelectionMode = true; // 이동 선택 모드 활성화
 
+    if (moveTileSelectionCancelButton != null)
+    {
+        moveTileSelectionCancelButton.gameObject.SetActive(true); // 이동 타일 선택 시작 시 중단 버튼 활성화
+    }
+
     tileSelectionManager.SelectTileWithCustomView(
         currentMoveBaseTile,
         selectedRigWorldOffset,
@@ -609,47 +636,62 @@ private void SelectMoveTargetTile(TilePrefab targetTile) // 이동 대상 타일
 
     if (tileMoveExecuteUI != null)
         tileMoveExecuteUI.SetActive(true); // 이동 실행 UI 활성화
+
+    if (moveTileSelectionCancelButton != null)
+    {
+        moveTileSelectionCancelButton.gameObject.SetActive(true); // 최종 확인 상태에서도 선택 중단 버튼 유지
+    }
 }
 
 private void ExecuteTileMove() // 확정된 타일로 플레이어 이동 실행
 {
     if (selectedMoveTargetTile == null || playerTileMembership == null)
     {
-        return; // 이동 대상 또는 플레이어 소속 정보가 없으면 종료
+        return;
     }
 
-    playerTileMembership.SetCurrentTile(selectedMoveTargetTile, selectedMoveTargetTile.transform); // 현재 플레이어 소속 타일 갱신
+    if (moveTileSelectionCancelButton != null)
+        moveTileSelectionCancelButton.gameObject.SetActive(false);
+
+    if (baseEventPanel == null)
+        baseEventPanel = FindFirstObjectByType<BaseEventPanel>();
+
+    if (baseEventPanel != null)
+        baseEventPanel.HideEventUI(); // 타일 이동 시 이벤트 UI 비활성화 + 이벤트 비주얼 삭제
+
+    playerTileMembership.SetCurrentTile(selectedMoveTargetTile, selectedMoveTargetTile.transform);
+
+    if (hexTilePlacementManager != null)
+        hexTilePlacementManager.MarkTileEnteredAndSave(selectedMoveTargetTile); // 이동한 타일 방문 저장
 
     if (tileSelectionManager != null)
-    {
-        tileSelectionManager.ClearSelection(); // 이동 완료 후 현재 선택 해제 실행
-    }
+        tileSelectionManager.ClearSelection();
 
-    ApplySearchUILock(false); // 이동 완료 후 탐색 UI 잠금 해제
+    ApplySearchUILock(false);
 
-    isMoveSelectionMode = false; // 이동 선택 모드 종료
-    currentMoveBaseTile = null; // 기준 타일 초기화
-    hoveredMoveTile = null; // hover 타일 초기화
-    selectedMoveTargetTile = null; // 이동 대상 초기화
-    movableTileSet.Clear(); // 이동 가능 타일 목록 초기화
+    isMoveSelectionMode = false;
+    currentMoveBaseTile = null;
+    hoveredMoveTile = null;
+    selectedMoveTargetTile = null;
+    movableTileSet.Clear();
 
     if (worldCanvas1 != null)
-        worldCanvas1.gameObject.SetActive(false); // 이동 완료 후 월드 캔버스 비활성화
+        worldCanvas1.gameObject.SetActive(false);
 
     if (tileMoveDisplayUI != null)
-        tileMoveDisplayUI.SetActive(false); // 이동 표시 UI 비활성화
+        tileMoveDisplayUI.SetActive(false);
 
     if (tileMoveExecuteUI != null)
-        tileMoveExecuteUI.SetActive(false); // 이동 실행 UI 비활성화
+        tileMoveExecuteUI.SetActive(false);
 
     if (parentPanel != null)
-        parentPanel.gameObject.SetActive(true); // 이동 실행 후 기존 타일 행동 패널 다시 활성화
+        parentPanel.gameObject.SetActive(true);
 
-    RefreshPanelPosition(); // parentPanel 위치 갱신
-    RefreshTileSearchInfo(true); // 새 타일 기준 탐색 정보 갱신
-    UpdateSearchGauge(); // 탐색 게이지 갱신
-    UpdateMoveButtonState(); // 이동 버튼 상태 갱신
-    TryStartDelayedSurpriseBattle(); // 카메라 위치 복귀 실행 후 지연 기습 전투 시도
+    RefreshPanelPosition();
+    RefreshTileSearchInfo(true);
+    UpdateSearchGauge();
+    UpdateMoveButtonState();
+    TryStartDelayedSurpriseBattle();
 }
 
 private void TryStartDelayedSurpriseBattle() // 지연 기습 전투 발생 시도
@@ -763,6 +805,57 @@ private void AddCurrentTileSearchRequiredTime() // 현재 타일 탐색 소요 �
 
     timeSystemManager.AddMinute(searchRequiredMinute); // 탐색 소요 시간만큼 시간 증가
 }
+
+private void CancelSelectedMoveTargetTile() // 최종 타일 이동 취소
+{
+    selectedMoveTargetTile = null; // 확정된 이동 대상 해제
+    hoveredMoveTile = null; // hover 타일 초기화
+
+    if (tileMoveExecuteUI != null)
+        tileMoveExecuteUI.SetActive(false); // 최종 이동 실행 UI 비활성화
+
+    if (tileMoveDisplayUI != null)
+        tileMoveDisplayUI.SetActive(true); // 이동 가능 타일 선택 안내 UI 다시 활성화
+
+    if (worldCanvas1 != null)
+        worldCanvas1.gameObject.SetActive(false); // 선택된 타일 표시 숨김
+
+    isMoveSelectionMode = true; // 이동 타일 선택 상태 유지
+}
+
+private void CancelMoveSelectionMode() // 이동 타일 선택 중단
+{
+    isMoveSelectionMode = false; // 이동 선택 모드 종료
+    currentMoveBaseTile = null; // 기준 타일 초기화
+    hoveredMoveTile = null; // hover 타일 초기화
+    selectedMoveTargetTile = null; // 이동 대상 초기화
+    movableTileSet.Clear(); // 이동 가능 타일 목록 초기화
+
+    if (worldCanvas1 != null)
+        worldCanvas1.gameObject.SetActive(false); // 이동 표시 캔버스 비활성화
+
+    if (tileMoveDisplayUI != null)
+        tileMoveDisplayUI.SetActive(false); // 이동 표시 UI 비활성화
+
+    if (tileMoveExecuteUI != null)
+        tileMoveExecuteUI.SetActive(false); // 최종 이동 실행 UI 비활성화
+
+    if (moveTileSelectionCancelButton != null)
+        moveTileSelectionCancelButton.gameObject.SetActive(false); // 이동 선택 중단 버튼 비활성화
+
+    if (tileSelectionManager != null)
+        tileSelectionManager.ClearSelection(); // 타일 선택 해제 + 카메라 정상 위치 복귀
+
+    if (parentPanel != null)
+        parentPanel.gameObject.SetActive(true); // 기존 타일 행동 패널 복귀
+
+    RefreshPanelPosition(); // 행동 패널 위치 갱신
+    UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+}
+
+
+
+
 
 
 

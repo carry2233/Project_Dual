@@ -155,9 +155,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 1
+  buttonClickBaseVolume: 0.7
 --- !u!1 &6312687488286517466
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,9 +456,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 1
+  buttonClickBaseVolume: 0.7
 --- !u!1 &6741875379958099052
 GameObject:
   m_ObjectHideFlags: 0

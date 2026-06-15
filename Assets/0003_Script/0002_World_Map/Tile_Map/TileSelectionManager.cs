@@ -73,8 +73,12 @@ private bool showDeselectButtonAfterSelection = true; // 선택 연출 완료 �
 private Vector3 customSelectedRigWorldOffset; // 커스텀 선택 루트 오프셋
 private Vector3 customSelectedCameraLocalPosition; // 커스텀 선택 카메라 로컬 위치
 private Vector3 customSelectedCameraLocalEuler; // 커스텀 선택 카메라 로컬 회전
+private bool isTileActionUIOpen = false; // 타일 행동 UI 활성 상태 여부
+private bool isSettingUIOpen = false; // 설정창 활성 상태 여부
 
-    private bool isTileActionUIOpen = false; // 타일 행동 UI 활성 상태 여부
+
+
+
 
 private void Awake() // 시작 전 기본 참조와 초기값 저장
 {
@@ -102,9 +106,9 @@ private void Awake() // 시작 전 기본 참조와 초기값 저장
 
 private void Update() // 매 프레임 클릭 입력 처리
 {
-    if (isSelectionInputBlockedByUI == true || isNotepadUIOpen == true || isTileActionUIOpen == true)
+    if (isSelectionInputBlockedByUI == true || isNotepadUIOpen == true || isTileActionUIOpen == true || isSettingUIOpen == true)
     {
-        return; // 외부 UI, 메모장, 타일 행동 UI 활성 상태면 입력 차단
+        return;
     }
 
     if (Mouse.current == null)
@@ -305,7 +309,8 @@ private void UpdateMovementLock() // 현재 상태에 따라 월드맵 이동 �
         currentState == SelectionState.Deselecting ||
         isSelectionInputBlockedByUI == true ||
         isNotepadUIOpen == true ||
-        isTileActionUIOpen == true; // 타일 행동 UI 활성 중에도 이동 잠금
+        isTileActionUIOpen == true ||
+        isSettingUIOpen == true; // 타일 행동 UI 활성 중에도 이동 잠금
 
     worldMapCameraController.SetMovementLock(shouldLock); // 이동 잠금 적용
 }
@@ -413,4 +418,28 @@ private void BeginSelectTile(TilePrefab tile) // 실제 타일 선택 공통 처
     SetDeselectButtonVisible(false); // 선택 연출 중에는 선택해제 버튼 숨김
     PlaySelectionAnimation(true); // 선택 연출 재생
 }
+
+public void SetSettingUIOpen(bool isOpen) // 설정창 열림 상태 전달
+{
+    isSettingUIOpen = isOpen;
+
+    if (isOpen == true)
+    {
+        ClearSelection(); // 설정창이 열리면 현재 타일 선택 해제
+    }
+
+    UpdateMovementLock();
+}
+
+
+
+
+
+
+
+
+
+
+
+
 }

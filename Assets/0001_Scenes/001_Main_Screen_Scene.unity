@@ -380,9 +380,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &151196731
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,9 +628,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &201333358
 GameObject:
   m_ObjectHideFlags: 0
@@ -2695,9 +2695,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &959179571
 GameObject:
   m_ObjectHideFlags: 0
@@ -3626,9 +3626,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &1201474654
 GameObject:
   m_ObjectHideFlags: 0
@@ -4049,9 +4049,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &1420877356
 GameObject:
   m_ObjectHideFlags: 0
@@ -4207,9 +4207,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &1431762918
 GameObject:
   m_ObjectHideFlags: 0
@@ -4502,9 +4502,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &1459788287
 GameObject:
   m_ObjectHideFlags: 0
@@ -5645,9 +5645,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &1845931490
 GameObject:
   m_ObjectHideFlags: 0
@@ -5784,6 +5784,7 @@ MonoBehaviour:
     voiceVolume: 50
     bgmVolume: 50
     uiSoundVolume: 50
+  globalSoundVolumeSaveFileName: global_sound_volume_setting.json
   currentBattleEventRuntimeData:
     eventID: 0
     minEnemySpawnCount: 0
@@ -5795,6 +5796,7 @@ MonoBehaviour:
     minBattleRequiredMinute: 0
     maxBattleRequiredMinute: 0
     battleRequiredMinute: 0
+    battleTilePrefabNumber: -1
   lastExecutedEventID: -1
   hasExecutedBattle: 0
 --- !u!4 &1871097358
@@ -6025,11 +6027,11 @@ MonoBehaviour:
   startingFriendlyNigrumSettingList:
   - friendlyCharacterDefinition: {fileID: 11400000, guid: 7ce4b19c46c892f4f94d58aca2830b4e, type: 2}
     startCurrentNigrumCapacity: 20
-  startMasterVolume: 86
-  startEffectVolume: 66
+  startMasterVolume: 100
+  startEffectVolume: 100
   startVoiceVolume: 100
-  startBgmVolume: 48
-  startUISoundVolume: 69
+  startBgmVolume: 100
+  startUISoundVolume: 100
   startHour: 9
   startMinute: 0
 --- !u!4 &1943530136
@@ -7072,9 +7074,9 @@ MonoBehaviour:
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
   imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.15
+  imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  buttonClickBaseVolume: 0.4
+  buttonClickBaseVolume: 0.7
 --- !u!1 &2136145139
 GameObject:
   m_ObjectHideFlags: 0

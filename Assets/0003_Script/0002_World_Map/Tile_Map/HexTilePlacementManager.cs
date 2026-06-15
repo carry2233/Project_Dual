@@ -121,6 +121,9 @@ public enum MapShapeType
 [Header("시작점 타일 설정")]
 [SerializeField] private GameObject startPointTilePrefab; // 외곽 1칸에 배치할 시작점 타일 프리팹
 
+[Header("미방문 타일 어둠처리 설정")]
+[SerializeField] private bool useUnvisitedTileDarkness; // 체크 시 방문하지 않은 타일을 어둠처리
+
 private int nextTileNumber = 0; // 다음에 부여할 타일 번호
 
 [System.Serializable]
@@ -336,9 +339,11 @@ private void SpawnPrefabAtCell(Vector3Int cellPosition, GameObject prefabToSpawn
     GameObject spawnedObject = Instantiate(prefabToSpawn, spawnPosition, spawnRotation, parentToUse); // 프리팹 생성
 
     TilePrefab tilePrefab = spawnedObject.GetComponent<TilePrefab>(); // 배치된 타일 프리팹 컴포넌트 가져오기
+
     if (tilePrefab != null)
     {
         tilePrefab.SetTileNumber(nextTileNumber); // 생성 시 타일 번호 지정
+        ApplyTileEnteredVisualState(tilePrefab); // 방문 여부에 따른 어둠/본체 표시 적용
         nextTileNumber++; // 다음 타일 번호 증가
     }
 
@@ -654,9 +659,11 @@ public void LoadPlacementFromJson() // JSON 저장본을 기준으로 배치 복
         spawnedObject.transform.localScale = prefabToSpawn.transform.localScale; // 프리팹 기본 로컬 스케일 적용
 
         TilePrefab tilePrefab = spawnedObject.GetComponent<TilePrefab>(); // 생성된 오브젝트의 타일 프리팹 컴포넌트 가져오기
+
         if (tilePrefab != null)
         {
             tilePrefab.SetTileNumber(tileData.tileNumber); // 저장된 타일 번호 복원
+            ApplyTileEnteredVisualState(tilePrefab); // 방문 여부에 따른 어둠/본체 표시 적용
         }
 
         if (prefabToSpawn == startPointTilePrefab)
@@ -1129,7 +1136,8 @@ private void ApplyPlayerStartTileMembership() // 시작점 타일 정보를 플�
         return;
     }
 
-    playerTileMembership.SetCurrentTile(startTilePrefab, lastSpawnedStartPointTileObject.transform); // 플레이어 현재 타일 정보 설정
+    playerTileMembership.SetCurrentTile(startTilePrefab, lastSpawnedStartPointTileObject.transform);
+    MarkTileEnteredAndSave(startTilePrefab); // 시작 소속 타일 방문 처리 및 저장
 }
 
 private bool HasPlacementSaveFile() // 현재 저장본 ID의 타일 저장본 존재 여부 확인
@@ -1198,6 +1206,39 @@ public List<TilePrefab> GetNeighborTilePrefabs(TilePrefab centerTile) // 기준 
 
     return result; // 주변 1칸 타일 목록 반환
 }
+
+private void ApplyTileEnteredVisualState(TilePrefab tilePrefab) // 타일 방문 상태에 따른 표시 적용
+{
+    if (tilePrefab == null)
+        return;
+
+    bool hasEntered = false;
+
+    if (saveStorage != null)
+    {
+        hasEntered = saveStorage.IsCurrentSaveTileEntered(tilePrefab.TileNumber);
+    }
+
+    tilePrefab.SetTileEnteredState(hasEntered, useUnvisitedTileDarkness);
+}
+
+public void MarkTileEnteredAndSave(TilePrefab tilePrefab) // 타일 방문 처리 및 저장
+{
+    if (tilePrefab == null)
+        return;
+
+    tilePrefab.MarkTileEntered(useUnvisitedTileDarkness);
+
+    if (saveStorage != null)
+    {
+        saveStorage.AddCurrentSaveEnteredTile(tilePrefab.TileNumber);
+    }
+}
+
+
+
+
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected() // 선택 시 원점 셀 중심 위치를 기즈모로 표시

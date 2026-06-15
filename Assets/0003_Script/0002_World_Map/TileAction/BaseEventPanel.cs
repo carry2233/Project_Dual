@@ -40,6 +40,13 @@ public class BaseEventPanel : MonoBehaviour
 [SerializeField] private string battleSceneName; // 전투 이벤트 버튼 클릭 시 이동할 씬 이름
 [SerializeField] private SaveStorage saveStorage; // 전투 데이터 전달용 저장소
 
+
+[Header("_________________________________________________________")]
+
+
+[Header("현재 소속 타일 참조")]
+[SerializeField] private PlayerTileMembership playerTileMembership; // 현재 소속 타일 정보 참조
+
     private GameObject currentEventVisualInstance; // 현재 생성된 이벤트 비주얼 인스턴스
 
     private void Start() // 시작 시 참조 보정
@@ -50,6 +57,11 @@ public class BaseEventPanel : MonoBehaviour
         if (saveStorage == null)
         {
             saveStorage = SaveStorage.Instance; // 저장소 전역 인스턴스 참조
+        }
+
+        if (playerTileMembership == null)
+        {
+            playerTileMembership = FindFirstObjectByType<PlayerTileMembership>();
         }
     }
 
@@ -328,22 +340,34 @@ private void OnBattleEventSlotClicked(BattleOccurrenceEvent battleEvent) // 전�
 {
     if (battleEvent == null)
     {
-        return; // 이벤트가 없으면 종료
+        return;
     }
 
     if (saveStorage == null)
     {
-        saveStorage = SaveStorage.Instance; // 저장소 재참조
+        saveStorage = SaveStorage.Instance;
+    }
+
+    if (playerTileMembership == null)
+    {
+        playerTileMembership = FindFirstObjectByType<PlayerTileMembership>();
+    }
+
+    int battleTilePrefabNumber = -1;
+
+    if (playerTileMembership != null)
+    {
+        battleTilePrefabNumber = playerTileMembership.CurrentTilePrefabNumber;
     }
 
     if (saveStorage != null)
     {
-        saveStorage.StoreBattleEventRuntimeData(battleEvent); // 전투 이벤트 데이터 저장
+        saveStorage.StoreBattleEventRuntimeData(battleEvent, battleTilePrefabNumber);
     }
 
     if (!string.IsNullOrEmpty(battleSceneName))
     {
-        SceneManager.LoadScene(battleSceneName); // 전투 씬 이동
+        SceneManager.LoadScene(battleSceneName);
     }
 }
 

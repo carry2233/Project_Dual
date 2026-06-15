@@ -26,6 +26,7 @@ public class BattleEventRuntimeData
     public int minBattleRequiredMinute; // 최소 전투 소요 시간
     public int maxBattleRequiredMinute; // 최대 전투 소요 시간
     public int battleRequiredMinute; // 이번 전투 실제 소요 시간
+    public int battleTilePrefabNumber = -1; // 전투가 발생한 타일 종류 ID
 }
 
 [Serializable]
@@ -160,6 +161,7 @@ public class SaveEntry
     public List<NotepadPageData> notepadPageList = new List<NotepadPageData>(); // 이 저장본에 소속된 메모장 페이지 목록
     public List<FriendlyNigrumSaveData> friendlyNigrumSaveList = new List<FriendlyNigrumSaveData>(); // 이 저장본에 소속된 아군 흑체 저장 목록
     public SoundVolumeSaveData soundVolumeSaveData = new SoundVolumeSaveData(); // 이 저장본에 소속된 소리 설정
+    public List<int> enteredTileNumberList = new List<int>(); // 이 저장본에서 소속한 적이 있는 타일 번호 목록
 
     public int currentDay; // 현재 일차
     public int currentHour; // 현재 시간
@@ -183,6 +185,9 @@ public List<FriendlyNigrumSaveData> CurrentFriendlyNigrumSaveList => GetFriendly
 
 [Header("현재 소리 설정")]
 [SerializeField] private SoundVolumeSaveData currentSoundVolumeSaveData = new SoundVolumeSaveData(); // 현재 세이브 기준 소리 설정
+
+[Header("전역 소리 설정 저장")]
+[SerializeField] private string globalSoundVolumeSaveFileName = "global_sound_volume_setting.json"; // 전역 소리 설정 파일 이름
 
 public SoundVolumeSaveData CurrentSoundVolumeSaveData => GetSoundVolumeSaveDataCopy(currentSoundVolumeSaveData); // 현재 소리 설정 복사 반환
 
@@ -217,13 +222,15 @@ private void Awake() // 시작 시 전역 인스턴스 및 저장 데이터 로�
 {
     if (instance != null && instance != this)
     {
-        Destroy(gameObject); // 중복 인스턴스 제거
+        Destroy(gameObject);
         return;
     }
 
-    instance = this; // 전역 인스턴스 등록
-    DontDestroyOnLoad(gameObject); // 씬 전환 시 유지
-    LoadFromFile(); // 파일에서 저장 데이터 불러오기
+    instance = this;
+    DontDestroyOnLoad(gameObject);
+
+    LoadFromFile();
+    LoadGlobalSoundVolumeSaveData(); // 전역 소리 설정 불러오기
 }
 
 public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
@@ -247,6 +254,8 @@ public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
         copy.currentDay = source.currentDay; // 현재 일차 복사
         copy.currentHour = source.currentHour; // 현재 시간 복사
         copy.currentMinute = source.currentMinute; // 현재 분 복사
+        copy.enteredTileNumberList = GetIntListCopy(source.enteredTileNumberList); // 방문 타일 목록 복사
+        
         
 
         result.Add(copy); // 복사본 추가
@@ -979,7 +988,7 @@ public bool SaveCurrentOwnedCharacterInventoryListToSelectedSave() // 현재 캐
     return false; // 대상 저장본 없음
 }
 
-public void StoreBattleEventRuntimeData(BattleOccurrenceEvent battleEvent) // 전투 이벤트 데이터 저장
+public void StoreBattleEventRuntimeData(BattleOccurrenceEvent battleEvent, int battleTilePrefabNumber) // 전투 이벤트 데이터 저장
 {
     if (battleEvent == null)
     {
@@ -999,6 +1008,7 @@ public void StoreBattleEventRuntimeData(BattleOccurrenceEvent battleEvent) // �
     currentBattleEventRuntimeData.minBattleRequiredMinute = battleEvent.MinBattleRequiredMinute; // 최소 전투 소요 시간 저장
     currentBattleEventRuntimeData.maxBattleRequiredMinute = battleEvent.MaxBattleRequiredMinute; // 최대 전투 소요 시간 저장
     currentBattleEventRuntimeData.spawnableEnemyList = new List<GlobalCharacterDefinition>(battleEvent.SpawnableEnemyList); // 적 목록 복사
+    currentBattleEventRuntimeData.battleTilePrefabNumber = battleTilePrefabNumber; // 전투 발생 타일 종류 ID 저장
 }
 
 public void SendBattleEventRuntimeDataToEnemySpawnManager(EnemySpawnManager enemySpawnManager) // 적 생성 관리자에게 전투 데이터 전달
@@ -1910,8 +1920,114 @@ public bool AddCriticalHitExperienceToCurrentOwnedCharacter(
     return isLevelUp;
 }
 
+private List<int> GetIntListCopy(List<int> sourceList) // int 리스트 복사
+{
+    List<int> copyList = new List<int>();
 
+    if (sourceList == null)
+        return copyList;
 
+    for (int i = 0; i < sourceList.Count; i++)
+    {
+        copyList.Add(sourceList[i]);
+    }
 
+    return copyList;
+}
+
+public bool IsCurrentSaveTileEntered(int tileNumber) // 현재 선택 저장본에서 방문한 타일인지 확인
+{
+    if (tileNumber < 0)
+        return false;
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i];
+
+        if (entry.saveId != currentSelectedSaveId)
+            continue;
+
+        if (entry.enteredTileNumberList == null)
+            entry.enteredTileNumberList = new List<int>();
+
+        return entry.enteredTileNumberList.Contains(tileNumber);
+    }
+
+    return false;
+}
+
+public bool AddCurrentSaveEnteredTile(int tileNumber) // 현재 선택 저장본에 방문 타일 저장
+{
+    if (tileNumber < 0 || currentSelectedSaveId <= 0)
+        return false;
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i];
+
+        if (entry.saveId != currentSelectedSaveId)
+            continue;
+
+        if (entry.enteredTileNumberList == null)
+            entry.enteredTileNumberList = new List<int>();
+
+        if (!entry.enteredTileNumberList.Contains(tileNumber))
+        {
+            entry.enteredTileNumberList.Add(tileNumber);
+            SaveToFile();
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+public void LoadGlobalSoundVolumeSaveData() // 전역 소리 설정 불러오기
+{
+    string path = GetGlobalSoundVolumeSaveFilePath();
+
+    if (!File.Exists(path))
+    {
+        currentSoundVolumeSaveData = new SoundVolumeSaveData();
+        SaveGlobalSoundVolumeSaveData(currentSoundVolumeSaveData);
+        return;
+    }
+
+    string json = File.ReadAllText(path);
+
+    if (string.IsNullOrEmpty(json))
+    {
+        currentSoundVolumeSaveData = new SoundVolumeSaveData();
+        SaveGlobalSoundVolumeSaveData(currentSoundVolumeSaveData);
+        return;
+    }
+
+    SoundVolumeSaveData loadedData = JsonUtility.FromJson<SoundVolumeSaveData>(json);
+
+    if (loadedData == null)
+    {
+        currentSoundVolumeSaveData = new SoundVolumeSaveData();
+        SaveGlobalSoundVolumeSaveData(currentSoundVolumeSaveData);
+        return;
+    }
+
+    currentSoundVolumeSaveData = GetSoundVolumeSaveDataCopy(loadedData);
+}
+
+public void SaveGlobalSoundVolumeSaveData(SoundVolumeSaveData sourceData) // 전역 소리 설정 저장
+{
+    currentSoundVolumeSaveData = GetSoundVolumeSaveDataCopy(sourceData);
+
+    string path = GetGlobalSoundVolumeSaveFilePath();
+    string json = JsonUtility.ToJson(currentSoundVolumeSaveData, true);
+
+    File.WriteAllText(path, json);
+}
+
+private string GetGlobalSoundVolumeSaveFilePath() // 전역 소리 설정 저장 경로 반환
+{
+    return Path.Combine(Application.persistentDataPath, globalSoundVolumeSaveFileName);
+}
 
 }

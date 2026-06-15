@@ -16,6 +16,43 @@ public class TilePrefab : MonoBehaviour
     [Header("타일 레이캐스트 콜라이더")]
 [SerializeField] private Collider tileRaycastCollider; // 마우스 레이캐스트 감지에 사용할 3D 콜라이더
 
+
+[Header("타일 방문 상태")]
+[SerializeField] private bool hasEnteredTile; // 한 세이브에서 소속한 적이 있는 타일인지 여부
+
+[Header("타일 시야 처리 오브젝트")]
+[SerializeField] private GameObject tileDarknessObject; // 미방문 타일 어둠처리 오브젝트
+[SerializeField] private GameObject tileBodyObject; // 실제 타일 본체 오브젝트
+
+public bool HasEnteredTile => hasEnteredTile;
+
+public void SetTileEnteredState(bool entered, bool useUnvisitedDarkness) // 타일 방문 상태 적용
+{
+    hasEnteredTile = entered;
+
+    if (!useUnvisitedDarkness)
+    {
+        if (tileDarknessObject != null)
+            tileDarknessObject.SetActive(false);
+
+        if (tileBodyObject != null)
+            tileBodyObject.SetActive(true);
+
+        return;
+    }
+
+    if (tileDarknessObject != null)
+        tileDarknessObject.SetActive(!hasEnteredTile);
+
+    if (tileBodyObject != null)
+        tileBodyObject.SetActive(hasEnteredTile);
+}
+
+public void MarkTileEntered(bool useUnvisitedDarkness) // 현재 타일을 방문 처리
+{
+    SetTileEnteredState(true, useUnvisitedDarkness);
+}
+
 public Collider TileRaycastCollider => tileRaycastCollider; // 타일 레이캐스트 콜라이더 반환
 
     public int TilePrefabNumber => tilePrefabNumber; // 프리팹 종류 번호 반환
