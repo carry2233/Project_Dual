@@ -102,35 +102,18 @@ public class SaveSelection : MonoBehaviour
 
 private void Awake() // 시작 전 기본 UI 상태 초기화
 {
-    if (saveStorage == null)
-    {
-        saveStorage = SaveStorage.Instance != null ? SaveStorage.Instance : FindFirstObjectByType<SaveStorage>(); // SaveStorage 자동 참조
-    }
-
-    if (characterInfoManager == null)
-    {
-    characterInfoManager = CharacterInfoManager.Instance != null
-        ? CharacterInfoManager.Instance
-        : FindFirstObjectByType<CharacterInfoManager>(); // 캐릭터 정보 매니저 자동 참조
-    }
-
-    if (friendlyNigrumIntakeManager == null)
-    {
-    friendlyNigrumIntakeManager = FriendlyNigrumIntakeManager.Instance != null
-        ? FriendlyNigrumIntakeManager.Instance
-        : FindFirstObjectByType<FriendlyNigrumIntakeManager>(); // 흑체 관리자 자동 참조
-    }
-
+    CacheRuntimeReferences(); // 씬 재진입 또는 싱글톤 중복 삭제 후 참조 재연결
     SetInitialUIState(); // 기본 UI 상태 적용
 }
 
 private void Start() // 시작 시 저장본 목록 구성
 {
+    CacheRuntimeReferences(); // 실제 사용 직전 참조 재확인
+
     RefreshSaveSlotList(); // 저장본 버튼 목록 새로 생성
     UpdateCreateSaveButtonState(); // 생성 버튼 상태 갱신
     UpdateBlockedButtonsState(); // 모달 UI 상태에 따른 버튼 클릭 가능 여부 갱신
 }
-
     private void OnEnable() // 활성화 시 버튼 이벤트 연결
     {
         AddButtonEvents(); // 버튼 리스너 등록
@@ -217,11 +200,14 @@ private void RemoveButtonEvents() // 버튼 이벤트 해제
 
 public void RefreshSaveSlotList() // 저장본 버튼 목록 다시 생성
 {
+    CacheRuntimeReferences(); // 메인씬 재진입 후 죽은 SaveStorage 참조 방지
+
     ClearCreatedSlotButtons(); // 기존 버튼 제거
 
     if (saveStorage == null || saveSlotButtonPrefab == null || contentRectTransform == null)
     {
         UpdateContentHeight(0); // 참조 부족 시 Content 높이 최소 보정
+        UpdateCreateSaveButtonState(); // 생성 버튼 상태도 같이 갱신
         return; // 생성 종료
     }
 
@@ -241,6 +227,7 @@ public void RefreshSaveSlotList() // 저장본 버튼 목록 다시 생성
     UpdateCreateSaveButtonState(); // 생성 버튼 상태 갱신
     UpdateBlockedButtonsState(); // 현재 모달 UI 상태를 새로 생성된 버튼들에도 반영
 }
+    
     private void ClearCreatedSlotButtons() // 기존 저장본 버튼 제거
     {
         for (int i = 0; i < createdSlotButtonList.Count; i++)
@@ -305,17 +292,42 @@ public void RefreshSaveSlotList() // 저장본 버튼 목록 다시 생성
         return 1; // 자유 배치일 때 기본 1열 처리
     }
 
-    private void UpdateCreateSaveButtonState() // 생성 버튼 클릭 가능 상태 갱신
+private void UpdateCreateSaveButtonState() // 생성 버튼 클릭 가능 상태 갱신
+{
+    if (createSaveButton == null)
     {
-        if (createSaveButton == null || saveStorage == null) return; // 참조 없으면 종료
-
-        createSaveButton.interactable = saveStorage.CanCreateNewSave(); // 최대 저장본 여부에 따라 클릭 가능 설정
+        return;
     }
+
+    CacheSaveStorageReference(); // 생성 버튼 갱신 시점에 SaveStorage 재확인
+
+    if (saveStorage == null)
+    {
+        createSaveButton.interactable = false;
+        return;
+    }
+
+    createSaveButton.interactable = saveStorage.CanCreateNewSave(); // 최대 저장본 여부에 따라 클릭 가능 설정
+}
 
 private void OpenSaveNameInputUI() // 이름 입력 UI 열기
 {
-    if (saveStorage != null && !saveStorage.CanCreateNewSave()) return; // 최대 저장본이면 열지 않음
-    if (saveNameInputUI == null) return; // 참조 없으면 종료
+    CacheRuntimeReferences(); // 생성 UI 열기 전 참조 재확인
+
+    if (saveStorage == null)
+    {
+        return;
+    }
+
+    if (!saveStorage.CanCreateNewSave())
+    {
+        return; // 최대 저장본이면 열지 않음
+    }
+
+    if (saveNameInputUI == null)
+    {
+        return; // 참조 없으면 종료
+    }
 
     saveNameInputUI.SetActive(true); // 이름 입력 UI 활성화
     UpdateBlockedButtonsState(); // 모달 UI 열림 상태 반영
@@ -328,8 +340,17 @@ private void OpenSaveNameInputUI() // 이름 입력 UI 열기
 
 private void TryCreateSave() // 저장본 생성 시도
 {
-    if (saveStorage == null) return; // 저장 참조 없으면 종료
-    if (!saveStorage.CanCreateNewSave()) return; // 최대 저장본이면 종료
+    CacheRuntimeReferences(); // 생성 실행 직전 참조 재확인
+
+    if (saveStorage == null)
+    {
+        return; // 저장 참조 없으면 종료
+    }
+
+    if (!saveStorage.CanCreateNewSave())
+    {
+        return; // 최대 저장본이면 종료
+    }
 
     string inputName = saveNameInputField == null ? string.Empty : saveNameInputField.text; // 입력 이름 가져오기
 
@@ -339,28 +360,38 @@ private void TryCreateSave() // 저장본 생성 시도
         return; // 생성 중단
     }
 
-bool createResult = saveStorage.CreateSave(
-    inputName,
-    startingOwnedCharacterList,
-    CreateStartingOwnedCharacterStatList(),
-    startingOwnedCharacterInventoryList,
-    GetStartingFriendlyNigrumSaveList(),
-    GetStartingSoundVolumeSaveData(),
-    startHour,
-    startMinute,
-    0
-); // 이름/허기값이 반영된 시작 스탯 목록으로 세이브 생성
+    bool createResult = saveStorage.CreateSave(
+        inputName,
+        startingOwnedCharacterList,
+        CreateStartingOwnedCharacterStatList(),
+        startingOwnedCharacterInventoryList,
+        GetStartingFriendlyNigrumSaveList(),
+        GetStartingSoundVolumeSaveData(),
+        startHour,
+        startMinute,
+        0
+    ); // 이름/허기값이 반영된 시작 스탯 목록으로 세이브 생성
 
-    if (!createResult) return; // 생성 실패 시 종료
+    if (!createResult)
+    {
+        return; // 생성 실패 시 종료
+    }
 
     if (saveNameInputUI != null)
     {
         saveNameInputUI.SetActive(false); // 생성 후 이름 입력 UI 비활성화
     }
 
+    if (saveNameInputField != null)
+    {
+        saveNameInputField.text = string.Empty; // 다음 생성을 위해 입력값 초기화
+    }
+
     RefreshSaveSlotList(); // 저장본 버튼 목록 갱신
     UpdateBlockedButtonsState(); // 모달 UI 닫힘 상태 반영
-}    private void ShowEmptyNameWarningUI() // 빈 입력 경고 UI 표시
+}
+
+private void ShowEmptyNameWarningUI() // 빈 입력 경고 UI 표시
     {
         if (emptyNameWarningUI == null) return; // 참조 없으면 종료
 
@@ -389,6 +420,7 @@ public void OpenDeleteConfirmUI(SaveSlotButton targetSlotButton) // 삭제 확�
     deleteConfirmUI.SetActive(true); // 삭제 확인 UI 활성화
     UpdateBlockedButtonsState(); // 모달 UI 열림 상태 반영
 }
+
 private void CloseDeleteConfirmUI() // 삭제 확인 UI 닫기
 {
     if (deleteConfirmUI != null)
@@ -402,6 +434,8 @@ private void CloseDeleteConfirmUI() // 삭제 확인 UI 닫기
 
 private void ExecuteDeletePendingSave() // 삭제 대기 저장본 삭제 실행
 {
+    CacheRuntimeReferences(); // 삭제 실행 직전 SaveStorage 재확인
+
     if (pendingDeleteSlotButton == null)
     {
         CloseDeleteConfirmUI(); // 대상 없으면 UI 닫기
@@ -410,29 +444,45 @@ private void ExecuteDeletePendingSave() // 삭제 대기 저장본 삭제 실행
 
     if (saveStorage == null)
     {
-        Debug.LogWarning("[SaveSelection] SaveStorage 참조가 없어 삭제할 수 없습니다."); // 저장 참조 없음 경고
-        CloseDeleteConfirmUI(); // 저장 참조 없으면 UI 닫기
-        return; // 삭제 종료
+        Debug.LogWarning("[SaveSelection] SaveStorage 참조가 없어 삭제할 수 없습니다.");
+        CloseDeleteConfirmUI();
+        return;
     }
 
     int targetSaveId = pendingDeleteSlotButton.SaveId; // 삭제 대상 고유 ID 저장
     bool deleteResult = saveStorage.DeleteSaveById(targetSaveId); // 고유 ID 기준 저장본 삭제
 
-    Debug.Log($"[SaveSelection] 삭제 시도 - SaveId: {targetSaveId}, 결과: {deleteResult}"); // 삭제 결과 로그
+    Debug.Log($"[SaveSelection] 삭제 시도 - SaveId: {targetSaveId}, 결과: {deleteResult}");
 
     CloseDeleteConfirmUI(); // 삭제 확인 UI 닫기
 
-    if (!deleteResult) return; // 삭제 실패 시 종료
+    if (!deleteResult)
+    {
+        return; // 삭제 실패 시 종료
+    }
 
     RefreshSaveSlotList(); // 저장본 버튼 목록 다시 생성
-    Debug.Log("[SaveSelection] 저장본 목록 갱신 완료"); // 목록 갱신 로그
+    Debug.Log("[SaveSelection] 저장본 목록 갱신 완료");
 }
 
 public void NotifySaveSlotClicked(SaveSlotButton clickedSlotButton) // 저장본 본체 클릭 알림 처리
 {
-    if (clickedSlotButton == null) return; // 대상이 없으면 종료
-    if (saveStorage == null) return; // 저장 참조가 없으면 종료
-    if (string.IsNullOrEmpty(worldMapSceneName)) return; // 이동할 씬 이름이 비어 있으면 종료
+    CacheRuntimeReferences(); // 슬롯 클릭 시 SaveStorage 재확인
+
+    if (clickedSlotButton == null)
+    {
+        return; // 대상이 없으면 종료
+    }
+
+    if (saveStorage == null)
+    {
+        return; // 저장 참조가 없으면 종료
+    }
+
+    if (string.IsNullOrEmpty(worldMapSceneName))
+    {
+        return; // 이동할 씬 이름이 비어 있으면 종료
+    }
 
     saveStorage.SetCurrentSelectedSaveId(clickedSlotButton.SaveId); // 현재 선택된 저장본 ID 기록
     saveStorage.LoadOwnedCharacterDataFromSave(clickedSlotButton.SaveId); // 해당 세이브의 캐릭터/스탯/인벤토리/흑체 저장 목록을 현재 목록에 적용
@@ -480,12 +530,7 @@ private void UpdateBlockedButtonsState() // 모달 UI 상태에 따라 버튼 �
 
 private List<SaveStorage.FriendlyNigrumSaveData> GetStartingFriendlyNigrumSaveList() // 시작 흑체 설정을 저장 데이터로 변환
 {
-    if (friendlyNigrumIntakeManager == null)
-    {
-        friendlyNigrumIntakeManager = FriendlyNigrumIntakeManager.Instance != null
-            ? FriendlyNigrumIntakeManager.Instance
-            : FindFirstObjectByType<FriendlyNigrumIntakeManager>(); // 흑체 관리자 재탐색
-    }
+    CacheFriendlyNigrumIntakeManagerReference(); // 흑체 관리자 재확인
 
     if (friendlyNigrumIntakeManager != null)
     {
@@ -510,7 +555,14 @@ private SaveStorage.SoundVolumeSaveData GetStartingSoundVolumeSaveData() // 시�
 
 private List<SaveStorage.OwnedCharacterStatData> CreateStartingOwnedCharacterStatList() // 시작 캐릭터 스탯정보 목록 생성
 {
+    CacheCharacterInfoManagerReference(); // 캐릭터 정보 매니저 재확인
+
     List<SaveStorage.OwnedCharacterStatData> resultList = new List<SaveStorage.OwnedCharacterStatData>(); // 결과 리스트
+
+    if (characterInfoManager == null)
+    {
+        return resultList; // 캐릭터 정의 매니저가 없으면 빈 목록 반환
+    }
 
     for (int i = 0; i < startingOwnedCharacterStatList.Count; i++)
     {
@@ -521,7 +573,7 @@ private List<SaveStorage.OwnedCharacterStatData> CreateStartingOwnedCharacterSta
             continue; // 비어 있으면 건너뜀
         }
 
-        GlobalCharacterDefinition definition = CharacterInfoManager.Instance.FindDefinitionByID(
+        GlobalCharacterDefinition definition = characterInfoManager.FindDefinitionByID(
             sourceStatData.firstRowID,
             sourceStatData.secondRowID); // 캐릭터 정의 탐색
 
@@ -580,7 +632,16 @@ private void ApplyDefinitionNameAndHungerToStartingStatData(SaveStorage.OwnedCha
         return; // 스탯 데이터가 없으면 종료
     }
 
-    GlobalCharacterDefinition definition = CharacterInfoManager.Instance.FindDefinitionByID(statData.firstRowID, statData.secondRowID); // 캐릭터 정의 탐색
+    CacheCharacterInfoManagerReference(); // 캐릭터 정보 매니저 재확인
+
+    if (characterInfoManager == null)
+    {
+        return; // 캐릭터 정의 매니저가 없으면 종료
+    }
+
+    GlobalCharacterDefinition definition = characterInfoManager.FindDefinitionByID(
+        statData.firstRowID,
+        statData.secondRowID); // 캐릭터 정의 탐색
 
     if (definition == null)
     {
@@ -590,7 +651,11 @@ private void ApplyDefinitionNameAndHungerToStartingStatData(SaveStorage.OwnedCha
     statData.characterName = definition.CharacterName; // 캐릭터 이름 저장
     statData.maxHunger = Mathf.Max(0, definition.BaseMaxHunger); // 최대 허기 저장
 
-    int startCurrentHunger = FindStartingCurrentHunger(statData.firstRowID, statData.secondRowID, statData.individualID); // 시작 현재 허기 탐색
+    int startCurrentHunger = FindStartingCurrentHunger(
+        statData.firstRowID,
+        statData.secondRowID,
+        statData.individualID); // 시작 현재 허기 탐색
+
     statData.currentHunger = Mathf.Clamp(startCurrentHunger, 0, statData.maxHunger); // 최대 허기를 넘지 않게 적용
     statData.isStarving = statData.currentHunger <= 0; // 공복 여부 적용
 }
@@ -616,6 +681,54 @@ private int FindStartingCurrentHunger(int firstRowID, int secondRowID, int indiv
 
     return 0; // 설정이 없으면 0
 }
+
+private void CacheRuntimeReferences() // 런타임 핵심 참조 재연결
+{
+    CacheSaveStorageReference();
+    CacheCharacterInfoManagerReference();
+    CacheFriendlyNigrumIntakeManagerReference();
+}
+
+private void CacheSaveStorageReference() // 살아있는 SaveStorage 참조 재연결
+{
+    if (SaveStorage.Instance != null)
+    {
+        saveStorage = SaveStorage.Instance;
+        return;
+    }
+
+    if (saveStorage == null)
+    {
+        saveStorage = FindFirstObjectByType<SaveStorage>();
+    }
+}
+
+private void CacheCharacterInfoManagerReference() // 캐릭터 정보 매니저 참조 재연결
+{
+    if (characterInfoManager == null)
+    {
+        characterInfoManager = CharacterInfoManager.Instance != null
+            ? CharacterInfoManager.Instance
+            : FindFirstObjectByType<CharacterInfoManager>();
+    }
+}
+
+private void CacheFriendlyNigrumIntakeManagerReference() // 흑체 관리자 참조 재연결
+{
+    if (friendlyNigrumIntakeManager == null)
+    {
+        friendlyNigrumIntakeManager = FriendlyNigrumIntakeManager.Instance != null
+            ? FriendlyNigrumIntakeManager.Instance
+            : FindFirstObjectByType<FriendlyNigrumIntakeManager>();
+    }
+}
+
+
+
+
+
+
+
 
 
 

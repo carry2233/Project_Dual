@@ -4,6 +4,7 @@ using UnityEngine.UI; // Button, Image 사용
 using System.Collections.Generic; // List, HashSet 사용
 using UnityEngine.EventSystems; // UI 위 마우스 감지
 using UnityEngine.InputSystem; // 새 입력 시스템 마우스 입력 사용
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 타일 행동 UI를 관리하는 스크립트입니다.
@@ -106,6 +107,15 @@ public class TileActionManager : MonoBehaviour
 
 [SerializeField] private float surpriseBattleDelayAfterCameraReturn = 1f; // 카메라 위치 복귀 실행 후 기습 전투까지 대기 시간
 
+
+[Header("=======================================================")]
+
+
+[Header("귀환 설정")]
+[SerializeField] private Button returnButton; // 귀환 버튼
+[SerializeField] private string returnSceneName; // 귀환 시 이동할 엔딩 씬 이름
+[SerializeField] private int minReturnAvailableDay = 3; // 귀환 버튼 상호작용 가능 최소 일차
+
 private Coroutine surpriseBattleDelayCoroutine; // 기습 전투 지연 실행 코루틴
 
 
@@ -147,6 +157,11 @@ private readonly HashSet<TilePrefab> movableTileSet = new HashSet<TilePrefab>();
 
         if (moveTileSelectionCancelButton != null)
             moveTileSelectionCancelButton.onClick.AddListener(CancelMoveSelectionMode); // 이동 타일 선택 중단 버튼 이벤트 연결
+            
+        if (returnButton != null)
+        {
+            returnButton.onClick.AddListener(ExecuteReturn);
+        }
     }
 
 private void Start() // 씬 시작 시 초기화
@@ -187,6 +202,9 @@ private void Start() // 씬 시작 시 초기화
     {
         moveTileSelectionCancelButton.gameObject.SetActive(false); // 씬 시작 시 이동 타일 선택 중단 버튼 비활성화
     }
+
+    RegisterFirstOwnedTileIfNeeded();
+    UpdateReturnButtonState();
 }
 
     private void OnDestroy() // 오브젝트 제거 시 버튼 이벤트 해제
@@ -216,6 +234,11 @@ private void Start() // 씬 시작 시 초기화
 
         if (moveTileSelectionCancelButton != null)
             moveTileSelectionCancelButton.onClick.RemoveListener(CancelMoveSelectionMode); // 이동 타일 선택 중단 버튼 이벤트 해제
+
+        if (returnButton != null)
+        {
+            returnButton.onClick.RemoveListener(ExecuteReturn);
+        }
     }
 
 private void LateUpdate() // 매 프레임 UI 위치 갱신
@@ -230,6 +253,7 @@ private void LateUpdate() // 매 프레임 UI 위치 갱신
     }
 
     RefreshTileSearchInfo(false); // 타일 ID 변경 여부 확인
+    UpdateReturnButtonState();
 }
 
 private void SetInitialUIState() // 씬 시작 시 UI 초기 상태 설정
@@ -853,9 +877,85 @@ private void CancelMoveSelectionMode() // 이동 타일 선택 중단
     UpdateMoveButtonState(); // 이동 버튼 상태 갱신
 }
 
+private void RegisterFirstOwnedTileIfNeeded() // 처음 소속 타일 저장
+{
+    if (SaveStorage.Instance == null || playerTileMembership == null)
+    {
+        return;
+    }
 
+    SaveStorage.Instance.SaveFirstOwnedTileIfEmpty(
+        playerTileMembership.CurrentTileNumber,
+        playerTileMembership.CurrentTilePrefabNumber);
+}
 
+private void UpdateReturnButtonState() // 현재 타일과 현재 일차 기준으로 귀환 버튼 상태 갱신
+{
+    if (returnButton == null)
+    {
+        return;
+    }
 
+    if (SaveStorage.Instance == null || playerTileMembership == null)
+    {
+        returnButton.gameObject.SetActive(false);
+        returnButton.interactable = false;
+        return;
+    }
+
+    bool isFirstOwnedTile = SaveStorage.Instance.IsCurrentTileFirstOwnedTile(
+        playerTileMembership.CurrentTileNumber,
+        playerTileMembership.CurrentTilePrefabNumber);
+
+    returnButton.gameObject.SetActive(isFirstOwnedTile);
+
+    if (!isFirstOwnedTile)
+    {
+        returnButton.interactable = false;
+        return;
+    }
+
+    returnButton.interactable = IsCurrentSaveReturnDaySatisfied();
+}
+
+private bool IsCurrentSaveReturnDaySatisfied() // 현재 세이브의 귀환 가능 일차 조건 확인
+{
+    if (SaveStorage.Instance == null)
+    {
+        return false;
+    }
+
+    int currentDay;
+    int currentHour;
+    int currentMinute;
+
+    bool hasTimeData = SaveStorage.Instance.TryGetCurrentSelectedTime(
+        out currentDay,
+        out currentHour,
+        out currentMinute);
+
+    if (!hasTimeData)
+    {
+        return false;
+    }
+
+    return currentDay >= minReturnAvailableDay;
+}
+
+private void ExecuteReturn() // 귀환 실행
+{
+    if (string.IsNullOrEmpty(returnSceneName))
+    {
+        return;
+    }
+
+    if (!IsCurrentSaveReturnDaySatisfied())
+    {
+        return;
+    }
+
+    SceneManager.LoadScene(returnSceneName);
+}
 
 
 

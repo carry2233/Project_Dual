@@ -25,7 +25,7 @@ MonoBehaviour:
   characterName: 
   baseMaxHunger: 100
   baseMaxHealth: 1000
-  baseAttackPower: 3
+  baseAttackPower: 1111
   baseDefenseValue: 0
   baseBodySize: 4
   baseSpeedStat: 18

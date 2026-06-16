@@ -24,11 +24,11 @@ MonoBehaviour:
   characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: d4d25fb84f0f37349818399be7d5bc03, type: 3}
   characterName: "\uC73C\uBBF8\uC73C\uBBF8"
   baseMaxHunger: 100
-  baseMaxHealth: 1000
+  baseMaxHealth: 1
   baseAttackPower: 10
   baseDefenseValue: 10
   baseBodySize: 4
-  baseSpeedStat: 50
+  baseSpeedStat: 1
   basePowerRatePercent: 100
   baseMoveSpeed: 5
   baseMoveSpeedPercent: 100

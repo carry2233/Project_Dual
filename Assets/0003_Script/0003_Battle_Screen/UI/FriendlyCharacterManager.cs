@@ -12,16 +12,43 @@ public class FriendlyCharacterManager : MonoBehaviour
         [SerializeField] private MoveCommandController moveCommandController; // 해당 캐릭터의 이동 명령 컨트롤러
         [SerializeField] private int assignedSelectionOrder; // 런타임에 부여된 실제 선택 순서값
 
+        [SerializeField] private bool isDead; // 해당 아군 사망 여부
+        [SerializeField] private CharacterStatSystem characterStatSystem; // 해당 캐릭터 스탯 시스템 참조
+
+public bool IsDead => isDead;
+public CharacterStatSystem CharacterStatSystem => characterStatSystem;
+
         public CharacterDuelAI CharacterDuelAI => characterDuelAI; // 캐릭터 참조 반환
         public MoveCommandController MoveCommandController => moveCommandController; // 이동 명령 컨트롤러 반환
         public int AssignedSelectionOrder => assignedSelectionOrder; // 실제 선택 순서값 반환
 
-        public FriendlyCharacterEntry(CharacterDuelAI targetCharacter, MoveCommandController targetController, int targetOrder)
-        {
-            characterDuelAI = targetCharacter; // 캐릭터 저장
-            moveCommandController = targetController; // 컨트롤러 저장
-            assignedSelectionOrder = targetOrder; // 순서값 저장
-        }
+public FriendlyCharacterEntry(CharacterDuelAI targetCharacter, MoveCommandController targetController, int targetOrder)
+{
+    characterDuelAI = targetCharacter;
+    moveCommandController = targetController;
+    assignedSelectionOrder = targetOrder;
+
+    if (targetCharacter != null)
+    {
+        characterStatSystem = targetCharacter.GetComponent<CharacterStatSystem>();
+        isDead = characterStatSystem != null && characterStatSystem.IsDead;
+    }
+}
+
+public bool RefreshDeadState() // 현재 스탯 기준 사망 상태 갱신
+{
+    if (characterStatSystem == null && characterDuelAI != null)
+    {
+        characterStatSystem = characterDuelAI.GetComponent<CharacterStatSystem>();
+    }
+
+    bool newDeadState = characterStatSystem != null && characterStatSystem.IsDead;
+    bool changed = isDead != newDeadState;
+
+    isDead = newDeadState;
+
+    return changed;
+}
     }
 
     [Header("필수 참조")]
@@ -156,11 +183,11 @@ private void Start() // 시작 시 아군 생성 및 목록 구성
 
 private void Update() // 매 프레임 숫자키 선택, 상세 UI, 결투기술 선택 처리
 {
-    HandleNumberKeySelectionInput(); // 숫자키 선택 처리
-    HandleDetailUIToggleInput(); // 상세 UI 토글 키 처리
-    HandleDuelSkillMenuReleaseInput(); // 결투기술 목록 우클릭 해제 처리
+    HandleNumberKeySelectionInput();
+    HandleDetailUIToggleInput();
+    HandleDuelSkillMenuReleaseInput();
+    RefreshFriendlyDeadStateToSaveStorage();
 }
-
     public bool IsFriendlyTeam(int teamNumber) // 해당 팀 번호가 아군인지 반환
     {
         return friendlyTeamNumbers.Contains(teamNumber); // 아군 팀 번호 목록 포함 여부 반환
@@ -889,5 +916,57 @@ public bool RefreshFriendlyCharacterStatFromSaveStorage(
 
     return false;
 }
+
+private void RefreshFriendlyDeadStateToSaveStorage() // 등록된 아군들의 사망 여부를 저장소에 반영
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance;
+    }
+
+    if (saveStorage == null)
+    {
+        return;
+    }
+
+    for (int i = 0; i < friendlyCharacterEntryList.Count; i++)
+    {
+        FriendlyCharacterEntry entry = friendlyCharacterEntryList[i];
+
+        if (entry == null || entry.CharacterDuelAI == null)
+        {
+            continue;
+        }
+
+        bool changed = entry.RefreshDeadState();
+
+        // 죽은 상태로 새로 바뀐 순간에만 SaveStorage에 반영
+        if (!changed || !entry.IsDead)
+        {
+            continue;
+        }
+
+        CharacterDuelAI duelAI = entry.CharacterDuelAI;
+
+        saveStorage.SetOwnedCharacterDeadState(
+            duelAI.FirstRowID,
+            duelAI.SecondRowID,
+            duelAI.IndividualID,
+            true);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

@@ -28,7 +28,7 @@ MonoBehaviour:
   baseAttackPower: 10
   baseDefenseValue: 0
   baseBodySize: 4
-  baseSpeedStat: 2
+  baseSpeedStat: 1
   basePowerRatePercent: 100
   baseMoveSpeed: 5
   baseMoveSpeedPercent: 100

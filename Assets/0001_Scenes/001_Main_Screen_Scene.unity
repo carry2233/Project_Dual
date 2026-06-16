@@ -3665,6 +3665,11 @@ MonoBehaviour:
     startCurrentNigrumCapacity: 40
     decreaseIntervalMinute: 3
     nigrumDecreaseAmountPerInterval: 0
+  - friendlyCharacterDefinition: {fileID: 11400000, guid: d0e9abd06a4775041a51d0d5a6a973c0, type: 2}
+    maxNigrumCapacity: 100
+    startCurrentNigrumCapacity: 40
+    decreaseIntervalMinute: 3
+    nigrumDecreaseAmountPerInterval: 0
 --- !u!4 &1201474656
 Transform:
   m_ObjectHideFlags: 0
@@ -5799,6 +5804,12 @@ MonoBehaviour:
     battleTilePrefabNumber: -1
   lastExecutedEventID: -1
   hasExecutedBattle: 0
+  currentSaveSomeFriendlyDead: 0
+  currentSaveAllFriendlyDead: 0
+  currentSaveFirstOwnedTileNumber: -1
+  currentSaveFirstOwnedTilePrefabNumber: -1
+  allFriendlyDeadSceneName: 004_Ending_Scene
+  allFriendlyDeadSceneMoveDelay: 2
 --- !u!4 &1871097358
 Transform:
   m_ObjectHideFlags: 0

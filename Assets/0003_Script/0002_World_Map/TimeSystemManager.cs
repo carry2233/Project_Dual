@@ -50,7 +50,13 @@ public class TimeSystemManager : MonoBehaviour
         bool result = saveStorage.AddMinutesToCurrentSelectedTime(addMinute); // 저장 시간 증가
         if (!result) return; // 실패 시 종료
 
-        RefreshTimeUI(); // 시간 UI 갱신
+    RefreshTimeUI();
+
+    if (saveStorage != null)
+    {
+        saveStorage.CheckCurrentSaveAllFriendlyDeadAndMoveIfNeeded();
+    }
+    
     }
 
     public void RefreshTimeUI() // 현재 선택 저장본 기준 시간 UI 갱신

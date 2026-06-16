@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 
 /// <summary>
@@ -166,6 +168,12 @@ public class SaveEntry
     public int currentDay; // 현재 일차
     public int currentHour; // 현재 시간
     public int currentMinute; // 현재 분
+
+    public bool hasSomeFriendlyDead; // 한 세이브에서 아군 일부 사망 발생 여부
+    public bool hasAllFriendlyDead; // 한 세이브에서 아군 전원 사망 여부
+
+    public int firstOwnedTileNumber = -1; // 처음 소속한 타일 번호
+    public int firstOwnedTilePrefabNumber = -1; // 처음 소속한 타일 종류 ID
 }
 
 
@@ -198,6 +206,25 @@ public SoundVolumeSaveData CurrentSoundVolumeSaveData => GetSoundVolumeSaveDataC
 [SerializeField] private int lastExecutedEventID = -1; // 직전에 실행한 이벤트 ID
 [SerializeField] private bool hasExecutedBattle; // 전투 수행 여부
 
+
+[Header("___________________________________________________________________")]
+
+
+[Header("엔딩 상태")]
+[SerializeField] private bool currentSaveSomeFriendlyDead; // 현재 세이브 아군 일부 사망 여부
+[SerializeField] private bool currentSaveAllFriendlyDead; // 현재 세이브 아군 전원 사망 여부
+
+[Header("처음 소속 타일")]
+[SerializeField] private int currentSaveFirstOwnedTileNumber = -1; // 현재 세이브 처음 소속 타일 번호
+[SerializeField] private int currentSaveFirstOwnedTilePrefabNumber = -1; // 현재 세이브 처음 소속 타일 종류 ID
+
+[Header("전원사망 엔딩 이동")]
+[SerializeField] private string allFriendlyDeadSceneName; // 아군 전원사망 시 이동할 씬
+[SerializeField] private float allFriendlyDeadSceneMoveDelay = 2f; // 전원사망 체크 후 씬 이동 딜레이
+
+private Coroutine allFriendlyDeadSceneMoveCoroutine;
+private bool isAllFriendlyDeadSceneMoveStarted; // 전원사망 씬 이동이 이미 시작됐는지 여부
+
 public int LastExecutedEventID => lastExecutedEventID; // 직전 실행 이벤트 ID 반환
 public bool HasExecutedBattle => hasExecutedBattle; // 전투 수행 여부 반환
 
@@ -218,6 +245,13 @@ public static SaveStorage Instance => instance; // 전역 인스턴스 반환
 public int CurrentSelectedSaveId => currentSelectedSaveId; // 현재 선택된 저장본 ID 반환
 public int MaxSaveCount => maxSaveCount; // 최대 저장본 개수 반환
 
+public bool CurrentSaveSomeFriendlyDead => currentSaveSomeFriendlyDead;
+public bool CurrentSaveAllFriendlyDead => currentSaveAllFriendlyDead;
+public int CurrentSaveFirstOwnedTileNumber => currentSaveFirstOwnedTileNumber;
+public int CurrentSaveFirstOwnedTilePrefabNumber => currentSaveFirstOwnedTilePrefabNumber;
+
+
+
 private void Awake() // 시작 시 전역 인스턴스 및 저장 데이터 로드
 {
     if (instance != null && instance != this)
@@ -235,35 +269,81 @@ private void Awake() // 시작 시 전역 인스턴스 및 저장 데이터 로�
 
 public List<SaveEntry> GetSaveList() // 저장본 목록 복사 반환
 {
-    List<SaveEntry> result = new List<SaveEntry>(); // 반환용 리스트
+    List<SaveEntry> result = new List<SaveEntry>();
 
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
-        SaveEntry source = currentSaveFileData.saveList[i]; // 원본 저장본 참조
+        SaveEntry copy = GetSaveEntryCopy(currentSaveFileData.saveList[i]);
 
-        SaveEntry copy = new SaveEntry(); // 복사용 저장본 생성
-        copy.saveId = source.saveId; // 고유 ID 복사
-        copy.saveName = source.saveName; // 이름 복사
-        copy.saveNumber = source.saveNumber; // 번호 복사
-        copy.ownedCharacterList = GetOwnedCharacterListCopy(source.ownedCharacterList); // 소유 캐릭터 목록 복사
-        copy.ownedCharacterStatList = GetOwnedCharacterStatListCopy(source.ownedCharacterStatList); // 소유 캐릭터 스탯정보 목록 복사
-        copy.notepadPageList = GetNotepadPageListCopy(source.notepadPageList); // 메모장 페이지 목록 복사
-        copy.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(source.ownedCharacterInventoryList); // 소유 캐릭터 인벤토리 목록 복사
-        copy.friendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(source.friendlyNigrumSaveList); // 아군 흑체 저장 목록 복사
-        copy.soundVolumeSaveData = GetSoundVolumeSaveDataCopy(source.soundVolumeSaveData); // 소리 설정 복사
-        copy.currentDay = source.currentDay; // 현재 일차 복사
-        copy.currentHour = source.currentHour; // 현재 시간 복사
-        copy.currentMinute = source.currentMinute; // 현재 분 복사
-        copy.enteredTileNumberList = GetIntListCopy(source.enteredTileNumberList); // 방문 타일 목록 복사
-        
-        
+        if (copy == null)
+        {
+            continue;
+        }
 
-        result.Add(copy); // 복사본 추가
+        result.Add(copy);
     }
 
-    
-    result.Sort((a, b) => a.saveNumber.CompareTo(b.saveNumber)); // 번호 기준 정렬
-    return result; // 정렬된 리스트 반환
+    result.Sort((a, b) => a.saveNumber.CompareTo(b.saveNumber));
+    return result;
+}
+
+private SaveEntry GetSaveEntryCopy(SaveEntry source) // 저장본 데이터 깊은 복사
+{
+    if (source == null)
+    {
+        return null;
+    }
+
+    SaveEntry copy = new SaveEntry();
+
+    copy.saveId = source.saveId;
+    copy.saveName = source.saveName;
+    copy.saveNumber = source.saveNumber;
+
+    copy.ownedCharacterList = GetOwnedCharacterListCopy(source.ownedCharacterList);
+    copy.ownedCharacterStatList = GetOwnedCharacterStatListCopy(source.ownedCharacterStatList);
+    copy.ownedCharacterInventoryList = GetOwnedCharacterInventoryListCopy(source.ownedCharacterInventoryList);
+    copy.notepadPageList = GetNotepadPageListCopy(source.notepadPageList);
+    copy.friendlyNigrumSaveList = GetFriendlyNigrumSaveListCopy(source.friendlyNigrumSaveList);
+    copy.soundVolumeSaveData = GetSoundVolumeSaveDataCopy(source.soundVolumeSaveData);
+    copy.enteredTileNumberList = GetIntListCopy(source.enteredTileNumberList);
+
+    copy.currentDay = source.currentDay;
+    copy.currentHour = source.currentHour;
+    copy.currentMinute = source.currentMinute;
+
+    copy.hasSomeFriendlyDead = source.hasSomeFriendlyDead;
+    copy.hasAllFriendlyDead = source.hasAllFriendlyDead;
+
+    copy.firstOwnedTileNumber = source.firstOwnedTileNumber;
+    copy.firstOwnedTilePrefabNumber = source.firstOwnedTilePrefabNumber;
+
+    return copy;
+}
+
+public SaveEntry GetCurrentSelectedSaveEntryCopy() // 현재 선택된 저장본 데이터 복사 반환
+{
+    if (currentSelectedSaveId <= 0)
+    {
+        return null;
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i];
+
+        if (entry == null)
+        {
+            continue;
+        }
+
+        if (entry.saveId == currentSelectedSaveId)
+        {
+            return GetSaveEntryCopy(entry);
+        }
+    }
+
+    return null;
 }
 
     public bool CanCreateNewSave() // 새 저장본 생성 가능 여부 확인
@@ -300,6 +380,15 @@ public bool CreateSave(
     newEntry.currentDay = Mathf.Max(0, startDay); // 시작 일차 저장
     newEntry.currentHour = Mathf.Clamp(startHour, 0, 23); // 시작 시간 저장
     newEntry.currentMinute = Mathf.Clamp(startMinute, 0, 59); // 시작 분 저장
+    newEntry.hasSomeFriendlyDead = false;
+    newEntry.hasAllFriendlyDead = false;
+    newEntry.firstOwnedTileNumber = -1;
+    newEntry.firstOwnedTilePrefabNumber = -1;
+
+    currentSaveSomeFriendlyDead = false;
+    currentSaveAllFriendlyDead = false;
+    currentSaveFirstOwnedTileNumber = -1;
+    currentSaveFirstOwnedTilePrefabNumber = -1;
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
     currentSaveFileData.saveList.Add(newEntry); // 목록에 저장본 추가
@@ -315,6 +404,7 @@ public bool CreateSave(
 
     return true; // 생성 성공 반환
 }
+
     public bool DeleteSaveByNumber(int targetSaveNumber) // 번호 기준 저장본 삭제
     {
         int removeIndex = -1; // 삭제할 인덱스
@@ -473,31 +563,69 @@ public void SetCurrentSelectedSaveId(int targetSaveId) // 현재 선택된 저�
 
 public bool DeleteSaveById(int targetSaveId) // 고유 ID 기준 저장본 삭제
 {
-    int removeIndex = -1; // 삭제할 인덱스
+    int removeIndex = -1;
 
     for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
     {
         if (currentSaveFileData.saveList[i].saveId == targetSaveId)
         {
-            removeIndex = i; // 삭제 대상 인덱스 기록
-            break; // 탐색 종료
+            removeIndex = i;
+            break;
         }
     }
 
-    if (removeIndex < 0) return false; // 삭제 대상이 없으면 실패
-
-    currentSaveFileData.saveList.RemoveAt(removeIndex); // 저장본 삭제
-
-    if (currentSelectedSaveId == targetSaveId)
+    if (removeIndex < 0)
     {
-        currentSelectedSaveId = -1; // 현재 선택된 저장본이 삭제되면 초기화
+        return false;
     }
 
-    DeleteTileLayoutSaveFile(targetSaveId); // 연결된 타일 배치 저장본도 같이 삭제
-    SortAndReindex(); // 화면 표시용 번호 재정렬
-    SaveToFile(); // 파일 저장
+    bool isDeletingCurrentSelectedSave = currentSelectedSaveId == targetSaveId;
 
-    return true; // 삭제 성공 반환
+    currentSaveFileData.saveList.RemoveAt(removeIndex);
+
+    if (isDeletingCurrentSelectedSave)
+    {
+        currentSelectedSaveId = -1;
+        ClearCurrentSaveRuntimeDataAfterDelete();
+    }
+
+    DeleteTileLayoutSaveFile(targetSaveId);
+    SortAndReindex();
+    SaveToFile();
+
+    return true;
+}
+
+public bool DeleteCurrentSelectedSave() // 현재 선택된 저장본 삭제
+{
+    if (currentSelectedSaveId <= 0)
+    {
+        return false;
+    }
+
+    int deleteSaveId = currentSelectedSaveId;
+    return DeleteSaveById(deleteSaveId);
+}
+
+private void ClearCurrentSaveRuntimeDataAfterDelete() // 삭제된 세이브의 현재 런타임 데이터 초기화
+{
+    currentOwnedCharacterList = new List<OwnedCharacterData>();
+    currentOwnedCharacterStatList = new List<OwnedCharacterStatData>();
+    currentOwnedCharacterInventoryList = new List<OwnedCharacterInventorySaveData>();
+    currentFriendlyNigrumSaveList = new List<FriendlyNigrumSaveData>();
+
+    currentBattleEventRuntimeData = null;
+    lastExecutedEventID = -1;
+    hasExecutedBattle = false;
+
+    currentSaveSomeFriendlyDead = false;
+    currentSaveAllFriendlyDead = false;
+
+    currentSaveFirstOwnedTileNumber = -1;
+    currentSaveFirstOwnedTilePrefabNumber = -1;
+
+    allFriendlyDeadSceneMoveCoroutine = null;
+    isAllFriendlyDeadSceneMoveStarted = false;
 }
 
 public string GetTileLayoutSaveFilePath(int targetSaveId) // 저장본 ID에 대응하는 타일 저장 파일 경로 반환
@@ -604,6 +732,10 @@ public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본
         ApplyCurrentOwnedCharacterInventoryList(entry.ownedCharacterInventoryList); // 현재 캐릭터 인벤토리 목록에 적용
         ApplyCurrentFriendlyNigrumSaveList(entry.friendlyNigrumSaveList); // 현재 아군 흑체 저장 목록에 적용
         ApplyCurrentSoundVolumeSaveData(entry.soundVolumeSaveData); // 현재 소리 설정에 적용
+        currentSaveSomeFriendlyDead = entry.hasSomeFriendlyDead;
+        currentSaveAllFriendlyDead = entry.hasAllFriendlyDead;
+        currentSaveFirstOwnedTileNumber = entry.firstOwnedTileNumber;
+        currentSaveFirstOwnedTilePrefabNumber = entry.firstOwnedTilePrefabNumber;
 
         return true; // 적용 성공
     }
@@ -1473,34 +1605,59 @@ public bool SetOwnedCharacterDeadState(int firstRowID, int secondRowID, int indi
 {
     for (int i = 0; i < currentOwnedCharacterList.Count; i++)
     {
-        OwnedCharacterData ownedData = currentOwnedCharacterList[i]; // 현재 소유 캐릭터 데이터
+        OwnedCharacterData ownedData = currentOwnedCharacterList[i];
 
         if (ownedData == null)
         {
-            continue; // 비어 있으면 건너뜀
+            continue;
         }
 
         if (ownedData.firstRowID != firstRowID)
         {
-            continue; // 첫 번째 행 ID가 다르면 건너뜀
+            continue;
         }
 
         if (ownedData.secondRowID != secondRowID)
         {
-            continue; // 두 번째 행 ID가 다르면 건너뜀
+            continue;
         }
 
         if (ownedData.individualID != individualID)
         {
-            continue; // 개체별 ID가 다르면 건너뜀
+            continue;
         }
 
-        ownedData.isDead = deadState; // 사망 상태 저장
-        SaveCurrentOwnedCharacterListToSelectedSave(); // 현재 선택 저장본에 반영
-        return true; // 처리 성공
+        bool wasDead = ownedData.isDead;
+
+        // 이미 같은 사망 상태면 저장을 반복하지 않음
+        if (wasDead == deadState)
+        {
+            if (deadState)
+            {
+                CheckCurrentSaveAllFriendlyDeadAndMoveIfNeeded();
+            }
+
+            return true;
+        }
+
+        ownedData.isDead = deadState;
+
+        if (!wasDead && deadState)
+        {
+            MarkCurrentSaveSomeFriendlyDead();
+        }
+
+        SaveCurrentOwnedCharacterListToSelectedSave();
+
+        if (deadState)
+        {
+            CheckCurrentSaveAllFriendlyDeadAndMoveIfNeeded();
+        }
+
+        return true;
     }
 
-    return false; // 대상 없음
+    return false;
 }
 
 public bool SaveCurrentOwnedCharacterListToSelectedSave() // 현재 소유 캐릭터 목록을 선택 저장본에 저장
@@ -1680,8 +1837,10 @@ public void ProcessNigrumDeathAndRedistributeItems(List<FriendlyCharacterDefinit
     if (aliveInventoryList.Count > 0)
         DistributeSaveItemsToAliveInventories(collectedItemList, aliveInventoryList);
 
-    SaveCurrentOwnedCharacterListToSelectedSave();
-    SaveCurrentOwnedCharacterInventoryListToSelectedSave();
+        MarkCurrentSaveSomeFriendlyDead();
+        SaveCurrentOwnedCharacterListToSelectedSave();
+        SaveCurrentOwnedCharacterInventoryListToSelectedSave();
+        CheckCurrentSaveAllFriendlyDeadAndMoveIfNeeded();
 }
 
 private List<OwnedCharacterInventorySaveData> GetAliveCharacterInventorySaveList() // 살아있는 캐릭터 인벤토리 목록 반환
@@ -2029,5 +2188,171 @@ private string GetGlobalSoundVolumeSaveFilePath() // 전역 소리 설정 저장
 {
     return Path.Combine(Application.persistentDataPath, globalSoundVolumeSaveFileName);
 }
+
+public bool MarkCurrentSaveSomeFriendlyDead() // 현재 세이브에 아군 일부 사망 여부 저장
+{
+    if (currentSelectedSaveId < 0)
+    {
+        return false;
+    }
+
+    currentSaveSomeFriendlyDead = true;
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i];
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue;
+        }
+
+        entry.hasSomeFriendlyDead = true;
+        SaveToFile();
+        return true;
+    }
+
+    return false;
+}
+
+public bool MarkCurrentSaveAllFriendlyDead() // 현재 세이브에 아군 전원 사망 여부 저장
+{
+    if (currentSelectedSaveId < 0)
+    {
+        return false;
+    }
+
+    currentSaveAllFriendlyDead = true;
+    currentSaveSomeFriendlyDead = true;
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i];
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue;
+        }
+
+        entry.hasAllFriendlyDead = true;
+        entry.hasSomeFriendlyDead = true;
+        SaveToFile();
+        return true;
+    }
+
+    return false;
+}
+
+public bool CheckCurrentSaveAllFriendlyDeadAndMoveIfNeeded() // 현재 세이브의 전원사망 여부 확인 후 엔딩씬 이동 예약
+{
+    if (currentOwnedCharacterList == null || currentOwnedCharacterList.Count <= 0)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < currentOwnedCharacterList.Count; i++)
+    {
+        OwnedCharacterData ownedData = currentOwnedCharacterList[i];
+
+        if (ownedData == null)
+        {
+            continue;
+        }
+
+        if (!ownedData.isDead)
+        {
+            return false;
+        }
+    }
+
+    MarkCurrentSaveAllFriendlyDead();
+    StartAllFriendlyDeadSceneMove();
+
+    return true;
+}
+
+private void StartAllFriendlyDeadSceneMove() // 전원사망 엔딩씬 이동 시작
+{
+    if (string.IsNullOrEmpty(allFriendlyDeadSceneName))
+    {
+        return;
+    }
+
+    // 이미 이동 코루틴이 시작됐으면 다시 시작하지 않음
+    if (isAllFriendlyDeadSceneMoveStarted)
+    {
+        return;
+    }
+
+    isAllFriendlyDeadSceneMoveStarted = true;
+    allFriendlyDeadSceneMoveCoroutine = StartCoroutine(AllFriendlyDeadSceneMoveRoutine());
+}
+
+private IEnumerator AllFriendlyDeadSceneMoveRoutine() // 딜레이 후 전원사망 엔딩씬 이동
+{
+    float safeDelay = Mathf.Max(0f, allFriendlyDeadSceneMoveDelay);
+
+    if (safeDelay > 0f)
+    {
+        yield return new WaitForSeconds(safeDelay);
+    }
+
+    SceneManager.LoadScene(allFriendlyDeadSceneName);
+}
+
+public bool SaveFirstOwnedTileIfEmpty(int tileNumber, int tilePrefabNumber) // 처음 소속 타일이 비어있을 때만 저장
+{
+    if (currentSelectedSaveId < 0 || tileNumber < 0)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i];
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue;
+        }
+
+        if (entry.firstOwnedTileNumber >= 0)
+        {
+            currentSaveFirstOwnedTileNumber = entry.firstOwnedTileNumber;
+            currentSaveFirstOwnedTilePrefabNumber = entry.firstOwnedTilePrefabNumber;
+            return false;
+        }
+
+        entry.firstOwnedTileNumber = tileNumber;
+        entry.firstOwnedTilePrefabNumber = tilePrefabNumber;
+
+        currentSaveFirstOwnedTileNumber = tileNumber;
+        currentSaveFirstOwnedTilePrefabNumber = tilePrefabNumber;
+
+        SaveToFile();
+        return true;
+    }
+
+    return false;
+}
+
+public bool IsCurrentTileFirstOwnedTile(int tileNumber, int tilePrefabNumber) // 현재 타일이 처음 소속 타일인지 확인
+{
+    return currentSaveFirstOwnedTileNumber == tileNumber &&
+           currentSaveFirstOwnedTilePrefabNumber == tilePrefabNumber;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

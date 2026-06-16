@@ -105,6 +105,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleSoundEmitter.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\DuelSandbagTarget.cs" />
+    <Compile Include="Assets\0003_Script\004_Ending_Scene\EndingManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\CharacterInventory.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\CharacterDuelAI.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\UI\FriendlyCharacterStatusUI.cs" />
