@@ -24,26 +24,26 @@ MonoBehaviour:
   characterInventorySlotPrefab: {fileID: 0}
   characterName: 
   baseMaxHunger: 100
-  baseMaxHealth: 1000
-  baseAttackPower: 1111
+  baseMaxHealth: 111
+  baseAttackPower: 10
   baseDefenseValue: 0
   baseBodySize: 4
-  baseSpeedStat: 18
+  baseSpeedStat: 1
   basePowerRatePercent: 100
   baseMoveSpeed: 5
   baseMoveSpeedPercent: 100
-  baseMaxStaggerAmount: 1
-  baseStaggerResistancePercent: 50
-  increaseMaxHealthPerLevel: 1
-  increaseAttackPowerPerLevel: 1
+  baseMaxStaggerAmount: 111
+  baseStaggerResistancePercent: 0
+  increaseMaxHealthPerLevel: 0
+  increaseAttackPowerPerLevel: 0
   increaseDefenseValuePerLevel: 0
   increaseBodySizePerLevel: 0
-  increaseSpeedStatPerLevel: 1
+  increaseSpeedStatPerLevel: 0
   increasePowerRatePercentPerLevel: 0
   increaseMoveSpeedPerLevel: 0
-  increaseMoveSpeedPercentPerLevel: 1
-  increaseMaxStaggerAmountPerLevel: 1
-  increaseStaggerResistancePercentPerLevel: 1
+  increaseMoveSpeedPercentPerLevel: 0
+  increaseMaxStaggerAmountPerLevel: 0
+  increaseStaggerResistancePercentPerLevel: 0
   baseRequiredExperience: 10
   requiredExperienceLevelMultiplier: 5
   criticalAttackDamagePercent: 150

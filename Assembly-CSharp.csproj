@@ -68,6 +68,7 @@
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\AttackSkillHitbox.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Status_Effect\StatusEffectDefinitionList.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\UISoundPlaybackSystem.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventInfoDefinition.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\ScriptEffect.cs" />
@@ -97,12 +98,14 @@
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\BaseEventPanel.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Status_Effect\BaseStatStatusEffectDefinitionManager.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Manager\GlobalCharacterDefinition.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Inventory\FriendlyCharacterInfoManager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\TileActionManager.cs" />
     <Compile Include="Assets\0003_Script\0001_Main_Screen\MainScreenManager.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Sound\BattleSoundEmitter.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Status_Effect\StatusEffectDefinitionSO.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
     <Compile Include="Assets\0003_Script\0003_Battle_Screen\Character\DuelSandbagTarget.cs" />
     <Compile Include="Assets\0003_Script\004_Ending_Scene\EndingManager.cs" />
@@ -128,6 +131,7 @@
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\Projectile.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\Character_Management\CharacterManagementManager.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
+    <Compile Include="Assets\0003_Script\0003_Battle_Screen\Status_Effect\StatusEffectDisplaySlot.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\FPSCounter.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\YToZPositionConverter.cs" />

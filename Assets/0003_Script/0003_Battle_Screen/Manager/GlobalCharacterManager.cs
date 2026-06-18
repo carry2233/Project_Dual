@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro; // 상태효과 설명 TMP 텍스트 사용
 
 /// <summary>
 /// 전역 캐릭터 관리 매니저
@@ -56,6 +57,18 @@ public class CharacterEntry // 캐릭터 관리 정보 단위
     [Header("등록된 캐릭터 목록")]
     [SerializeField] private List<CharacterEntry> characterEntryList = new List<CharacterEntry>(); // 씬에 등록된 캐릭터 정보 목록
 
+
+    [Header("________________________________________________________")]
+
+
+    [Header("상태효과 설명 UI")]
+[SerializeField] private TMP_Text statusEffectDescriptionText; // 상태효과 설명을 표시할 TMP 텍스트
+[SerializeField] private GameObject statusEffectDescriptionPanel; // 상태효과 설명 UI 패널 오브젝트
+
+[Header("상태효과 정의 참조")]
+[SerializeField] private StatusEffectDefinitionList statusEffectDefinitionList; // 일반 상태효과 정의 리스트 참조
+[SerializeField] private BaseStatStatusEffectDefinitionManager baseStatStatusEffectDefinitionManager; // 기본 스탯 상태효과 정의 관리자 참조
+
     public IReadOnlyList<CharacterEntry> CharacterEntryList => characterEntryList; // 등록 목록 반환
 
 private void Awake() // 싱글톤 초기화
@@ -74,15 +87,27 @@ private void Awake() // 싱글톤 초기화
     }
 }
 
-    private void Start() // 게임 시작 시 캐릭터 목록 구성
+private void Start() // 게임 시작 시 참조 설정과 캐릭터 목록 구성
+{
+    if (saveStorage == null)
     {
-        if (saveStorage == null)
-        {
         saveStorage = SaveStorage.Instance; // 저장소 자동 참조
-        }
-
-        RebuildCharacterList(); // 씬의 캐릭터 전체 재수집
     }
+
+    if (statusEffectDefinitionList == null)
+    {
+        statusEffectDefinitionList = StatusEffectDefinitionList.Instance; // 상태효과 정의 리스트 자동 참조
+    }
+
+    if (baseStatStatusEffectDefinitionManager == null)
+    {
+        baseStatStatusEffectDefinitionManager = BaseStatStatusEffectDefinitionManager.Instance; // 기본 스탯 상태효과 관리자 자동 참조
+    }
+
+    HideStatusEffectDescription(); // 시작 시 설명 UI 비활성화
+
+    RebuildCharacterList(); // 씬의 캐릭터 전체 재수집
+}
 
     public void RebuildCharacterList() // 씬의 캐릭터 목록 재구성
     {
@@ -369,8 +394,142 @@ private void ReleaseEnemyCharacterID(CharacterDuelAI deadEnemy) // 적군 사망
     }
 }
 
+public void ShowStatusEffectDescription(int statusEffectID) // 상태효과 설명 UI 표시
+{
+    if (statusEffectDescriptionPanel != null)
+    {
+        statusEffectDescriptionPanel.SetActive(true); // 설명 패널 활성화
+    }
 
+    if (statusEffectDescriptionText == null)
+    {
+        return; // 텍스트가 없으면 종료
+    }
 
+    statusEffectDescriptionText.text = GetStatusEffectDescriptionText(statusEffectID); // 설명 텍스트 적용
+}
+
+public void HideStatusEffectDescription() // 상태효과 설명 UI 숨김
+{
+    if (statusEffectDescriptionPanel != null)
+    {
+        statusEffectDescriptionPanel.SetActive(false); // 설명 패널 비활성화
+    }
+}
+
+public Sprite GetStatusEffectIcon(int statusEffectID) // 상태효과 ID에 맞는 표시 아이콘 반환
+{
+    if (statusEffectDefinitionList == null)
+    {
+        statusEffectDefinitionList = StatusEffectDefinitionList.Instance; // 상태효과 정의 리스트 재참조
+    }
+
+    if (statusEffectDefinitionList != null)
+    {
+        Sprite icon = statusEffectDefinitionList.GetStatusEffectIconByID(statusEffectID); // 일반 상태효과 아이콘 검색
+
+        if (icon != null)
+        {
+            return icon; // 일반 상태효과 아이콘 반환
+        }
+    }
+
+    if (baseStatStatusEffectDefinitionManager == null)
+    {
+        baseStatStatusEffectDefinitionManager = BaseStatStatusEffectDefinitionManager.Instance; // 기본 스탯 상태효과 관리자 재참조
+    }
+
+    if (baseStatStatusEffectDefinitionManager != null &&
+        baseStatStatusEffectDefinitionManager.IsBaseStatStatusEffectID(statusEffectID))
+    {
+        return baseStatStatusEffectDefinitionManager.GetBaseStatStatusEffectIcon(statusEffectID); // 스탯 상태효과 아이콘 반환
+    }
+
+    return null; // 찾지 못하면 아이콘 없음
+}
+
+public int GetStatusEffectSortPriority(int statusEffectID) // 상태효과 ID에 맞는 슬롯 정렬 우선순위 반환
+{
+    if (statusEffectDefinitionList == null)
+    {
+        statusEffectDefinitionList = StatusEffectDefinitionList.Instance; // 상태효과 정의 리스트 재참조
+    }
+
+    if (statusEffectDefinitionList != null && statusEffectDefinitionList.HasStatusEffectDefinition(statusEffectID))
+    {
+        return statusEffectDefinitionList.GetStatusEffectSortPriorityByID(statusEffectID); // 일반 상태효과 우선순위 반환
+    }
+
+    if (baseStatStatusEffectDefinitionManager == null)
+    {
+        baseStatStatusEffectDefinitionManager = BaseStatStatusEffectDefinitionManager.Instance; // 기본 스탯 상태효과 관리자 재참조
+    }
+
+    if (baseStatStatusEffectDefinitionManager != null &&
+        baseStatStatusEffectDefinitionManager.IsBaseStatStatusEffectID(statusEffectID))
+    {
+        return baseStatStatusEffectDefinitionManager.GetBaseStatStatusEffectSortPriority(statusEffectID); // 스탯 상태효과 우선순위 반환
+    }
+
+    return 9999; // 기본 우선순위 반환
+}
+
+private string GetStatusEffectDescriptionText(int statusEffectID) // 상태효과 설명용 최종 문자열 생성
+{
+    if (statusEffectDefinitionList == null)
+    {
+        statusEffectDefinitionList = StatusEffectDefinitionList.Instance; // 상태효과 정의 리스트 재참조
+    }
+
+    if (statusEffectDefinitionList != null && statusEffectDefinitionList.HasStatusEffectDefinition(statusEffectID))
+    {
+        string statusName = statusEffectDefinitionList.GetStatusEffectNameByID(statusEffectID); // 일반 상태효과 이름
+        string description = statusEffectDefinitionList.GetStatusEffectDescriptionByID(statusEffectID); // 일반 상태효과 상세 설명
+
+        if (string.IsNullOrEmpty(description))
+        {
+            description = statusEffectDefinitionList.GetStatusEffectShortDescriptionByID(statusEffectID); // 상세 설명이 없으면 짧은 설명 사용
+        }
+
+        if (string.IsNullOrEmpty(statusName))
+        {
+            statusName = "상태효과"; // 이름이 없을 때 기본 이름
+        }
+
+        if (string.IsNullOrEmpty(description))
+        {
+            description = "설명 정보가 없습니다."; // 설명이 비어 있을 때 기본 설명
+        }
+
+        return statusName + "\n" + description; // 이름과 설명 조합
+    }
+
+    if (baseStatStatusEffectDefinitionManager == null)
+    {
+        baseStatStatusEffectDefinitionManager = BaseStatStatusEffectDefinitionManager.Instance; // 기본 스탯 상태효과 관리자 재참조
+    }
+
+    if (baseStatStatusEffectDefinitionManager != null &&
+        baseStatStatusEffectDefinitionManager.IsBaseStatStatusEffectID(statusEffectID))
+    {
+        string baseName = baseStatStatusEffectDefinitionManager.GetBaseStatStatusEffectName(statusEffectID); // 스탯 상태효과 이름
+        string baseDescription = baseStatStatusEffectDefinitionManager.GetBaseStatStatusEffectDescription(statusEffectID); // 스탯 상태효과 설명
+
+        if (string.IsNullOrEmpty(baseName))
+        {
+            baseName = "스탯 상태효과"; // 이름이 없을 때 기본 이름
+        }
+
+        if (string.IsNullOrEmpty(baseDescription))
+        {
+            baseDescription = "스탯 수치를 상태효과 중첩에 따라 조정합니다."; // 설명이 비어 있을 때 기본 설명
+        }
+
+        return baseName + "\n" + baseDescription; // 이름과 설명 조합
+    }
+
+    return "알 수 없는 상태효과\n설명 정보를 찾을 수 없습니다."; // fallback 설명
+}
 
 
 

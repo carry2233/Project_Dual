@@ -95,6 +95,9 @@ public bool RefreshDeadState() // 현재 스탯 기준 사망 상태 갱신
 [SerializeField] private Transform friendlySpawnCenter; // 아군 생성 기준 위치
 [SerializeField] private float friendlySpawnRadius = 3f; // 아군 생성 반지름
 
+[Header("무게 디버프 상태효과 설정")]
+[SerializeField] private StatusEffectDefinitionSO overweightDebuffStatusEffectDefinition; // 초과 무게 중첩값에 따라 전투 시작 시 부여할 무게 디버프 상태효과
+
 [Header("아군 평균 레벨")]
 [SerializeField] private int friendlyAverageLevel = 1; // 현재 아군 평균 레벨
 
@@ -630,7 +633,9 @@ private void ApplySavedStatToFriendlyCharacter(GameObject characterObject, SaveS
         return; // 저장 스탯이 없으면 종료
     }
 
-    statSystem.ApplyOwnedCharacterStatData(statData); // 저장된 스탯 그대로 적용
+    statSystem.ApplyOwnedCharacterStatData(statData); // 저장된 기본 스탯 그대로 적용
+
+    ApplyOverweightDebuffStatusEffectToFriendlyCharacter(statSystem, statData); // 저장된 초과무게 중첩값 기준 무게 디버프 상태효과 적용
 }
 
 public void RefreshFriendlyAverageLevel() // 아군 평균 레벨 계산
@@ -956,8 +961,43 @@ private void RefreshFriendlyDeadStateToSaveStorage() // 등록된 아군들의 �
     }
 }
 
+private void ApplyOverweightDebuffStatusEffectToFriendlyCharacter(
+    CharacterStatSystem statSystem,
+    SaveStorage.OwnedCharacterStatData statData) // 초과무게 중첩값을 상태효과로 전투 캐릭터에게 적용
+{
+    if (statSystem == null || statData == null)
+    {
+        return; // 스탯 시스템 또는 저장 스탯 데이터가 없으면 종료
+    }
 
+    int overweightStackCount = Mathf.Max(0, statData.overweightDebuffStackCount); // 저장된 초과무게 디버프 중첩값
 
+    if (overweightStackCount <= 0)
+    {
+        return; // 초과무게 중첩이 없으면 상태효과 부여 안 함
+    }
+
+    if (overweightDebuffStatusEffectDefinition == null)
+    {
+        Debug.LogWarning("무게 디버프 상태효과 정의가 FriendlyCharacterManager에 설정되지 않았습니다.");
+        return; // 무게 디버프 상태효과 정의가 없으면 종료
+    }
+
+    if (overweightDebuffStatusEffectDefinition.HasDuration)
+    {
+        Debug.LogWarning("무게 디버프 상태효과는 지속시간이 없는 상태효과로 설정해야 합니다.");
+        return; // 무게 디버프는 지속시간 없는 상태효과를 기본 전제로 함
+    }
+
+    bool applied = statSystem.ApplyStatusEffectWithoutDuration(
+        overweightDebuffStatusEffectDefinition,
+        overweightStackCount); // 초과무게 중첩값만큼 상태효과 부여
+
+    if (!applied)
+    {
+        Debug.LogWarning("무게 디버프 상태효과 적용에 실패했습니다.");
+    }
+}
 
 
 

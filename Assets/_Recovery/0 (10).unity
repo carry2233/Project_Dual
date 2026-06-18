@@ -768,124 +768,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 201333358}
   m_CullTransparentMesh: 1
---- !u!1 &201368844
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 201368846}
-  - component: {fileID: 201368845}
-  m_Layer: 0
-  m_Name: BaseStatStatusEffectDefinitionManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &201368845
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 201368844}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d8b1270eaa61434b9862d07f146fa2f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BaseStatStatusEffectDefinitionManager
-  powerRateIncreaseStatusEffectID: 1001
-  powerRateIncreaseApplyValuePerStack: 1
-  powerRateIncreaseIcon: {fileID: 21300000, guid: b7541ca41a18a7e44bbd933a6d0552cc, type: 3}
-  powerRateIncreaseDescription: "\uC911\uCCA91\uB2F9 \uC704\uB825\uB960 +1%"
-  powerRateIncreaseSlotSortPriority: 5
-  powerRateDecreaseStatusEffectID: 1002
-  powerRateDecreaseApplyValuePerStack: 1
-  powerRateDecreaseIcon: {fileID: 21300000, guid: 3fdabf8566cb6b5479809187b42f077b, type: 3}
-  powerRateDecreaseDescription: "\uC911\uCCA91\uB2F9 \uC704\uB825\uB960 -1%"
-  powerRateDecreaseSlotSortPriority: 6
-  speedIncreaseStatusEffectID: 1003
-  speedIncreaseApplyValuePerStack: 1
-  speedIncreaseIcon: {fileID: 21300000, guid: d6b22c65fa5018f4c9e326a6117e0fac, type: 3}
-  speedIncreaseDescription: "\uC911\uCCA91\uB2F9 \uC18D\uB3C4 +1"
-  speedIncreaseSlotSortPriority: 7
-  speedDecreaseStatusEffectID: 1004
-  speedDecreaseApplyValuePerStack: 1
-  speedDecreaseIcon: {fileID: 21300000, guid: 4092ea19e59f3c7409efd890897033de, type: 3}
-  speedDecreaseDescription: "\uC911\uCCA91\uB2F9 \uC18D\uB3C4 -1"
-  speedDecreaseSlotSortPriority: 8
-  bodySizeIncreaseStatusEffectID: 1005
-  bodySizeIncreaseApplyValuePerStack: 1
-  bodySizeIncreaseIcon: {fileID: 21300000, guid: 1859c761cf73e444b8328d7e1c6459c7, type: 3}
-  bodySizeIncreaseDescription: "\uC911\uCCA91\uB2F9 \uCCB4\uAE09 +1"
-  bodySizeIncreaseSlotSortPriority: 13
-  bodySizeDecreaseStatusEffectID: 1006
-  bodySizeDecreaseApplyValuePerStack: 1
-  bodySizeDecreaseIcon: {fileID: 21300000, guid: b0b0877e880560249bcf8fe90f4cb24f, type: 3}
-  bodySizeDecreaseDescription: "\uC911\uCCA91\uB2F9 \uCCB4\uAE09 -1"
-  bodySizeDecreaseSlotSortPriority: 14
-  attackPowerIncreaseStatusEffectID: 1007
-  attackPowerIncreaseApplyValuePerStack: 1
-  attackPowerIncreaseIcon: {fileID: 21300000, guid: 5fa53d23ec4bebd4184c1466e0c8feca, type: 3}
-  attackPowerIncreaseDescription: "\uC911\uCCA91\uB2F9 \uACF5\uACA9\uB825 +1"
-  attackPowerIncreaseSlotSortPriority: 1
-  attackPowerDecreaseStatusEffectID: 1008
-  attackPowerDecreaseApplyValuePerStack: 1
-  attackPowerDecreaseIcon: {fileID: 21300000, guid: 5434528582de98541ba98e6844812ec0, type: 3}
-  attackPowerDecreaseDescription: "\uC911\uCCA91\uB2F9 \uACF5\uACA9\uB825 -1"
-  attackPowerDecreaseSlotSortPriority: 2
-  defenseIncreaseStatusEffectID: 1009
-  defenseIncreaseApplyValuePerStack: 1
-  defenseIncreaseIcon: {fileID: 21300000, guid: da91cf1565c6b064e9176b9bf19cb2d4, type: 3}
-  defenseIncreaseDescription: "\uC911\uCCA91\uB2F9 \uBC29\uC5B4 +1%"
-  defenseIncreaseSlotSortPriority: 3
-  defenseDecreaseStatusEffectID: 1010
-  defenseDecreaseApplyValuePerStack: 1
-  defenseDecreaseIcon: {fileID: 21300000, guid: 03c7eba6f03ec034983dc16768d6f45a, type: 3}
-  defenseDecreaseDescription: "\uC911\uCCA91\uB2F9 \uBC29\uC5B4 -1%"
-  defenseDecreaseSlotSortPriority: 4
-  staggerResistanceIncreaseStatusEffectID: 1011
-  staggerResistanceIncreaseApplyValuePerStack: 1
-  staggerResistanceIncreaseIcon: {fileID: 21300000, guid: 3a23216ca0e30ca40a1b8eaf0efc31a4, type: 3}
-  staggerResistanceIncreaseDescription: "\uC911\uCCA91\uB2F9 \uC640\uD574 \uC800\uD56D\uB960
-    +1%"
-  staggerResistanceIncreaseSlotSortPriority: 9
-  staggerResistanceDecreaseStatusEffectID: 1012
-  staggerResistanceDecreaseApplyValuePerStack: 1
-  staggerResistanceDecreaseIcon: {fileID: 21300000, guid: e9629233d363e7a44aa202a56ce4fe91, type: 3}
-  staggerResistanceDecreaseDescription: "\uC911\uCCA91\uB2F9 \uC640\uD574 \uC800\uD56D\uB960
-    -1%"
-  staggerResistanceDecreaseSlotSortPriority: 10
-  moveSpeedRateIncreaseStatusEffectID: 1013
-  moveSpeedRateIncreaseApplyValuePerStack: 1
-  moveSpeedRateIncreaseIcon: {fileID: 21300000, guid: abe3fe72a319abe4196e6115c3e19a92, type: 3}
-  moveSpeedRateIncreaseDescription: "\uC911\uCCA91\uB2F9 \uC774\uB3D9\uC18D\uB3C4\uB960
-    +1%"
-  moveSpeedRateIncreaseSlotSortPriority: 11
-  moveSpeedRateDecreaseStatusEffectID: 1014
-  moveSpeedRateDecreaseApplyValuePerStack: 1
-  moveSpeedRateDecreaseIcon: {fileID: 21300000, guid: d2abee64fd987b04a9a12f9f80ee9547, type: 3}
-  moveSpeedRateDecreaseDescription: "\uC911\uCCA91\uB2F9 \uC774\uB3D9\uC18D\uB3C4\uB960
-    -1%"
-  moveSpeedRateDecreaseSlotSortPriority: 12
---- !u!4 &201368846
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 201368844}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 388.29318, y: 184.1913, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &216049820
 GameObject:
   m_ObjectHideFlags: 0
@@ -1945,166 +1827,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &515330402
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 515330403}
-  - component: {fileID: 515330404}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &515330403
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 515330402}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1826959433}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!96 &515330404
-TrailRenderer:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 515330402}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 0
-  m_LightProbeUsage: 0
-  m_ReflectionProbeUsage: 0
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_Time: 0.2
-  m_PreviewTimeScale: 1
-  m_Parameters:
-    serializedVersion: 3
-    widthMultiplier: 1
-    widthCurve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      - serializedVersion: 3
-        time: 0.62327665
-        value: 0.7041945
-        inSlope: -1.5136657
-        outSlope: -1.5136657
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.2400793
-        outWeight: 0.33333334
-      - serializedVersion: 3
-        time: 1
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    colorGradient:
-      serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_ColorSpace: -1
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    numCornerVertices: 0
-    numCapVertices: 0
-    alignment: 0
-    textureMode: 0
-    textureScale: {x: 1, y: 1}
-    shadowBias: 0.5
-    generateLightingData: 0
-  m_MinVertexDistance: 0.1
-  m_Autodestruct: 0
-  m_Emitting: 1
-  m_ApplyActiveColorSpace: 1
 --- !u!1 &518749905
 GameObject:
   m_ObjectHideFlags: 0
@@ -4177,52 +3899,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1237278602}
   m_CullTransparentMesh: 1
---- !u!1 &1268290785
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1268290787}
-  - component: {fileID: 1268290786}
-  m_Layer: 0
-  m_Name: StatusEffectDefinitionList
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1268290786
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1268290785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3aef992c7a6a47a40ba9510b9724a7e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StatusEffectDefinitionList
-  statusEffectDefinitionList:
-  - {fileID: 11400000, guid: 57711e3363ee56d488c2da58c00471d7, type: 2}
---- !u!4 &1268290787
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1268290785}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 388.29318, y: 184.1913, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1359445054
 GameObject:
   m_ObjectHideFlags: 0
@@ -5977,38 +5653,6 @@ MonoBehaviour:
   imagePointerEnterBaseVolume: 0.2
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
---- !u!1 &1826959432
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1826959433}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1826959433
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1826959432}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0.22253773, w: 0.97492415}
-  m_LocalPosition: {x: -5.21, y: 1.87, z: 1.86}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 515330403}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 5734.284}
 --- !u!1 &1845931490
 GameObject:
   m_ObjectHideFlags: 0
@@ -6326,21 +5970,21 @@ MonoBehaviour:
     currentExperience: 0
     levelUpRequiredExperience: 0
     levelstats: 1
-    baseMoveSpeed: 0
-    moveSpeedPercent: 0
+    baseMoveSpeed: 10
+    moveSpeedPercent: 100
     finalMoveSpeed: 0
     attackPower: 0
     defenseValue: 0
-    maxHealth: 0
-    currentHealth: 0
+    maxHealth: 100
+    currentHealth: 78
     bodySize: 0
-    speedStat: 0
-    powerRatePercent: 0
-    maxStaggerAmount: 0
+    speedStat: 111
+    powerRatePercent: 120
+    maxStaggerAmount: 1111
     currentStaggerAmount: 0
-    staggerResistancePercent: 0
-    maxHunger: 0
-    currentHunger: 0
+    staggerResistancePercent: 10
+    maxHunger: 80
+    currentHunger: 24
     isStarving: 0
     overweightDebuffStackCount: 0
   - characterName: "\uBE59 \uADF8\uB798\uADF8\uB798"
@@ -6350,21 +5994,21 @@ MonoBehaviour:
     currentExperience: 0
     levelUpRequiredExperience: 0
     levelstats: 1
-    baseMoveSpeed: 0
-    moveSpeedPercent: 0
+    baseMoveSpeed: 5
+    moveSpeedPercent: 200
     finalMoveSpeed: 0
     attackPower: 0
     defenseValue: 0
-    maxHealth: 0
-    currentHealth: 0
+    maxHealth: 11
+    currentHealth: 11
     bodySize: 0
-    speedStat: 0
-    powerRatePercent: 0
-    maxStaggerAmount: 0
+    speedStat: 222
+    powerRatePercent: 100
+    maxStaggerAmount: 2222
     currentStaggerAmount: 0
-    staggerResistancePercent: 0
-    maxHunger: 0
-    currentHunger: 0
+    staggerResistancePercent: 50
+    maxHunger: 120
+    currentHunger: 85
     isStarving: 0
     overweightDebuffStackCount: 0
   startingOwnedCharacterInventoryList:
@@ -6393,8 +6037,6 @@ MonoBehaviour:
     startCurrentHunger: 60
   startingFriendlyNigrumSettingList:
   - friendlyCharacterDefinition: {fileID: 11400000, guid: 7ce4b19c46c892f4f94d58aca2830b4e, type: 2}
-    startCurrentNigrumCapacity: 20
-  - friendlyCharacterDefinition: {fileID: 11400000, guid: d0e9abd06a4775041a51d0d5a6a973c0, type: 2}
     startCurrentNigrumCapacity: 20
   startMasterVolume: 100
   startEffectVolume: 100
@@ -7602,10 +7244,7 @@ SceneRoots:
   - {fileID: 430116776}
   - {fileID: 1459788289}
   - {fileID: 1201474656}
-  - {fileID: 1268290787}
-  - {fileID: 201368846}
   - {fileID: 36241235}
   - {fileID: 1157838091}
   - {fileID: 1140032134}
   - {fileID: 2034068337}
-  - {fileID: 1826959433}

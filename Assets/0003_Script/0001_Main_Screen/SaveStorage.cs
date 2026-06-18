@@ -1703,17 +1703,22 @@ public bool ApplyBattleCharacterStatToCurrentSave(
     }
 
     statData.levelstats = statSystem.LevelStats; // 레벨 저장
-    statData.attackPower = statSystem.AttackPower; // 공격력 저장
-    statData.defenseValue = statSystem.DefenseValue; // 방어율 저장
+
+    statData.attackPower = statSystem.RawAttackPower; // 상태효과가 적용되지 않은 기본 공격력 저장
+    statData.defenseValue = statSystem.RawDefenseValue; // 상태효과가 적용되지 않은 기본 방어력 저장
     statData.maxHealth = statSystem.MaxHealth; // 최대체력 저장
     statData.currentHealth = statSystem.CurrentHealth; // 현재체력 저장
-    statData.bodySize = statSystem.BodySize; // 체급 저장
-    statData.speedStat = statSystem.SpeedStat; // 속도 저장
-    statData.powerRatePercent = statSystem.PowerRatePercent; // 위력률 저장
+    statData.bodySize = statSystem.RawBodySize; // 상태효과가 적용되지 않은 기본 체급 저장
+    statData.speedStat = statSystem.RawSpeedStat; // 상태효과가 적용되지 않은 기본 속도 저장
+    statData.powerRatePercent = statSystem.RawPowerRatePercent; // 상태효과가 적용되지 않은 기본 위력률 저장
+
     statData.baseMoveSpeed = statSystem.BaseMoveSpeed; // 기본 이동속도 저장
-    statData.moveSpeedPercent = statSystem.MoveSpeedPercent; // 이동속도율 저장
-    statData.finalMoveSpeed = statSystem.FinalMoveSpeed; // 최종 이동속도 저장
+    statData.moveSpeedPercent = statSystem.RawMoveSpeedPercent; // 상태효과가 적용되지 않은 기본 이동속도률 저장
+    statData.finalMoveSpeed = statSystem.RawCalculatedMoveSpeed; // 상태효과가 적용되지 않은 기본 최종 이동속도 계산값 저장
+
+    statData.maxStaggerAmount = statSystem.MaxStaggerAmount; // 최대 와해량 저장
     statData.currentStaggerAmount = statSystem.CurrentStaggerAmount; // 현재 와해량 저장
+    statData.staggerResistancePercent = statSystem.RawStaggerResistancePercent; // 상태효과가 적용되지 않은 기본 와해 저항률 저장
 
     SetOwnedCharacterDeadState(firstRowID, secondRowID, individualID, statSystem.IsDead); // 사망 여부 저장
     SaveCurrentOwnedCharacterStatListToSelectedSave(); // 스탯 목록 저장
