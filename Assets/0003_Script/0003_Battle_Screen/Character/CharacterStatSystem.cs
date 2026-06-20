@@ -495,7 +495,9 @@ private IEnumerator BrokenReleaseRoutine() // 와해해제 애니메이션 후 �
     }
 
     isBrokenState = false; // 와해상태 해제
-    currentStaggerAmount = 0; // 와해상태 해제 후 현재 와해량 초기화
+    currentBrokenTimer = 0f; // 와해 유지 타이머 초기화
+    ResetCurrentStaggerAmountToZero(); // 와해상태 해제 후 현재 와해량 초기화
+
     SetActionLocked(false); // 행동 잠금 해제
 
     if (characterAnimationPlayer != null)
@@ -521,6 +523,7 @@ public void CancelBrokenStateByAttackSkillHit() // 공격기술 피격 진입으
 
     isBrokenState = false; // 와해상태 해제
     currentBrokenTimer = 0f; // 와해 유지 타이머 초기화
+    ResetCurrentStaggerAmountToZero(); // 와해 강제 종료 시 현재 와해량 초기화
 
     if (characterAnimationPlayer != null)
     {
@@ -626,6 +629,8 @@ private IEnumerator DeathBrokenClearRoutine() // 설정한 프레임 동안 와�
 
 private void ForceClearBrokenStateByDeath() // 사망 상태에서 와해상태 강제 해제
 {
+    bool changedStaggerAmount = false; // 현재 와해량 변경 여부
+
     if (brokenStateCoroutine != null)
     {
         StopCoroutine(brokenStateCoroutine); // 와해 유지 코루틴 정지
@@ -634,10 +639,16 @@ private void ForceClearBrokenStateByDeath() // 사망 상태에서 와해상태 
 
     isBrokenState = false; // 와해상태 해제
     currentBrokenTimer = 0f; // 와해 유지 타이머 초기화
+    changedStaggerAmount = ResetCurrentStaggerAmountToZero(); // 사망으로 와해 해제 시 현재 와해량 초기화
 
     if (characterAnimationPlayer != null)
     {
         characterAnimationPlayer.ClearBrokenAnimationLock(); // 와해 애니메이션 잠금 해제
+    }
+
+    if (changedStaggerAmount)
+    {
+        NotifyStatusValueChanged(); // 와해량이 실제로 바뀐 경우 UI 갱신
     }
 }
 
@@ -1282,6 +1293,20 @@ private int CompareStatusEffectDisplayDataPriority(StatusEffectDisplayData left,
 
     return left.StatusEffectID.CompareTo(right.StatusEffectID); // 우선순위가 같으면 ID 낮은 순 정렬
 }
+
+private bool ResetCurrentStaggerAmountToZero() // 현재 와해량을 0으로 초기화
+{
+    if (currentStaggerAmount <= 0)
+    {
+        return false; // 이미 0이면 변경 없음
+    }
+
+    currentStaggerAmount = 0; // 현재 와해량 초기화
+    return true; // 값이 변경되었음을 반환
+}
+
+
+
 
 
 

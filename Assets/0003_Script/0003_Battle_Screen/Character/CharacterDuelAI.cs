@@ -181,6 +181,9 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [SerializeField] private bool hasStoredPhysicalContactTriggerState; // 물리접촉 콜라이더 원래 트리거 상태 저장 여부
 [SerializeField] private bool storedPhysicalContactTriggerState; // 물리접촉 콜라이더 원래 트리거 상태
 
+[Header("와해 대상 공격기술 예약 상태")]
+[SerializeField] private CharacterDuelAI reservedAttackSkillCaster; // 이 캐릭터를 공격기술 대상으로 예약한 시전자
+
 [Header("____________________________________________________________")]
 
 
@@ -189,6 +192,8 @@ private enum PlayerControlledActionType // 플레이어 조작형 행동 분류
 [SerializeField] private SaveStorage saveStorage; // 치명타 경험치 저장 참조
 [SerializeField] private FriendlyCharacterManager friendlyCharacterManager; // 레벨업 후 현재 아군 스탯 재적용 참조
 
+
+public CharacterDuelAI ReservedAttackSkillCaster => reservedAttackSkillCaster; // 현재 이 캐릭터를 공격기술 대상으로 예약한 시전자 반환
 private Coroutine skillCastBlockCoroutine; // 시전 금지 타이머 코루틴
 
 private Coroutine attackSkillCoroutine; // 공격기술 진행 코루틴
@@ -995,7 +1000,6 @@ public void ClearPriorityTarget() // 직접 지정 공격 대상 해제
 
 private void UpdateDashToDuel() // 결투 대상에게 돌진 처리
 {
-
     if (IsDeadCharacter(currentDuelTarget))
     {
         EndDuel(); // 돌진 중 대상이 사망하면 결투 종료
@@ -1005,6 +1009,12 @@ private void UpdateDashToDuel() // 결투 대상에게 돌진 처리
     if (currentDuelTarget == null)
     {
         EndDuel(); // 결투 대상이 없으면 종료
+        return;
+    }
+
+    if (!IsCurrentAttackSkillReservationValid())
+    {
+        EndDuel(); // 공격기술 예약이 깨졌으면 돌진 종료
         return;
     }
 
@@ -1280,6 +1290,7 @@ private void OnDisable() // 비활성화 시 참조 정리
     currentSkillCastBlockTimer = 0f; // 시전 금지 타이머 초기화
 
     CancelAttackSkillState(); // 비활성화 시 공격기술 상태 정리
+    reservedAttackSkillCaster = null; // 비활성화 시 자신을 대상으로 잡은 공격기술 예약 해제
 
     CharacterDuelAI previousTarget = currentTarget; // 기존 현재 타겟 임시 저장
     CharacterDuelAI previousDuelTarget = currentDuelTarget; // 기존 결투 대상 임시 저장
@@ -1473,6 +1484,8 @@ public int GetCurrentMaximumSpeedRatePercent() // 현재 선택된 결투 기술
 
 public void EndDuel(bool stopManualAnimation = true) // 결투 종료 처리
 {
+    ReleaseCurrentAttackSkillTargetReservation(); // 공격기술 돌진 중이었다면 와해 대상 예약 해제
+
     isDuelResolutionProcessing = false; // 결투 판정 실행 잠금 해제
     isDashingToDuel = false; // 결투 돌진 상태 해제
     isAutoChasingCurrentTarget = false; // 공격 대상 자동 추적 상태 해제
@@ -1480,6 +1493,12 @@ public void EndDuel(bool stopManualAnimation = true) // 결투 종료 처리
     currentDuelTarget = null; // 현재 결투 대상 제거
     lastDashWorldDirection = Vector2.zero; // 저장된 돌진 방향 초기화
     hasLastDashWorldDirection = false; // 저장된 돌진 방향 유효 여부 초기화
+
+    if (currentAttackSkillDefinition != null)
+    {
+        currentAttackSkillTarget = null; // 공격기술 대상 초기화
+        currentAttackSkillDefinition = null; // 공격기술 정의 초기화
+    }
 
     StartSkillCastBlock(skillCastBlockDurationAfterDuelSkill); // 결투기술 종료 후 결투/공격기술 시전 금지 시작
 
@@ -2202,8 +2221,8 @@ private bool TryStartAttackSkillDashToBrokenTarget(float distanceToTarget) // �
 {
     if (IsDeadCharacter(currentTarget))
     {
-    SetCurrentTarget(null); // 사망한 대상이면 공격기술 대상 해제
-    return false;
+        SetCurrentTarget(null); // 사망한 대상이면 공격기술 대상 해제
+        return false;
     }
 
     AttackSkillDefinitionSO selectedAttackSkill = GetCurrentSelectedAttackSkill(); // 현재 선택 공격기술 가져오기
@@ -2218,7 +2237,9 @@ private bool TryStartAttackSkillDashToBrokenTarget(float distanceToTarget) // �
         return false; // 대상 정보가 없으면 기존 결투 진행
     }
 
-    if (selectedAttackSkill.CanUseOnlyOnBrokenTarget && !currentTarget.characterStatSystem.IsBrokenState)
+    bool isTargetBroken = currentTarget.characterStatSystem.IsBrokenState; // 대상 와해상태 여부
+
+    if (selectedAttackSkill.CanUseOnlyOnBrokenTarget && !isTargetBroken)
     {
         return false; // 와해 전용인데 대상이 와해상태가 아니면 기존 결투 진행
     }
@@ -2226,6 +2247,11 @@ private bool TryStartAttackSkillDashToBrokenTarget(float distanceToTarget) // �
     if (distanceToTarget > dashStartDistance)
     {
         return false; // 돌진 시작 거리 밖이면 실행하지 않음
+    }
+
+    if (isTargetBroken && !currentTarget.TryReserveAttackSkillTarget(this))
+    {
+        return false; // 와해 대상이 이미 다른 캐릭터에게 예약되어 있으면 공격기술 시작 차단
     }
 
     StartAttackSkillDashState(currentTarget, selectedAttackSkill); // 공격기술 돌진 시작
@@ -2663,6 +2689,7 @@ private void FlipAttackSkillFacingDirection(CharacterDuelAI targetAI) // 현재 
 
 private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
 {
+    ReleaseCurrentAttackSkillTargetReservation(); // 공격기술 종료 시 와해 대상 예약 해제
     RestoreAttackSkillPhysicalContactTriggerState(); // 공격자 물리접촉 콜라이더 상태 복원
 
     isAttackSkillCasting = false; // 시전상태 해제
@@ -2712,6 +2739,8 @@ private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
 
 private void CancelAttackSkillState() // 공격기술 상태 강제 정리
 {
+    ReleaseCurrentAttackSkillTargetReservation(); // 공격기술 취소 시 와해 대상 예약 해제
+
     if (attackSkillCoroutine != null)
     {
         StopCoroutine(attackSkillCoroutine); // 진행 중 코루틴 정지
@@ -2965,6 +2994,171 @@ private void ApplyCriticalHitExperienceReward() // 치명타 적중 경험치 �
         characterStatSystem.ApplyOwnedCharacterStatData(refreshedStatData);
     }
 }
+
+public bool IsAttackSkillReservedByOther(CharacterDuelAI requester) // 다른 캐릭터가 이 대상을 공격기술 대상으로 예약했는지 확인
+{
+    ClearInvalidAttackSkillReservation(); // 유효하지 않은 예약 정리
+
+    if (reservedAttackSkillCaster == null)
+    {
+        return false; // 예약자가 없으면 다른 대상이 예약한 상태가 아님
+    }
+
+    return reservedAttackSkillCaster != requester; // 예약자가 요청자와 다르면 다른 캐릭터가 예약 중
+}
+
+public bool IsAttackSkillReservedByCaster(CharacterDuelAI requester) // 요청자가 이 대상을 예약한 상태인지 확인
+{
+    ClearInvalidAttackSkillReservation(); // 유효하지 않은 예약 정리
+    return reservedAttackSkillCaster == requester; // 요청자가 예약자인지 반환
+}
+
+public bool TryReserveAttackSkillTarget(CharacterDuelAI caster) // 와해 대상 공격기술 예약 시도
+{
+    if (caster == null)
+    {
+        return false; // 시전자가 없으면 예약 불가
+    }
+
+    if (caster == this)
+    {
+        return false; // 자기 자신은 공격기술 대상으로 예약 불가
+    }
+
+    ClearInvalidAttackSkillReservation(); // 끊긴 예약 정리
+
+    if (reservedAttackSkillCaster != null && reservedAttackSkillCaster != caster)
+    {
+        return false; // 이미 다른 시전자가 예약 중이면 실패
+    }
+
+    if (characterStatSystem == null)
+    {
+        return false; // 스탯 참조가 없으면 와해상태 확인 불가
+    }
+
+    if (characterStatSystem.IsDead)
+    {
+        return false; // 사망 대상은 예약 불가
+    }
+
+    if (!characterStatSystem.IsBrokenState)
+    {
+        return false; // 와해상태 대상만 예약 가능
+    }
+
+    if (isAttackSkillCasting || isAttackSkillHitState)
+    {
+        return false; // 이미 공격기술 시전/피격 중이면 예약 불가
+    }
+
+    reservedAttackSkillCaster = caster; // 이 대상을 공격기술 대상으로 선점
+    return true; // 예약 성공
+}
+
+public void ReleaseAttackSkillTargetReservation(CharacterDuelAI caster) // 와해 대상 공격기술 예약 해제
+{
+    if (reservedAttackSkillCaster == null)
+    {
+        return; // 예약자가 없으면 종료
+    }
+
+    if (caster != null && reservedAttackSkillCaster != caster)
+    {
+        return; // 다른 시전자의 예약은 해제하지 않음
+    }
+
+    reservedAttackSkillCaster = null; // 예약 해제
+}
+
+private void ClearInvalidAttackSkillReservation() // 유효하지 않은 공격기술 예약 정리
+{
+    if (reservedAttackSkillCaster == null)
+    {
+        return; // 예약자가 없으면 종료
+    }
+
+    if (!IsAttackSkillReservationOwnerValid(reservedAttackSkillCaster))
+    {
+        reservedAttackSkillCaster = null; // 시전자가 사라졌거나 더 이상 이 대상을 노리지 않으면 예약 해제
+    }
+}
+
+private bool IsAttackSkillReservationOwnerValid(CharacterDuelAI caster) // 예약자가 아직 유효한지 확인
+{
+    if (caster == null)
+    {
+        return false; // 예약자가 없으면 무효
+    }
+
+    if (!caster.isActiveAndEnabled)
+    {
+        return false; // 비활성화된 시전자는 무효
+    }
+
+    if (IsDeadCharacter(caster))
+    {
+        return false; // 사망한 시전자는 무효
+    }
+
+    if (caster.currentAttackSkillTarget != this && caster.currentDuelTarget != this)
+    {
+        return false; // 더 이상 이 캐릭터를 공격기술 대상으로 들고 있지 않으면 무효
+    }
+
+    return true; // 예약자 유효
+}
+
+private void ReleaseCurrentAttackSkillTargetReservation() // 현재 자신이 잡고 있는 공격기술 대상 예약 해제
+{
+    if (currentAttackSkillTarget != null)
+    {
+        currentAttackSkillTarget.ReleaseAttackSkillTargetReservation(this); // 공격기술 대상 예약 해제
+    }
+
+    if (currentDuelTarget != null && currentDuelTarget != currentAttackSkillTarget)
+    {
+        currentDuelTarget.ReleaseAttackSkillTargetReservation(this); // 돌진 대상 예약 해제
+    }
+}
+
+private bool IsCurrentAttackSkillReservationValid() // 현재 공격기술 돌진 예약이 아직 유효한지 확인
+{
+    if (currentAttackSkillDefinition == null)
+    {
+        return true; // 공격기술 흐름이 아니면 검사 불필요
+    }
+
+    if (currentDuelTarget == null)
+    {
+        return false; // 대상이 없으면 무효
+    }
+
+    CharacterStatSystem targetStat = currentDuelTarget.GetCharacterStatSystem(); // 대상 스탯 참조
+
+    if (targetStat == null)
+    {
+        return false; // 대상 스탯이 없으면 무효
+    }
+
+    if (targetStat.IsDead)
+    {
+        return false; // 사망 대상이면 무효
+    }
+
+    if (!targetStat.IsBrokenState)
+    {
+        return false; // 공격기술 시전 전 대상 와해가 풀렸으면 무효
+    }
+
+    return currentDuelTarget.IsAttackSkillReservedByCaster(this); // 자신이 예약한 대상인지 확인
+}
+
+
+
+
+
+
 
 
 
