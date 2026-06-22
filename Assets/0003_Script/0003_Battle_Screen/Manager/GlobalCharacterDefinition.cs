@@ -2,18 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[System.Serializable]
-public class CharacterUIImageData
-{
-    [Header("표시 이미지")]
-    public Sprite displaySprite;
-
-    [Header("UI 위치")]
-    public Vector2 anchoredPosition;
-
-    [Header("UI 회전")]
-    public Vector3 localEulerAngles;
-}
 
 
 /// <summary>
@@ -58,6 +46,17 @@ public int HungerDecreaseAmount => hungerDecreaseAmount; // 주기당 허기 감
 
 
 [Header("________________________________________________________________________________")]
+
+
+[Header("캐릭터 인덱스 비주얼 프리팹 목록")]
+[Tooltip("캐릭터 관리창에서 이전/다음 버튼으로 전환하며 표시할 완성형 UI 비주얼 프리팹 목록입니다.")]
+[SerializeField] private List<GameObject> characterIndexVisualPrefabList = new List<GameObject>(); // 캐릭터 관리창에 생성할 비주얼 프리팹 목록
+
+public List<GameObject> CharacterIndexVisualPrefabList => characterIndexVisualPrefabList; // 캐릭터 인덱스 비주얼 프리팹 목록 반환
+
+
+[Header("________________________________________________________________________________")]
+
 
 [Header("캐릭터 이름")]
 [SerializeField] private string characterName; // 캐릭터 표시 이름
@@ -153,7 +152,7 @@ public int CriticalHitExperienceReward => criticalHitExperienceReward;
 
 public CharacterInventorySlot CharacterInventorySlotPrefab => characterInventorySlotPrefab; // 인벤토리 캐릭터 슬롯 프리팹 반환
 
-public List<CharacterUIImageData> characterUIImageList = new List<CharacterUIImageData>();
+
 
 public GameObject ManagementCharacterSlotPrefab => managementCharacterSlotPrefab; // 캐릭터 관리창 슬롯 프리팹 반환
 

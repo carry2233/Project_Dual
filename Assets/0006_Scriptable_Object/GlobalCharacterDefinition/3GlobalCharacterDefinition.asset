@@ -22,9 +22,10 @@ MonoBehaviour:
   battleCharacterListUIPrefab: {fileID: 0}
   managementCharacterSlotPrefab: {fileID: 0}
   characterInventorySlotPrefab: {fileID: 0}
+  characterIndexVisualPrefabList: []
   characterName: 
   baseMaxHunger: 100
-  baseMaxHealth: 111
+  baseMaxHealth: 2000
   baseAttackPower: 10
   baseDefenseValue: 0
   baseBodySize: 4
@@ -48,16 +49,3 @@ MonoBehaviour:
   requiredExperienceLevelMultiplier: 5
   criticalAttackDamagePercent: 150
   criticalHitExperienceReward: 1
-  characterUIImageList:
-  - displaySprite: {fileID: 21300000, guid: 87200599fefb43b43a4ab7c657d757ef, type: 3}
-    anchoredPosition: {x: 0, y: 10}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: 1c3b2270a761f664283d4755f2be5c51, type: 3}
-    anchoredPosition: {x: 0, y: 20}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: a63b6c4acc0b6c14281c7f130d9b27c9, type: 3}
-    anchoredPosition: {x: 0, y: 30}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: cfcbaa73d74264242b34f7208e15a865, type: 3}
-    anchoredPosition: {x: 0, y: 40}
-    localEulerAngles: {x: 0, y: 0, z: 0}

@@ -41,6 +41,23 @@ public class AttackSkillDefinitionSO : ScriptableObject
     [Header("공격기술 사운드 목록")]
     [SerializeField] private List<AttackSkillSoundEventData> attackSkillSoundEventList = new List<AttackSkillSoundEventData>(); // 공격기술 중 재생할 사운드 목록
 
+    [Header("________________________________________________________________________________")]
+
+[Header("공격기술 종료 시 자신에게 부여할 상태효과 목록")]
+[Tooltip("공격기술이 정상적으로 끝났을 때 시전자 자신에게 부여할 상태효과 목록입니다.")]
+[SerializeField] private List<AttackSkillEndStatusEffectApplyData> selfStatusEffectApplyListOnAttackSkillEnd
+    = new List<AttackSkillEndStatusEffectApplyData>(); // 공격기술 종료 시 자신에게 부여할 상태효과 목록
+
+[Header("공격기술 종료 시 피격자에게 부여할 상태효과 목록")]
+[Tooltip("공격기술이 정상적으로 끝났을 때 피격자에게 부여할 상태효과 목록입니다.")]
+[SerializeField] private List<AttackSkillEndStatusEffectApplyData> targetStatusEffectApplyListOnAttackSkillEnd
+    = new List<AttackSkillEndStatusEffectApplyData>(); // 공격기술 종료 시 피격자에게 부여할 상태효과 목록
+
+[Header("특정 공격 치명타 적용 목록")]
+[Tooltip("공격 목록 인덱스 기준으로 특정 공격에 치명타 피해/치명타 경험치 획득 여부를 예약합니다. 인덱스는 0부터 시작합니다.")]
+[SerializeField] private List<AttackSkillCriticalApplyData> attackSkillCriticalApplyList
+    = new List<AttackSkillCriticalApplyData>(); // 특정 공격 인덱스에 적용할 치명타 예약 목록
+
     public string AttackSkillName => attackSkillName; // 공격기술 이름 반환
     public int FirstRowID => firstRowID; // A ID 반환
     public int SecondRowID => secondRowID; // B ID 반환
@@ -56,6 +73,15 @@ public class AttackSkillDefinitionSO : ScriptableObject
     public IReadOnlyList<AttackSkillAnimationData> AttackSkillAnimationList => attackSkillAnimationList; // 애니메이션 목록 반환
     public IReadOnlyList<AttackSkillMotionEventData> AttackSkillMotionEventList => attackSkillMotionEventList; // 모션 이벤트 목록 반환
     public IReadOnlyList<AttackSkillSoundEventData> AttackSkillSoundEventList => attackSkillSoundEventList; // 사운드 이벤트 목록 반환
+
+    public IReadOnlyList<AttackSkillEndStatusEffectApplyData> SelfStatusEffectApplyListOnAttackSkillEnd
+    => selfStatusEffectApplyListOnAttackSkillEnd; // 공격기술 종료 시 자신에게 부여할 상태효과 목록 반환
+
+    public IReadOnlyList<AttackSkillEndStatusEffectApplyData> TargetStatusEffectApplyListOnAttackSkillEnd
+    => targetStatusEffectApplyListOnAttackSkillEnd; // 공격기술 종료 시 피격자에게 부여할 상태효과 목록 반환
+
+    public IReadOnlyList<AttackSkillCriticalApplyData> AttackSkillCriticalApplyList
+    => attackSkillCriticalApplyList; // 특정 공격 치명타 적용 목록 반환
 
     [System.Serializable]
     public class AttackEffectSpawnData
@@ -222,4 +248,47 @@ public class AttackSkillDefinitionSO : ScriptableObject
         public int AnimationListIndex => animationListIndex; // 애니메이션 인덱스 반환
         public float SoundStartDelay => soundStartDelay; // 시작 딜레이 반환
     }
+
+    [System.Serializable]
+public class AttackSkillEndStatusEffectApplyData
+{
+    [Header("부여할 상태효과")]
+    [SerializeField] private StatusEffectDefinitionSO statusEffectDefinition; // 부여할 상태효과 ScriptableObject
+
+    [Header("부여 중첩값")]
+    [Tooltip("상태효과를 몇 중첩 부여할지 설정합니다. 최소 1 이상으로 보정됩니다.")]
+    [SerializeField] private int applyStack = 1; // 부여할 상태효과 중첩값
+
+    [Header("부여 지속값")]
+    [Tooltip("상태효과가 지속시간 개념을 사용할 때만 적용됩니다. 지속시간이 없는 상태효과라면 이 값은 무시됩니다.")]
+    [SerializeField] private float applyDuration = 1f; // 부여할 지속시간, 비지속 상태효과면 무시
+
+    public StatusEffectDefinitionSO StatusEffectDefinition => statusEffectDefinition; // 부여할 상태효과 반환
+    public int ApplyStack => Mathf.Max(1, applyStack); // 부여 중첩값 반환
+    public float ApplyDuration => Mathf.Max(0f, applyDuration); // 부여 지속값 반환
+}
+
+[System.Serializable]
+public class AttackSkillCriticalApplyData
+{
+    [Header("해당될 공격 리스트 인덱스")]
+    [Tooltip("AttackExecutionList 기준 인덱스입니다. 0부터 시작합니다.")]
+    [SerializeField] private int attackExecutionListIndex; // 치명타 설정이 적용될 공격 목록 인덱스
+
+    [Header("치명타 피해 적용 여부")]
+    [SerializeField] private bool applyCriticalDamage; // 해당 공격에 치명타 피해를 적용할지 여부
+
+    [Header("치명타 경험치 획득 여부")]
+    [SerializeField] private bool gainCriticalExperience; // 해당 공격 적중 시 치명타 경험치를 획득할지 여부
+
+    public int AttackExecutionListIndex => attackExecutionListIndex; // 치명타 적용 공격 인덱스 반환
+    public bool ApplyCriticalDamage => applyCriticalDamage; // 치명타 피해 적용 여부 반환
+    public bool GainCriticalExperience => gainCriticalExperience; // 치명타 경험치 획득 여부 반환
+}
+
+
+
+
+
+
 }

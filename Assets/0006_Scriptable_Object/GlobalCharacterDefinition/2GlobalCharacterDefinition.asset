@@ -18,17 +18,22 @@ MonoBehaviour:
   hungerDecreaseAmount: 1
   inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 48265d171824f02438a23458ccfc1f09, type: 3}
   displayPriority: 0
-  detailUIPrefab: {fileID: 2177999571878758286, guid: 31cedc5b583c6534faaa73d40ba1b25a, type: 3}
+  detailUIPrefab: {fileID: 2177999571878758286, guid: be15dd55fd542174b9d70edb64a9bb9a, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 6573314813019425848, guid: dec19dd9c3cf68f4aa7c2b132a6045e0, type: 3}
   characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: fc57d870e08194246b89abb89e745009, type: 3}
+  characterIndexVisualPrefabList:
+  - {fileID: 581678893387137466, guid: 4b65fdee37f75bb478b4756b68fdae19, type: 3}
+  - {fileID: 581678893387137466, guid: 3ba348bab02d0ee4cbacab2f26b1ab9b, type: 3}
+  - {fileID: 581678893387137466, guid: 83d95aabd593a9c45805c6e6a45115b4, type: 3}
+  - {fileID: 581678893387137466, guid: ff03bd7e684d64049a7e57f672e3fbdc, type: 3}
   characterName: "\uC554\uBBF8\uBBF8"
   baseMaxHunger: 100
   baseMaxHealth: 1111
   baseAttackPower: 10
   baseDefenseValue: 0
   baseBodySize: 4
-  baseSpeedStat: 1
+  baseSpeedStat: 5
   basePowerRatePercent: 100
   baseMoveSpeed: 5
   baseMoveSpeedPercent: 100
@@ -48,16 +53,3 @@ MonoBehaviour:
   requiredExperienceLevelMultiplier: 5
   criticalAttackDamagePercent: 200
   criticalHitExperienceReward: 1
-  characterUIImageList:
-  - displaySprite: {fileID: 21300000, guid: 87200599fefb43b43a4ab7c657d757ef, type: 3}
-    anchoredPosition: {x: 0, y: 10}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: 1c3b2270a761f664283d4755f2be5c51, type: 3}
-    anchoredPosition: {x: 0, y: 20}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: a63b6c4acc0b6c14281c7f130d9b27c9, type: 3}
-    anchoredPosition: {x: 0, y: 30}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: cfcbaa73d74264242b34f7208e15a865, type: 3}
-    anchoredPosition: {x: 0, y: 40}
-    localEulerAngles: {x: 0, y: 0, z: 0}

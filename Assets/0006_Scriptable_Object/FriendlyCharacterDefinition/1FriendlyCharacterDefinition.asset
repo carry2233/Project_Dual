@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FriendlyCharacterDefinition
   globalCharacterDefinition: {fileID: 11400000, guid: a19548db7d5a79a4bbaab1fe0bb9295c, type: 2}
   slotDisplayPriority: 0
-  properWeightKg: 15
+  properWeightKg: 333

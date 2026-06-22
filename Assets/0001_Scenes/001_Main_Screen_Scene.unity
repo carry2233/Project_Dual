@@ -379,8 +379,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 150175495}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &151196731
@@ -627,8 +627,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 173170596}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &201333358
@@ -1790,7 +1790,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 85058624}
   m_HandleRect: {fileID: 85058623}
   m_Direction: 3
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2830,7 +2830,7 @@ MonoBehaviour:
   m_CaretWidth: 1
   m_ReadOnly: 0
   m_RichText: 1
-  m_GlobalFontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_GlobalFontAsset: {fileID: 11400000, guid: 03462e6f98baa7f4f9c1b8a10ddf1f33, type: 2}
   m_OnFocusSelectAll: 1
   m_ResetOnDeActivation: 1
   m_KeepTextSelectionVisible: 0
@@ -3047,8 +3047,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 902029704}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &959179571
@@ -3247,8 +3247,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u200B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 03462e6f98baa7f4f9c1b8a10ddf1f33, type: 2}
+  m_sharedMaterial: {fileID: -7318062587347729328, guid: 03462e6f98baa7f4f9c1b8a10ddf1f33, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3982,8 +3982,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 1191263375}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &1201474654
@@ -4287,6 +4287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StatusEffectDefinitionList
   statusEffectDefinitionList:
   - {fileID: 11400000, guid: 57711e3363ee56d488c2da58c00471d7, type: 2}
+  - {fileID: 11400000, guid: 3a39eb56df5174a4da08fcd66773a2fc, type: 2}
 --- !u!4 &1268290787
 Transform:
   m_ObjectHideFlags: 0
@@ -4456,8 +4457,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 1359445056}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &1420877356
@@ -4614,8 +4615,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 1420877358}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &1431762918
@@ -4909,8 +4910,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 1451255548}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &1459788287
@@ -5115,8 +5116,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uC774\uB984\uC791\uC131"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
-  m_sharedMaterial: {fileID: 2906029063069092093, guid: bd576279ea13f5742a163421d5c0db5a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 03462e6f98baa7f4f9c1b8a10ddf1f33, type: 2}
+  m_sharedMaterial: {fileID: -7318062587347729328, guid: 03462e6f98baa7f4f9c1b8a10ddf1f33, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6159,8 +6160,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 1823580857}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &1824143077
@@ -7778,8 +7779,8 @@ MonoBehaviour:
   buttonComponent: {fileID: 2134594366}
   playSoundOnImagePointerEnter: 1
   playSoundOnButtonClick: 1
-  imagePointerEnterSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
-  imagePointerEnterBaseVolume: 0.2
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
   buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
   buttonClickBaseVolume: 0.7
 --- !u!1 &2136145139
@@ -7795,6 +7796,7 @@ GameObject:
   - component: {fileID: 2136145142}
   - component: {fileID: 2136145141}
   - component: {fileID: 2136145144}
+  - component: {fileID: 2136145145}
   m_Layer: 5
   m_Name: createConfirmButton
   m_TagString: Untagged
@@ -7919,6 +7921,26 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -2}
   m_UseGraphicAlpha: 1
+--- !u!114 &2136145145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136145139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ccf314c585f394db6b3e0174666820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISoundPlaybackSystem
+  uiImage: {fileID: 2136145142}
+  buttonComponent: {fileID: 2136145141}
+  playSoundOnImagePointerEnter: 1
+  playSoundOnButtonClick: 1
+  imagePointerEnterSoundClip: {fileID: 8300000, guid: 935bed714ffd0be45bdf9d4d6bbd4b17, type: 3}
+  imagePointerEnterBaseVolume: 0.6
+  buttonClickSoundClip: {fileID: 8300000, guid: b49df896a74cb4340ace6bf809ba1297, type: 3}
+  buttonClickBaseVolume: 0.7
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

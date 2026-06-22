@@ -97,7 +97,13 @@ public enum MapShapeType
 
 [Header("맵 형태 설정")]
 [SerializeField] private MapShapeType mapShapeType = MapShapeType.NormalIsland; // 생성할 맵 형태 타입
-[SerializeField] private int randomSeed = 0; // 노이즈 계산용 시드값
+[SerializeField] private int randomSeed = 0; // 실제 타일 생성에 사용할 최종 시드값
+
+[Header("새 저장본 최초 타일 생성 시드 설정")]
+[SerializeField] private bool useRandomSeedOnNewSaveTileGeneration = true; // 새 저장본 최초 타일 생성 시 랜덤 시드를 사용할지 여부
+[SerializeField] private int randomSeedMinValue = 0; // 랜덤 시드 최소값
+[SerializeField] private int randomSeedMaxValue = 999999; // 랜덤 시드 최대값
+
 [SerializeField] private float noiseScale = 0.15f; // 노이즈 확대/축소 값
 [SerializeField] private float shapeThreshold = 0.45f; // 섬으로 인정할 최소 기준값
 [SerializeField] private float edgeFalloffStrength = 1.2f; // 바깥으로 갈수록 줄어드는 강도
@@ -205,13 +211,36 @@ private void Start() // 게임 시작 시 저장본 기준 자동 생성 또는 
 
     if (HasPlacementSaveFile() == true)
     {
-        LoadPlacementFromJson(); // 저장본이 있으면 복원
+        LoadPlacementFromJson(); // 저장본이 있으면 기존 저장된 타일 배치 복원
     }
     else
     {
-        PlacePrefabsInRange(); // 저장본이 없으면 새 생성
+        ApplyRandomSeedForNewSaveTileGeneration(); // 저장본이 없을 때만 새 랜덤 시드 적용
+        PlacePrefabsInRange(); // 랜덤 시드가 적용된 상태로 새 타일 생성
         SavePlacementToJson(); // 새 생성 결과를 현재 저장본 ID로 저장
     }
+}
+
+private void ApplyRandomSeedForNewSaveTileGeneration() // 새 저장본 최초 타일 생성용 랜덤 시드 적용
+{
+    if (useRandomSeedOnNewSaveTileGeneration == false)
+    {
+        return; // 랜덤 시드 사용을 꺼두면 인스펙터의 randomSeed 값을 그대로 사용
+    }
+
+    int minSeedValue = Mathf.Min(randomSeedMinValue, randomSeedMaxValue); // 최소/최대값이 뒤집혀 있어도 안전하게 보정
+    int maxSeedValue = Mathf.Max(randomSeedMinValue, randomSeedMaxValue); // 최소/최대값이 뒤집혀 있어도 안전하게 보정
+
+    if (minSeedValue == maxSeedValue)
+    {
+        randomSeed = minSeedValue; // 범위가 1개 값이면 해당 값을 그대로 사용
+    }
+    else
+    {
+        randomSeed = Random.Range(minSeedValue, maxSeedValue + 1); // 설정 범위 안에서 새 시드 결정
+    }
+
+    Debug.Log($"[HexTilePlacementManager] 새 저장본 최초 타일 생성 시드 적용 : {randomSeed}", this); // 적용된 시드 확인 로그
 }
 
 public void PlacePrefabsInRange() // 현재 설정값 기준으로 범위 내 타일 생성 실행

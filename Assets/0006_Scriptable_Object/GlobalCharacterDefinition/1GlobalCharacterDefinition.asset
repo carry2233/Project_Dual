@@ -22,20 +22,24 @@ MonoBehaviour:
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: c48a07d34c57f924088042b9b61b8ab9, type: 3}
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 1c9d70606cdd44f43a1fc3a120a8edfb, type: 3}
   characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: d4d25fb84f0f37349818399be7d5bc03, type: 3}
+  characterIndexVisualPrefabList:
+  - {fileID: 581678893387137466, guid: 4b65fdee37f75bb478b4756b68fdae19, type: 3}
+  - {fileID: 581678893387137466, guid: 3ba348bab02d0ee4cbacab2f26b1ab9b, type: 3}
+  - {fileID: 581678893387137466, guid: 83d95aabd593a9c45805c6e6a45115b4, type: 3}
   characterName: "\uC73C\uBBF8\uC73C\uBBF8"
   baseMaxHunger: 100
   baseMaxHealth: 1111
   baseAttackPower: 10
   baseDefenseValue: 0
   baseBodySize: 4
-  baseSpeedStat: 1
+  baseSpeedStat: 5
   basePowerRatePercent: 100
   baseMoveSpeed: 5
   baseMoveSpeedPercent: 100
   baseMaxStaggerAmount: 111
   baseStaggerResistancePercent: 0
   increaseMaxHealthPerLevel: 0
-  increaseAttackPowerPerLevel: 0
+  increaseAttackPowerPerLevel: 11
   increaseDefenseValuePerLevel: 0
   increaseBodySizePerLevel: 0
   increaseSpeedStatPerLevel: 0
@@ -48,16 +52,3 @@ MonoBehaviour:
   requiredExperienceLevelMultiplier: 5
   criticalAttackDamagePercent: 200
   criticalHitExperienceReward: 20
-  characterUIImageList:
-  - displaySprite: {fileID: 21300000, guid: 2b2ff7c2e6d861c4a9581cfa0b88512b, type: 3}
-    anchoredPosition: {x: 10, y: 0}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: 42d2d6425cc083c49b6a9a29e767ff1d, type: 3}
-    anchoredPosition: {x: 20, y: 0}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: 5f88c77e30715e14482ee96c014d7834, type: 3}
-    anchoredPosition: {x: 30, y: 0}
-    localEulerAngles: {x: 0, y: 0, z: 0}
-  - displaySprite: {fileID: 21300000, guid: 1d46cfe45803e6147904ea8a71d36e28, type: 3}
-    anchoredPosition: {x: 40, y: 0}
-    localEulerAngles: {x: 0, y: 0, z: 0}

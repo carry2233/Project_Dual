@@ -38,12 +38,6 @@ public class CharacterManagementManager : MonoBehaviour
 [Header("캐릭터 이미지 UI 부모")]
 public GameObject characterImageParentObject; // 이미지 부모 오브젝트
 
-[Header("캐릭터 이미지 UI")]
-public Image characterDisplayImage; // 표시할 UI 이미지
-
-[Header("이미지 위치/회전 적용 대상")]
-public RectTransform characterImageChildRect; // 위치/회전 적용 대상
-
 [Header("이미지 인덱스 버튼")]
 [SerializeField] private Button previousImageButton; // 이전 이미지 버튼
 [SerializeField] private Button nextImageButton; // 다음 이미지 버튼
@@ -54,6 +48,8 @@ private int currentImageIndex; // 현재 이미지 인덱스
 private GameObject currentDetailUIObject; // 현재 생성된 상세 UI 오브젝트
 
 private readonly List<GameObject> createdSlotObjectList = new List<GameObject>(); // 현재 생성된 관리창 슬롯 목록
+
+private GameObject currentCharacterVisualObject; // 현재 생성된 캐릭터 비주얼 프리팹 오브젝트
 
     private bool isPanelOpen = false; // 현재 패널 열림 상태
 
@@ -108,6 +104,7 @@ private void Start() // 시작 시 캐릭터 이미지 버튼 숨김
 {
     SetImageButtonActive(false); // 캐릭터 선택 전 이미지 버튼 비활성화
 }
+
 private void OnDestroy() // 종료 시 버튼 이벤트 해제
 {
     if (openButton != null)
@@ -244,6 +241,7 @@ tempSlotList.Add(slotObject); // 임시 목록에 추가
 
     RefreshContentRightValue(); // 생성된 슬롯 수 기준으로 Content 오른쪽값 갱신
 }
+
 
 private int CompareSlotPriority(GameObject a, GameObject b) // 슬롯 우선순위 비교
 {
@@ -404,43 +402,43 @@ public void SelectCharacterByID(int firstRowID, int secondRowID) // ID 기준으
     UpdateCharacterImage(); // 캐릭터 이미지 갱신
 }
 
-public void NextCharacterImage() // 다음 캐릭터 이미지 표시
+public void NextCharacterImage() // 다음 캐릭터 비주얼 프리팹 표시
 {
     if (currentSelectedCharacter == null)
     {
         return;
     }
 
-    List<CharacterUIImageData> imageList = currentSelectedCharacter.characterUIImageList; // 현재 캐릭터 이미지 리스트
+    List<GameObject> visualPrefabList = currentSelectedCharacter.CharacterIndexVisualPrefabList; // 현재 캐릭터 비주얼 프리팹 목록
 
-    if (imageList == null || imageList.Count == 0)
+    if (visualPrefabList == null || visualPrefabList.Count == 0)
     {
-        ClearCharacterImageUI(); // 이미지가 없으면 UI 초기화
+        ClearCharacterImageUI(); // 비주얼 프리팹이 없으면 UI 초기화
         return;
     }
 
     currentImageIndex++; // 다음 인덱스로 이동
 
-    if (currentImageIndex >= imageList.Count)
+    if (currentImageIndex >= visualPrefabList.Count)
     {
         currentImageIndex = 0; // 마지막 다음은 0번으로 순환
     }
 
-    UpdateCharacterImage(); // 캐릭터 이미지 갱신
+    UpdateCharacterImage(); // 캐릭터 비주얼 갱신
 }
 
-public void PreviousCharacterImage() // 이전 캐릭터 이미지 표시
+public void PreviousCharacterImage() // 이전 캐릭터 비주얼 프리팹 표시
 {
     if (currentSelectedCharacter == null)
     {
         return;
     }
 
-    List<CharacterUIImageData> imageList = currentSelectedCharacter.characterUIImageList; // 현재 캐릭터 이미지 리스트
+    List<GameObject> visualPrefabList = currentSelectedCharacter.CharacterIndexVisualPrefabList; // 현재 캐릭터 비주얼 프리팹 목록
 
-    if (imageList == null || imageList.Count == 0)
+    if (visualPrefabList == null || visualPrefabList.Count == 0)
     {
-        ClearCharacterImageUI(); // 이미지가 없으면 UI 초기화
+        ClearCharacterImageUI(); // 비주얼 프리팹이 없으면 UI 초기화
         return;
     }
 
@@ -448,13 +446,13 @@ public void PreviousCharacterImage() // 이전 캐릭터 이미지 표시
 
     if (currentImageIndex < 0)
     {
-        currentImageIndex = imageList.Count - 1; // 0번 이전은 마지막으로 순환
+        currentImageIndex = visualPrefabList.Count - 1; // 0번 이전은 마지막으로 순환
     }
 
-    UpdateCharacterImage(); // 캐릭터 이미지 갱신
+    UpdateCharacterImage(); // 캐릭터 비주얼 갱신
 }
 
-private void UpdateCharacterImage() // 현재 인덱스의 캐릭터 이미지 UI 갱신
+private void UpdateCharacterImage() // 현재 인덱스의 캐릭터 비주얼 프리팹 갱신
 {
     if (currentSelectedCharacter == null)
     {
@@ -462,58 +460,56 @@ private void UpdateCharacterImage() // 현재 인덱스의 캐릭터 이미지 U
         return;
     }
 
-    List<CharacterUIImageData> imageList = currentSelectedCharacter.characterUIImageList; // 현재 캐릭터 이미지 리스트
+    List<GameObject> visualPrefabList = currentSelectedCharacter.CharacterIndexVisualPrefabList; // 현재 캐릭터 비주얼 프리팹 목록
 
-    if (imageList == null || imageList.Count == 0)
+    if (visualPrefabList == null || visualPrefabList.Count == 0)
     {
-        ClearCharacterImageUI(); // 이미지 리스트가 비었으면 UI 초기화
+        ClearCharacterImageUI(); // 비주얼 프리팹 목록이 비었으면 UI 초기화
         return;
     }
 
-    if (currentImageIndex < 0 || currentImageIndex >= imageList.Count)
+    if (currentImageIndex < 0 || currentImageIndex >= visualPrefabList.Count)
     {
         currentImageIndex = 0; // 잘못된 인덱스면 0으로 보정
     }
 
-    CharacterUIImageData imageData = imageList[currentImageIndex]; // 현재 표시할 이미지 데이터
+    GameObject visualPrefab = visualPrefabList[currentImageIndex]; // 현재 생성할 캐릭터 비주얼 프리팹
+
+    if (visualPrefab == null)
+    {
+        ClearCurrentCharacterVisualObject(); // 기존 생성 비주얼 제거
+        SetImageButtonActive(false); // 버튼 비활성화
+        return;
+    }
 
     if (characterImageParentObject != null)
     {
-        characterImageParentObject.SetActive(true); // 이미지 부모 오브젝트 활성화
+        characterImageParentObject.SetActive(true); // 비주얼 부모 오브젝트 활성화
     }
 
-    if (characterDisplayImage != null)
-    {
-        characterDisplayImage.sprite = imageData.displaySprite; // UI Image에 Sprite 적용
-        characterDisplayImage.enabled = imageData.displaySprite != null; // 이미지가 있을 때만 표시
-    }
+    ClearCurrentCharacterVisualObject(); // 기존 생성된 비주얼 프리팹 제거
 
-    if (characterImageChildRect != null)
-    {
-        characterImageChildRect.anchoredPosition = imageData.anchoredPosition; // UI 위치 적용
-        characterImageChildRect.localEulerAngles = imageData.localEulerAngles; // UI 회전 적용
-    }
+    currentCharacterVisualObject = Instantiate(
+        visualPrefab,
+        characterImageParentObject.transform,
+        false); // 프리팹의 UI 위치/크기/회전 설정을 유지한 채 부모 아래 생성
 
-    SetImageButtonActive(true); // 캐릭터 이미지가 표시되는 동안 버튼 활성화
+    SetImageButtonActive(true); // 캐릭터 비주얼이 표시되는 동안 버튼 활성화
 }
 
-private void ClearCharacterImageUI() // 캐릭터 이미지 UI 초기화
+private void ClearCharacterImageUI() // 캐릭터 비주얼 UI 초기화
 {
     currentSelectedCharacter = null; // 현재 선택 캐릭터 초기화
-    currentImageIndex = 0; // 이미지 인덱스 초기화
+    currentImageIndex = 0; // 이미지/비주얼 인덱스 초기화
 
-    if (characterDisplayImage != null)
-    {
-        characterDisplayImage.sprite = null; // 표시 이미지 제거
-        characterDisplayImage.enabled = false; // 이미지 컴포넌트 숨김
-    }
+    ClearCurrentCharacterVisualObject(); // 현재 생성된 캐릭터 비주얼 프리팹 제거
 
     if (characterImageParentObject != null)
     {
-        characterImageParentObject.SetActive(false); // 이미지 부모 오브젝트 비활성화
+        characterImageParentObject.SetActive(false); // 비주얼 부모 오브젝트 비활성화
     }
 
-    SetImageButtonActive(false); // 이미지 버튼 비활성화
+    SetImageButtonActive(false); // 이전/다음 버튼 비활성화
 }
 
 private void SetImageButtonActive(bool isActive) // 이미지 이전/다음 버튼 활성 상태 적용
@@ -528,4 +524,16 @@ private void SetImageButtonActive(bool isActive) // 이미지 이전/다음 버�
         nextImageButton.gameObject.SetActive(isActive); // 다음 버튼 오브젝트 활성 상태 적용
     }
 }
+
+private void ClearCurrentCharacterVisualObject() // 현재 생성된 캐릭터 비주얼 프리팹 제거
+{
+    if (currentCharacterVisualObject != null)
+    {
+        Destroy(currentCharacterVisualObject); // 기존 비주얼 프리팹 삭제
+        currentCharacterVisualObject = null; // 참조 초기화
+    }
+}
+
+
+
 }

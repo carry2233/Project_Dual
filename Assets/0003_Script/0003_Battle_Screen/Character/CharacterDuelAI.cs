@@ -2343,6 +2343,7 @@ private IEnumerator AttackSkillCastRoutine(CharacterDuelAI target, AttackSkillDe
     currentAttackSkillFacingDirection = navigationMovementSystem.CurrentFacingXDirection; // 시전 방향 고정
     attackSkillTargetCorrectionLocalPosition = attackSkillDefinition.TargetLocalCorrectionPosition; // 위치보정값 저장
     hasAttackSkillFirstHitOccurred = false; // 첫 피격 상태 초기화
+    characterStatSystem?.SetNextAttackSkillCriticalState(false, false); // 이전 공격기술에서 남은 치명타 예약 상태 초기화
 
     ReverseAttackSkillFacingDirectionIfWallAhead(attackSkillDefinition); // 벽 감지 시 공격기술 방향 반전
 
@@ -2474,13 +2475,92 @@ private IEnumerator ApplyAttackExecutionEvents(AttackSkillDefinitionSO attackSki
             continue; // 현재 애니메이션 인덱스와 다르면 제외
         }
 
+        PrepareFirstAttackSkillCriticalStateIfNeeded(attackSkillDefinition, i); // 0번 공격 치명타 예약 예외 처리
+
         if (attackData.AttackStartDelay > 0f)
         {
             yield return new WaitForSeconds(attackData.AttackStartDelay); // 공격 실행 딜레이
         }
 
         ApplyAttackSkillDamage(attackData); // 실제 피해 적용
+
+        PrepareNextAttackSkillCriticalStateAfterCurrentAttack(attackSkillDefinition, i); // 다음 공격 인덱스 치명타 예약
     }
+}
+
+private void PrepareFirstAttackSkillCriticalStateIfNeeded(
+    AttackSkillDefinitionSO attackSkillDefinition,
+    int currentAttackExecutionIndex) // 0번 공격 치명타 예약 예외 처리
+{
+    if (currentAttackExecutionIndex != 0)
+    {
+        return; // 0번 공격이 아니면 처리하지 않음
+    }
+
+    ApplyAttackSkillCriticalStateForAttackIndex(
+        attackSkillDefinition,
+        currentAttackExecutionIndex); // 0번 공격은 이전 인덱스가 없으므로 공격 직전에 예약
+}
+
+private void PrepareNextAttackSkillCriticalStateAfterCurrentAttack(
+    AttackSkillDefinitionSO attackSkillDefinition,
+    int currentAttackExecutionIndex) // 현재 공격 이후 다음 공격 치명타 예약
+{
+    int nextAttackExecutionIndex = currentAttackExecutionIndex + 1; // 다음 공격 인덱스 계산
+
+    ApplyAttackSkillCriticalStateForAttackIndex(
+        attackSkillDefinition,
+        nextAttackExecutionIndex); // 다음 공격 인덱스에 해당하는 치명타 설정 적용
+}
+
+private void ApplyAttackSkillCriticalStateForAttackIndex(
+    AttackSkillDefinitionSO attackSkillDefinition,
+    int targetAttackExecutionIndex) // 특정 공격 인덱스에 대한 치명타 예약 적용
+{
+    if (attackSkillDefinition == null || characterStatSystem == null)
+    {
+        return; // 공격기술 정의 또는 스탯 시스템이 없으면 종료
+    }
+
+    IReadOnlyList<AttackSkillDefinitionSO.AttackSkillCriticalApplyData> criticalApplyList
+        = attackSkillDefinition.AttackSkillCriticalApplyList; // 치명타 적용 목록
+
+    if (criticalApplyList == null || criticalApplyList.Count <= 0)
+    {
+        return; // 치명타 설정이 없으면 종료
+    }
+
+    bool hasMatchedCriticalSetting = false; // 현재 인덱스에 해당하는 치명타 설정 존재 여부
+    bool useCriticalDamage = false; // 치명타 피해 적용 여부
+    bool gainCriticalExperience = false; // 치명타 경험치 획득 여부
+
+    for (int i = 0; i < criticalApplyList.Count; i++)
+    {
+        AttackSkillDefinitionSO.AttackSkillCriticalApplyData criticalData = criticalApplyList[i]; // 현재 치명타 설정 데이터
+
+        if (criticalData == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        if (criticalData.AttackExecutionListIndex != targetAttackExecutionIndex)
+        {
+            continue; // 목표 공격 인덱스가 아니면 건너뜀
+        }
+
+        hasMatchedCriticalSetting = true; // 해당 인덱스 설정 발견
+        useCriticalDamage |= criticalData.ApplyCriticalDamage; // 치명타 피해 적용 여부 누적
+        gainCriticalExperience |= criticalData.GainCriticalExperience; // 치명타 경험치 획득 여부 누적
+    }
+
+    if (!hasMatchedCriticalSetting)
+    {
+        return; // 현재 공격 인덱스에 해당하는 설정이 없으면 종료
+    }
+
+    characterStatSystem.SetNextAttackSkillCriticalState(
+        useCriticalDamage,
+        gainCriticalExperience); // 다음 공격기술 피해 처리에서 소비될 치명타 상태 예약
 }
 
 private void ApplyAttackSkillDamage(AttackSkillDefinitionSO.AttackExecutionData attackData) // 공격기술 피해 적용
@@ -2697,6 +2777,7 @@ private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
     hasAttackSkillFirstHitOccurred = false; // 첫 피격 상태 초기화
 
     StartSkillCastBlock(skillCastBlockDurationAfterAttackSkill); // 공격기술 종료 후 결투/공격기술 시전 금지 시작
+    ApplyAttackSkillEndStatusEffects(currentAttackSkillDefinition, target); // 공격기술 종료 시 자신/피격자 상태효과 부여
 
     if (target != null)
     {
@@ -2735,6 +2816,66 @@ private void EndAttackSkillCast(CharacterDuelAI target) // 공격기술 종료
     currentAttackSkillTarget = null; // 공격기술 대상 초기화
     currentAttackSkillDefinition = null; // 공격기술 정의 초기화
     attackSkillCoroutine = null; // 코루틴 참조 초기화
+    characterStatSystem?.SetNextAttackSkillCriticalState(false, false); // 공격기술 종료 후 남은 치명타 예약 상태 초기화
+}
+
+private void ApplyAttackSkillEndStatusEffects(
+    AttackSkillDefinitionSO attackSkillDefinition,
+    CharacterDuelAI target) // 공격기술 종료 시 상태효과 부여
+{
+    if (attackSkillDefinition == null)
+    {
+        return; // 공격기술 정의가 없으면 종료
+    }
+
+    ApplyAttackSkillStatusEffectListToCharacter(
+        attackSkillDefinition.SelfStatusEffectApplyListOnAttackSkillEnd,
+        characterStatSystem); // 자신에게 상태효과 부여
+
+    CharacterStatSystem targetStatSystem = target != null
+        ? target.GetCharacterStatSystem()
+        : null; // 피격자 스탯 시스템 가져오기
+
+    ApplyAttackSkillStatusEffectListToCharacter(
+        attackSkillDefinition.TargetStatusEffectApplyListOnAttackSkillEnd,
+        targetStatSystem); // 피격자에게 상태효과 부여
+}
+
+private void ApplyAttackSkillStatusEffectListToCharacter(
+    IReadOnlyList<AttackSkillDefinitionSO.AttackSkillEndStatusEffectApplyData> statusEffectApplyList,
+    CharacterStatSystem targetStatSystem) // 상태효과 목록을 대상 캐릭터에게 적용
+{
+    if (statusEffectApplyList == null || statusEffectApplyList.Count <= 0 || targetStatSystem == null)
+    {
+        return; // 적용할 목록 또는 대상 스탯 시스템이 없으면 종료
+    }
+
+    for (int i = 0; i < statusEffectApplyList.Count; i++)
+    {
+        AttackSkillDefinitionSO.AttackSkillEndStatusEffectApplyData applyData = statusEffectApplyList[i]; // 현재 상태효과 부여 데이터
+
+        if (applyData == null || applyData.StatusEffectDefinition == null)
+        {
+            continue; // 비어 있으면 건너뜀
+        }
+
+        StatusEffectDefinitionSO statusEffectDefinition = applyData.StatusEffectDefinition; // 부여할 상태효과 정의
+        int applyStack = applyData.ApplyStack; // 부여할 중첩값
+
+        if (statusEffectDefinition.HasDuration)
+        {
+            targetStatSystem.ApplyStatusEffect(
+                statusEffectDefinition,
+                applyStack,
+                applyData.ApplyDuration); // 지속시간이 있는 상태효과 적용
+        }
+        else
+        {
+            targetStatSystem.ApplyStatusEffectWithoutDuration(
+                statusEffectDefinition,
+                applyStack); // 지속시간이 없는 상태효과 적용
+        }
+    }
 }
 
 private void CancelAttackSkillState() // 공격기술 상태 강제 정리
@@ -2769,6 +2910,9 @@ private void CancelAttackSkillState() // 공격기술 상태 강제 정리
     isAttackSkillCasting = false; // 시전상태 해제
     isAttackSkillHitState = false; // 피격상태 해제
     hasAttackSkillFirstHitOccurred = false; // 첫 피격 여부 초기화
+
+    characterStatSystem?.SetNextAttackSkillCriticalState(false, false); // 공격기술 취소 시 남은 치명타 예약 상태 초기화
+
     currentAttackSkillTarget = null; // 대상 초기화
     currentAttackSkillDefinition = null; // 정의 초기화
 }
@@ -3153,10 +3297,6 @@ private bool IsCurrentAttackSkillReservationValid() // 현재 공격기술 돌�
 
     return currentDuelTarget.IsAttackSkillReservedByCaster(this); // 자신이 예약한 대상인지 확인
 }
-
-
-
-
 
 
 

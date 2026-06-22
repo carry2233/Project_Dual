@@ -157,3 +157,6 @@ MonoBehaviour:
     audioGroupType: 1
     animationListIndex: 3
     soundStartDelay: 0
+  selfStatusEffectApplyListOnAttackSkillEnd: []
+  targetStatusEffectApplyListOnAttackSkillEnd: []
+  attackSkillCriticalApplyList: []
