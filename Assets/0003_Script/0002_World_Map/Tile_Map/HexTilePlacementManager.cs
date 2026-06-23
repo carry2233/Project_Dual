@@ -327,7 +327,7 @@ public void PlacePrefabsInRange() // 현재 설정값 기준으로 범위 내 �
     AssignEmptyPrefabToRemainingCells(generatedCells, assignedPrefabMap); // 남은 셀은 빈칸 타일 배정
     PlaceStartPointOnOuterCell(generatedCells, assignedPrefabMap, random); // 외곽 셀 하나를 시작점으로 교체
     SpawnAssignedPrefabs(assignedPrefabMap); // 최종 프리팹 실제 생성
-    ApplyPlayerStartTileMembership(); // 생성된 시작점 타일 정보를 플레이어에 전달
+    ApplyPlayerSavedOrStartTileMembership(); // 저장된 현재 소속 타일이 있으면 복원, 없으면 시작점 타일 적용
 }
 
 public void ClearPlacedObjects() // 현재 매니저가 생성한 프리팹들을 모두 정리
@@ -711,7 +711,7 @@ public void LoadPlacementFromJson() // JSON 저장본을 기준으로 배치 복
     }
 
     RefreshStartPointReferenceFromPlacedObjects(); // 복원 후 시작점 타일 참조 재탐색
-    ApplyPlayerStartTileMembership(); // 플레이어 시작 타일 소속 정보 반영
+    ApplyPlayerSavedOrStartTileMembership(); // 저장된 현재 소속 타일이 있으면 복원, 없으면 시작점 타일 적용
 
     Debug.Log($"[HexTilePlacementManager] 배치 복원 완료 : 저장본 ID {saveData.saveSlotNumber}", this); // 복원 완료 로그
 }
@@ -1167,6 +1167,14 @@ private void ApplyPlayerStartTileMembership() // 시작점 타일 정보를 플�
 
     playerTileMembership.SetCurrentTile(startTilePrefab, lastSpawnedStartPointTileObject.transform);
     MarkTileEnteredAndSave(startTilePrefab); // 시작 소속 타일 방문 처리 및 저장
+
+    if (saveStorage != null)
+    {
+    saveStorage.SaveCurrentOwnedTileToSelectedSave(
+        startTilePrefab.TileNumber,
+        startTilePrefab.TilePrefabNumber,
+        false); // 저장된 현재 소속 타일이 없을 때 시작점 타일을 현재 소속 타일로 저장
+    }
 }
 
 private bool HasPlacementSaveFile() // 현재 저장본 ID의 타일 저장본 존재 여부 확인
@@ -1264,7 +1272,68 @@ public void MarkTileEnteredAndSave(TilePrefab tilePrefab) // 타일 방문 처�
     }
 }
 
+private void ApplyPlayerSavedOrStartTileMembership() // 저장된 현재 소속 타일 또는 시작점 타일을 플레이어에게 적용
+{
+    if (playerTileMembership == null)
+    {
+        return; // 플레이어 소속 스크립트가 없으면 종료
+    }
 
+    TilePrefab savedCurrentTilePrefab = GetSavedCurrentOwnedTilePrefab(); // 저장된 현재 소속 타일 찾기
+
+    if (savedCurrentTilePrefab != null)
+    {
+        playerTileMembership.SetCurrentTile(
+            savedCurrentTilePrefab,
+            savedCurrentTilePrefab.transform); // 저장된 현재 소속 타일로 복원
+
+        MarkTileEnteredAndSave(savedCurrentTilePrefab); // 복원된 현재 타일 방문 상태 보장
+        return;
+    }
+
+    ApplyPlayerStartTileMembership(); // 저장된 현재 소속 타일이 없으면 기존 시작점 타일 적용
+}
+
+private TilePrefab GetSavedCurrentOwnedTilePrefab() // SaveStorage에 저장된 현재 소속 타일 찾기
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance != null
+            ? SaveStorage.Instance
+            : FindFirstObjectByType<SaveStorage>(); // 저장 관리자 참조 보정
+    }
+
+    if (saveStorage == null)
+    {
+        return null; // 저장 관리자가 없으면 실패
+    }
+
+    int savedTileNumber;
+    int savedTilePrefabNumber;
+
+    bool hasSavedTile = saveStorage.TryGetCurrentOwnedTile(
+        out savedTileNumber,
+        out savedTilePrefabNumber); // 저장된 현재 소속 타일 정보 가져오기
+
+    if (hasSavedTile == false)
+    {
+        return null; // 저장된 현재 소속 타일이 없으면 실패
+    }
+
+    TilePrefab savedTilePrefab = GetTileByTileNumber(savedTileNumber); // 타일 번호로 배치된 타일 찾기
+
+    if (savedTilePrefab == null)
+    {
+        return null; // 저장된 번호의 타일이 없으면 실패
+    }
+
+    if (savedTilePrefab.TilePrefabNumber != savedTilePrefabNumber)
+    {
+        return null; // 타일 번호는 같지만 종류 ID가 다르면 잘못된 저장 정보로 판단
+    }
+
+    return savedTilePrefab; // 저장된 현재 소속 타일 반환
+}
 
 
 

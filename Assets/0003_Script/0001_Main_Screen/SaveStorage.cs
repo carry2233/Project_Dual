@@ -174,6 +174,10 @@ public class SaveEntry
 
     public int firstOwnedTileNumber = -1; // 처음 소속한 타일 번호
     public int firstOwnedTilePrefabNumber = -1; // 처음 소속한 타일 종류 ID
+
+    public int currentOwnedTileNumber = -1; // 현재 소속한 타일 번호
+    public int currentOwnedTilePrefabNumber = -1; // 현재 소속한 타일 종류 ID
+    public int currentSearchValue = 0; // 현재 탐색 충족도
 }
 
 
@@ -218,6 +222,13 @@ public SoundVolumeSaveData CurrentSoundVolumeSaveData => GetSoundVolumeSaveDataC
 [SerializeField] private int currentSaveFirstOwnedTileNumber = -1; // 현재 세이브 처음 소속 타일 번호
 [SerializeField] private int currentSaveFirstOwnedTilePrefabNumber = -1; // 현재 세이브 처음 소속 타일 종류 ID
 
+[Header("현재 소속 타일")]
+[SerializeField] private int currentSaveOwnedTileNumber = -1; // 현재 세이브의 현재 소속 타일 번호
+[SerializeField] private int currentSaveOwnedTilePrefabNumber = -1; // 현재 세이브의 현재 소속 타일 종류 ID
+
+[Header("현재 탐색 충족도")]
+[SerializeField] private int currentSaveSearchValue = 0; // 현재 세이브의 현재 탐색 충족도
+
 [Header("전원사망 엔딩 이동")]
 [SerializeField] private string allFriendlyDeadSceneName; // 아군 전원사망 시 이동할 씬
 [SerializeField] private float allFriendlyDeadSceneMoveDelay = 2f; // 전원사망 체크 후 씬 이동 딜레이
@@ -227,6 +238,10 @@ private bool isAllFriendlyDeadSceneMoveStarted; // 전원사망 씬 이동이 �
 
 public int LastExecutedEventID => lastExecutedEventID; // 직전 실행 이벤트 ID 반환
 public bool HasExecutedBattle => hasExecutedBattle; // 전투 수행 여부 반환
+
+public int CurrentSaveOwnedTileNumber => currentSaveOwnedTileNumber; // 현재 소속 타일 번호 반환
+public int CurrentSaveOwnedTilePrefabNumber => currentSaveOwnedTilePrefabNumber; // 현재 소속 타일 종류 ID 반환
+public int CurrentSaveSearchValue => currentSaveSearchValue; // 현재 탐색 충족도 반환
 
 public bool HasBattleEventRuntimeData => currentBattleEventRuntimeData != null; // 전투 이벤트 데이터 존재 여부
 
@@ -318,6 +333,10 @@ private SaveEntry GetSaveEntryCopy(SaveEntry source) // 저장본 데이터 깊�
     copy.firstOwnedTileNumber = source.firstOwnedTileNumber;
     copy.firstOwnedTilePrefabNumber = source.firstOwnedTilePrefabNumber;
 
+    copy.currentOwnedTileNumber = source.currentOwnedTileNumber; // 현재 소속 타일 번호 복사
+    copy.currentOwnedTilePrefabNumber = source.currentOwnedTilePrefabNumber; // 현재 소속 타일 종류 ID 복사
+    copy.currentSearchValue = Mathf.Max(0, source.currentSearchValue); // 현재 탐색 충족도 복사
+
     return copy;
 }
 
@@ -385,10 +404,18 @@ public bool CreateSave(
     newEntry.firstOwnedTileNumber = -1;
     newEntry.firstOwnedTilePrefabNumber = -1;
 
+    newEntry.currentOwnedTileNumber = -1; // 새 저장본 현재 소속 타일 번호 초기화
+    newEntry.currentOwnedTilePrefabNumber = -1; // 새 저장본 현재 소속 타일 종류 ID 초기화
+    newEntry.currentSearchValue = 0; // 새 저장본 현재 탐색 충족도 초기화
+
     currentSaveSomeFriendlyDead = false;
     currentSaveAllFriendlyDead = false;
     currentSaveFirstOwnedTileNumber = -1;
     currentSaveFirstOwnedTilePrefabNumber = -1;
+
+    currentSaveOwnedTileNumber = -1; // 현재 세이브 소속 타일 번호 초기화
+    currentSaveOwnedTilePrefabNumber = -1; // 현재 세이브 소속 타일 종류 ID 초기화
+    currentSaveSearchValue = 0; // 현재 탐색 충족도 초기화
 
     currentSaveFileData.nextSaveId++; // 다음 고유 ID 증가
     currentSaveFileData.saveList.Add(newEntry); // 목록에 저장본 추가
@@ -522,6 +549,15 @@ if (loadedData == null)
         currentSaveFileData.saveList[i].currentDay = Mathf.Max(0, currentSaveFileData.saveList[i].currentDay); // 일차 음수 방지
         currentSaveFileData.saveList[i].currentHour = Mathf.Clamp(currentSaveFileData.saveList[i].currentHour, 0, 23); // 시간 범위 보정
         currentSaveFileData.saveList[i].currentMinute = Mathf.Clamp(currentSaveFileData.saveList[i].currentMinute, 0, 59); // 분 범위 보정
+
+        currentSaveFileData.saveList[i].currentOwnedTileNumber =
+            Mathf.Max(-1, currentSaveFileData.saveList[i].currentOwnedTileNumber); // 현재 소속 타일 번호 보정
+
+        currentSaveFileData.saveList[i].currentOwnedTilePrefabNumber =
+            Mathf.Max(-1, currentSaveFileData.saveList[i].currentOwnedTilePrefabNumber); // 현재 소속 타일 종류 ID 보정
+
+        currentSaveFileData.saveList[i].currentSearchValue =
+            Mathf.Max(0, currentSaveFileData.saveList[i].currentSearchValue); // 현재 탐색 충족도 음수 방지
     }
     
 
@@ -623,6 +659,10 @@ private void ClearCurrentSaveRuntimeDataAfterDelete() // 삭제된 세이브의 
 
     currentSaveFirstOwnedTileNumber = -1;
     currentSaveFirstOwnedTilePrefabNumber = -1;
+
+    currentSaveOwnedTileNumber = -1; // 현재 소속 타일 번호 초기화
+    currentSaveOwnedTilePrefabNumber = -1; // 현재 소속 타일 종류 ID 초기화
+    currentSaveSearchValue = 0; // 현재 탐색 충족도 초기화
 
     allFriendlyDeadSceneMoveCoroutine = null;
     isAllFriendlyDeadSceneMoveStarted = false;
@@ -736,6 +776,10 @@ public bool LoadOwnedCharacterDataFromSave(int targetSaveId) // 특정 저장본
         currentSaveAllFriendlyDead = entry.hasAllFriendlyDead;
         currentSaveFirstOwnedTileNumber = entry.firstOwnedTileNumber;
         currentSaveFirstOwnedTilePrefabNumber = entry.firstOwnedTilePrefabNumber;
+
+        currentSaveOwnedTileNumber = entry.currentOwnedTileNumber; // 현재 소속 타일 번호 불러오기
+        currentSaveOwnedTilePrefabNumber = entry.currentOwnedTilePrefabNumber; // 현재 소속 타일 종류 ID 불러오기
+        currentSaveSearchValue = Mathf.Max(0, entry.currentSearchValue); // 현재 탐색 충족도 불러오기
 
         return true; // 적용 성공
     }
@@ -1601,6 +1645,15 @@ public float GetUISoundFinalVolume01(float baseVolume) // UI 사운드 최종 �
     return safeBaseVolume * masterRate * uiRate; // 최종 UI 사운드 볼륨 반환
 }
 
+public float GetBGMFinalVolume01(float baseVolume) // BGM 최종 볼륨 반환
+{
+    float safeBaseVolume = Mathf.Max(0f, baseVolume); // 기본 음악 볼륨 음수 방지
+    float masterRate = Mathf.Clamp(currentSoundVolumeSaveData.masterVolume, 0, 100) / 100f; // 전체 사운드 비율
+    float bgmRate = Mathf.Clamp(currentSoundVolumeSaveData.bgmVolume, 0, 100) / 100f; // BGM 사운드 비율
+
+    return safeBaseVolume * masterRate * bgmRate; // 최종 BGM 볼륨 반환
+}
+
 public bool SetOwnedCharacterDeadState(int firstRowID, int secondRowID, int individualID, bool deadState) // 현재 소유 캐릭터 사망 상태 설정
 {
     for (int i = 0; i < currentOwnedCharacterList.Count; i++)
@@ -2347,14 +2400,130 @@ public bool IsCurrentTileFirstOwnedTile(int tileNumber, int tilePrefabNumber) //
            currentSaveFirstOwnedTilePrefabNumber == tilePrefabNumber;
 }
 
+public bool TryGetCurrentOwnedTile(out int tileNumber, out int tilePrefabNumber) // 현재 선택 저장본의 현재 소속 타일 정보 가져오기
+{
+    tileNumber = -1; // 기본 타일 번호
+    tilePrefabNumber = -1; // 기본 타일 종류 ID
 
+    if (currentSelectedSaveId <= 0)
+    {
+        return false; // 선택 저장본이 없으면 실패
+    }
 
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
 
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
 
+        currentSaveOwnedTileNumber = entry.currentOwnedTileNumber; // 인스펙터 표시값 갱신
+        currentSaveOwnedTilePrefabNumber = entry.currentOwnedTilePrefabNumber; // 인스펙터 표시값 갱신
 
+        tileNumber = currentSaveOwnedTileNumber; // 현재 소속 타일 번호 반환
+        tilePrefabNumber = currentSaveOwnedTilePrefabNumber; // 현재 소속 타일 종류 ID 반환
 
+        return tileNumber >= 0 && tilePrefabNumber >= 0; // 유효한 타일이면 true
+    }
 
+    return false; // 대상 저장본 없음
+}
 
+public bool SaveCurrentOwnedTileToSelectedSave(
+    int tileNumber,
+    int tilePrefabNumber,
+    bool resetSearchValue) // 현재 선택 저장본에 현재 소속 타일 저장
+{
+    if (currentSelectedSaveId <= 0 || tileNumber < 0 || tilePrefabNumber < 0)
+    {
+        return false; // 선택 저장본 또는 타일 정보가 잘못되면 실패
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        entry.currentOwnedTileNumber = tileNumber; // 현재 소속 타일 번호 저장
+        entry.currentOwnedTilePrefabNumber = tilePrefabNumber; // 현재 소속 타일 종류 ID 저장
+
+        currentSaveOwnedTileNumber = tileNumber; // 인스펙터 표시값 갱신
+        currentSaveOwnedTilePrefabNumber = tilePrefabNumber; // 인스펙터 표시값 갱신
+
+        if (resetSearchValue == true)
+        {
+            entry.currentSearchValue = 0; // 타일 이동 시 현재 탐색 충족도 초기화
+            currentSaveSearchValue = 0; // 인스펙터 표시값 갱신
+        }
+
+        SaveToFile(); // save_data.json 저장
+        return true; // 저장 성공
+    }
+
+    return false; // 대상 저장본 없음
+}
+
+public int GetCurrentSaveSearchValue() // 현재 선택 저장본의 현재 탐색 충족도 반환
+{
+    if (currentSelectedSaveId <= 0)
+    {
+        return currentSaveSearchValue; // 선택 저장본이 없으면 런타임 값 반환
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        currentSaveSearchValue = Mathf.Max(0, entry.currentSearchValue); // 인스펙터 표시값 갱신
+        return currentSaveSearchValue; // 현재 탐색 충족도 반환
+    }
+
+    return currentSaveSearchValue; // 대상 저장본이 없으면 런타임 값 반환
+}
+
+public bool SaveCurrentSearchValueToSelectedSave(int searchValue) // 현재 선택 저장본에 현재 탐색 충족도 저장
+{
+    int safeSearchValue = Mathf.Max(0, searchValue); // 음수 방지
+
+    currentSaveSearchValue = safeSearchValue; // 인스펙터 표시값 갱신
+
+    if (currentSelectedSaveId <= 0)
+    {
+        return false; // 선택 저장본이 없으면 실패
+    }
+
+    for (int i = 0; i < currentSaveFileData.saveList.Count; i++)
+    {
+        SaveEntry entry = currentSaveFileData.saveList[i]; // 현재 저장본 참조
+
+        if (entry.saveId != currentSelectedSaveId)
+        {
+            continue; // 선택 저장본이 아니면 건너뜀
+        }
+
+        entry.currentSearchValue = safeSearchValue; // 현재 탐색 충족도 저장
+        SaveToFile(); // save_data.json 저장
+        return true; // 저장 성공
+    }
+
+    return false; // 대상 저장본 없음
+}
+
+public bool ResetCurrentSearchValueToSelectedSave() // 현재 선택 저장본의 현재 탐색 충족도 0 초기화
+{
+    return SaveCurrentSearchValueToSelectedSave(0); // 탐색 충족도 0 저장
+}
 
 
 

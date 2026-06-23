@@ -57,6 +57,8 @@ public class SettingManager : MonoBehaviour
         {
             settingCloseButton.onClick.AddListener(CloseSettingPanel);
         }
+
+        RegisterVolumeSliderEvents(); // 볼륨 슬라이더 실시간 변경 이벤트 연결
     }
 
     private void OnDestroy()
@@ -70,6 +72,8 @@ public class SettingManager : MonoBehaviour
         {
             settingCloseButton.onClick.RemoveListener(CloseSettingPanel);
         }
+
+        UnregisterVolumeSliderEvents(); // 볼륨 슬라이더 실시간 변경 이벤트 해제
     }
 
     public void OpenSettingPanel()
@@ -93,54 +97,80 @@ public class SettingManager : MonoBehaviour
         SetWorldInputLocked(true);
     }
 
-    public void CloseSettingPanel()
+public void CloseSettingPanel()
+{
+    if (saveStorage == null)
     {
-        if (saveStorage == null)
-        {
-            saveStorage = SaveStorage.Instance;
-        }
-
-        if (saveStorage != null)
-        {
-            SaveStorage.SoundVolumeSaveData soundData = CreateSoundDataFromSliders();
-            saveStorage.ApplyCurrentSoundVolumeSaveData(soundData);
-            saveStorage.SaveGlobalSoundVolumeSaveData(soundData); // 전역 소리 설정 JSON 저장
-        }
-
-        if (settingPanel != null)
-        {
-            settingPanel.SetActive(false);
-        }
-
-        SetWorldInputLocked(false);
+        saveStorage = SaveStorage.Instance;
     }
 
-    private void ApplySoundDataToSliders(SaveStorage.SoundVolumeSaveData soundData)
+    if (saveStorage != null)
     {
-        if (soundData == null)
-        {
-            soundData = new SaveStorage.SoundVolumeSaveData();
-        }
-
-        SetSliderValue(masterVolumeSlider, soundData.masterVolume);
-        SetSliderValue(effectVolumeSlider, soundData.effectVolume);
-        SetSliderValue(voiceVolumeSlider, soundData.voiceVolume);
-        SetSliderValue(bgmVolumeSlider, soundData.bgmVolume);
-        SetSliderValue(uiSoundVolumeSlider, soundData.uiSoundVolume);
+        SaveStorage.SoundVolumeSaveData soundData = CreateSoundDataFromSliders(); // 현재 슬라이더 값 생성
+        saveStorage.ApplyCurrentSoundVolumeSaveData(soundData); // SaveStorage 인스펙터 표시값 갱신
+        saveStorage.SaveGlobalSoundVolumeSaveData(soundData); // 닫기 버튼 클릭 시에만 전역 소리 설정 JSON 저장
     }
 
-    private SaveStorage.SoundVolumeSaveData CreateSoundDataFromSliders()
+    if (settingPanel != null)
     {
-        SaveStorage.SoundVolumeSaveData soundData = new SaveStorage.SoundVolumeSaveData();
-
-        soundData.masterVolume = GetSliderIntValue(masterVolumeSlider);
-        soundData.effectVolume = GetSliderIntValue(effectVolumeSlider);
-        soundData.voiceVolume = GetSliderIntValue(voiceVolumeSlider);
-        soundData.bgmVolume = GetSliderIntValue(bgmVolumeSlider);
-        soundData.uiSoundVolume = GetSliderIntValue(uiSoundVolumeSlider);
-
-        return soundData;
+        settingPanel.SetActive(false);
     }
+
+    SetWorldInputLocked(false);
+}
+
+private void ApplySoundDataToSliders(SaveStorage.SoundVolumeSaveData soundData)
+{
+    if (soundData == null)
+    {
+        soundData = new SaveStorage.SoundVolumeSaveData();
+    }
+
+    SetSliderValue(masterVolumeSlider, soundData.masterVolume);
+    SetSliderValue(effectVolumeSlider, soundData.effectVolume);
+    SetSliderValue(voiceVolumeSlider, soundData.voiceVolume);
+    SetSliderValue(bgmVolumeSlider, soundData.bgmVolume);
+    SetSliderValue(uiSoundVolumeSlider, soundData.uiSoundVolume);
+
+    if (saveStorage != null)
+    {
+        saveStorage.ApplyCurrentSoundVolumeSaveData(soundData); // 슬라이더 초기 반영 시 SaveStorage 인스펙터 값도 갱신
+    }
+}
+
+private SaveStorage.SoundVolumeSaveData CreateSoundDataFromSliders()
+{
+    SaveStorage.SoundVolumeSaveData soundData = saveStorage != null
+        ? saveStorage.CurrentSoundVolumeSaveData
+        : new SaveStorage.SoundVolumeSaveData(); // 기존 현재값을 기준으로 생성
+
+    if (masterVolumeSlider != null)
+    {
+        soundData.masterVolume = GetSliderIntValue(masterVolumeSlider); // 전체 볼륨 반영
+    }
+
+    if (effectVolumeSlider != null)
+    {
+        soundData.effectVolume = GetSliderIntValue(effectVolumeSlider); // 효과음 볼륨 반영
+    }
+
+    if (voiceVolumeSlider != null)
+    {
+        soundData.voiceVolume = GetSliderIntValue(voiceVolumeSlider); // 음성 볼륨 반영
+    }
+
+    if (bgmVolumeSlider != null)
+    {
+        soundData.bgmVolume = GetSliderIntValue(bgmVolumeSlider); // BGM 볼륨 반영
+    }
+
+    if (uiSoundVolumeSlider != null)
+    {
+        soundData.uiSoundVolume = GetSliderIntValue(uiSoundVolumeSlider); // UI 사운드 볼륨 반영
+    }
+
+    return soundData;
+}
 
 private void SetSliderValue(Slider slider, int value)
 {
@@ -149,7 +179,7 @@ private void SetSliderValue(Slider slider, int value)
         return;
     }
 
-    slider.value = Mathf.Clamp01(value / 100f);
+    slider.SetValueWithoutNotify(Mathf.Clamp01(value / 100f)); // 초기값 반영 중 이벤트 중복 호출 방지
 }
 
 private int GetSliderIntValue(Slider slider)
@@ -174,7 +204,77 @@ private int GetSliderIntValue(Slider slider)
         }
     }
 
+private void RegisterVolumeSliderEvents() // 볼륨 슬라이더 이벤트 연결
+{
+    if (masterVolumeSlider != null)
+    {
+        masterVolumeSlider.onValueChanged.AddListener(OnVolumeSliderValueChanged);
+    }
 
+    if (effectVolumeSlider != null)
+    {
+        effectVolumeSlider.onValueChanged.AddListener(OnVolumeSliderValueChanged);
+    }
+
+    if (voiceVolumeSlider != null)
+    {
+        voiceVolumeSlider.onValueChanged.AddListener(OnVolumeSliderValueChanged);
+    }
+
+    if (bgmVolumeSlider != null)
+    {
+        bgmVolumeSlider.onValueChanged.AddListener(OnVolumeSliderValueChanged);
+    }
+
+    if (uiSoundVolumeSlider != null)
+    {
+        uiSoundVolumeSlider.onValueChanged.AddListener(OnVolumeSliderValueChanged);
+    }
+}
+
+private void UnregisterVolumeSliderEvents() // 볼륨 슬라이더 이벤트 해제
+{
+    if (masterVolumeSlider != null)
+    {
+        masterVolumeSlider.onValueChanged.RemoveListener(OnVolumeSliderValueChanged);
+    }
+
+    if (effectVolumeSlider != null)
+    {
+        effectVolumeSlider.onValueChanged.RemoveListener(OnVolumeSliderValueChanged);
+    }
+
+    if (voiceVolumeSlider != null)
+    {
+        voiceVolumeSlider.onValueChanged.RemoveListener(OnVolumeSliderValueChanged);
+    }
+
+    if (bgmVolumeSlider != null)
+    {
+        bgmVolumeSlider.onValueChanged.RemoveListener(OnVolumeSliderValueChanged);
+    }
+
+    if (uiSoundVolumeSlider != null)
+    {
+        uiSoundVolumeSlider.onValueChanged.RemoveListener(OnVolumeSliderValueChanged);
+    }
+}
+
+private void OnVolumeSliderValueChanged(float value) // 슬라이더 값 변경 시 SaveStorage 현재 볼륨값 실시간 갱신
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance;
+    }
+
+    if (saveStorage == null)
+    {
+        return; // 저장 관리자가 없으면 종료
+    }
+
+    SaveStorage.SoundVolumeSaveData soundData = CreateSoundDataFromSliders(); // 현재 슬라이더 값 기준 소리 데이터 생성
+    saveStorage.ApplyCurrentSoundVolumeSaveData(soundData); // JSON 저장 없이 SaveStorage 인스펙터 표시값만 실시간 갱신
+}
 
 
 

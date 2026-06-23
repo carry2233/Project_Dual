@@ -879,6 +879,7 @@ MonoBehaviour:
     m_Bits: 64
   hasStoredPhysicalContactTriggerState: 0
   storedPhysicalContactTriggerState: 0
+  reservedAttackSkillCaster: {fileID: 0}
   characterInfoManager: {fileID: 0}
   saveStorage: {fileID: 0}
   friendlyCharacterManager: {fileID: 0}
@@ -1087,7 +1088,7 @@ MonoBehaviour:
       m_RotationOrder: 4
   criticalHealthDamageFloaterPrefab: {fileID: 5872442240948868380, guid: 7a2eb94822a1ab6459dac0addbc12b9b, type: 3}
   criticalHealthDamageFloaterSettings:
-    lifetime: 1
+    lifetime: 0.5
     fadeStartTime: 0.2
     minimumAlphaPercent: 0
     fadeDurationToMinimumAlpha: 0.3

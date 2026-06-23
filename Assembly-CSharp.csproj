@@ -72,6 +72,7 @@
     <Compile Include="Assets\0003_Script\0002_World_Map\UISoundPlaybackSystem.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventInfoDefinition.cs" />
     <Compile Include="Assets\0003_Script\Visual_Effect\ScriptEffect.cs" />
+    <Compile Include="Assets\0003_Script\BackgroundMusicManager.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\EventSlot.cs" />
     <Compile Include="Assets\0003_Script\0002_World_Map\TileAction\TileInfoDefinition.cs" />
     <Compile Include="Assets\0005_External_Assets\Free_Slash_VFX\Free Slash VFX\Demo\Scripts\AttackerController.cs" />

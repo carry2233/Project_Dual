@@ -29,6 +29,9 @@ public class TileActionManager : MonoBehaviour
     [Header("시간 시스템 참조")]
     [SerializeField] private TimeSystemManager timeSystemManager; // 시간 표시 및 시간 증가 관리자
 
+    [Header("저장 관리자 참조")]
+    [SerializeField] private SaveStorage saveStorage; // 현재 탐색 충족도 저장/불러오기용 저장 관리자
+
     [Header("월드 공간 UI 위치 설정")]
     [SerializeField] private Transform parentPanel; // 월드 공간 캔버스 또는 부모 패널 Transform
     [SerializeField] private Vector3 panelWorldOffset = Vector3.zero; // 타일 위치 기준 UI 위치 보정값
@@ -166,6 +169,8 @@ private readonly HashSet<TilePrefab> movableTileSet = new HashSet<TilePrefab>();
 
 private void Start() // 씬 시작 시 초기화
 {
+    RefreshSaveStorageReference(); // 저장 관리자 참조 보정
+    
     if (tileInfoManager == null)
         tileInfoManager = TileInfoManager.Instance; // 씬에 존재하는 타일 정보 관리자 참조
 
@@ -296,39 +301,40 @@ private void SetInitialUIState() // 씬 시작 시 UI 초기 상태 설정
         parentPanel.position = playerTileMembership.CurrentTileWorldPosition + panelWorldOffset; // 타일 위치에 UI 배치
     }
 
-    private void RefreshTileSearchInfo(bool forceRefresh) // 현재 타일 ID 기준 탐색 정보 갱신
+private void RefreshTileSearchInfo(bool forceRefresh) // 현재 타일 ID 기준 탐색 정보 갱신
+{
+    if (playerTileMembership == null)
+        return;
+
+    int currentTilePrefabNumber = playerTileMembership.CurrentTilePrefabNumber; // 현재 소속 타일 종류 ID
+
+    if (currentTilePrefabNumber < 0)
+        return;
+
+    if (forceRefresh == false && cachedTilePrefabNumber == currentTilePrefabNumber)
+        return;
+
+    cachedTilePrefabNumber = currentTilePrefabNumber; // 현재 타일 ID 캐싱
+
+    if (tileInfoManager == null)
+        tileInfoManager = TileInfoManager.Instance; // 매니저 참조 보정
+
+    if (tileInfoManager == null)
     {
-        if (playerTileMembership == null)
-            return;
-
-        int currentTilePrefabNumber = playerTileMembership.CurrentTilePrefabNumber; // 현재 소속 타일 종류 ID
-
-        if (currentTilePrefabNumber < 0)
-            return;
-
-        if (forceRefresh == false && cachedTilePrefabNumber == currentTilePrefabNumber)
-            return;
-
-        cachedTilePrefabNumber = currentTilePrefabNumber; // 현재 타일 ID 캐싱
-
-        if (tileInfoManager == null)
-            tileInfoManager = TileInfoManager.Instance; // 매니저 참조 보정
-
-        if (tileInfoManager == null)
-        {
-            maxSearchValue = 0; // 매니저가 없으면 최대값 초기화
-            currentSearchValue = 0; // 현재값 초기화
-            UpdateSearchGauge(); // 게이지 갱신
-            UpdateMoveButtonState(); // 이동 버튼 상태 갱신
-            return;
-        }
-
-        maxSearchValue = tileInfoManager.GetRequiredSearchValue(currentTilePrefabNumber); // 타일 ID에 맞는 탐색 충족도 가져오기
-        currentSearchValue = 0; // 새 타일 정보 반영 시 현재 탐색값 초기화
-
-        UpdateSearchGauge(); // 탐색 게이지 갱신
+        maxSearchValue = 0; // 매니저가 없으면 최대값 초기화
+        currentSearchValue = 0; // 현재값 초기화
+        UpdateSearchGauge(); // 게이지 갱신
         UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+        return;
     }
+
+    maxSearchValue = tileInfoManager.GetRequiredSearchValue(currentTilePrefabNumber); // 타일 ID에 맞는 탐색 충족도 가져오기
+    LoadCurrentSearchValueFromSave(); // 저장된 현재 탐색 충족도 불러오기
+    currentSearchValue = Mathf.Clamp(currentSearchValue, 0, maxSearchValue); // 최대값 초과 방지
+
+    UpdateSearchGauge(); // 탐색 게이지 갱신
+    UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+}
 
     public void ShowParentPanel() // 부모 패널 활성화
     {
@@ -377,6 +383,8 @@ private void OpenSearchUI() // 탐색 UI 열기
         searchUIObject.SetActive(true); // 탐색 UI 활성화
 
     ApplySearchUILock(true); // 탐색 UI 열림 상태로 외부 입력 잠금
+
+    LoadCurrentSearchValueFromSave(); // 탐색 UI 활성화 시 저장된 탐색 충족도 반영
 
     UpdateSearchGauge(); // 탐색 게이지 갱신
     UpdateMoveButtonState(); // 이동 버튼 상태 갱신
@@ -441,6 +449,8 @@ private IEnumerator SearchRoutine() // 탐색 진행 코루틴
 
     currentSearchValue += searchIncreaseValue; // 탐색 완료 시 현재 탐색 충족도 증가
     currentSearchValue = Mathf.Clamp(currentSearchValue, 0, maxSearchValue); // 최대값 초과 방지
+
+    SaveCurrentSearchValueToSave(); // 탐색 종료 후 현재 탐색 충족도 저장
 
     if (searchTimerImage != null)
         searchTimerImage.fillAmount = 0f; // 타이머 이미지 비우기
@@ -687,6 +697,8 @@ private void ExecuteTileMove() // 확정된 타일로 플레이어 이동 실행
 
     if (hexTilePlacementManager != null)
         hexTilePlacementManager.MarkTileEnteredAndSave(selectedMoveTargetTile); // 이동한 타일 방문 저장
+
+        SaveMovedTileAndResetSearchValue(selectedMoveTargetTile); // 현재 소속 타일 저장 + 탐색 충족도 0 초기화 
 
     if (tileSelectionManager != null)
         tileSelectionManager.ClearSelection();
@@ -957,9 +969,64 @@ private void ExecuteReturn() // 귀환 실행
     SceneManager.LoadScene(returnSceneName);
 }
 
+private void RefreshSaveStorageReference() // SaveStorage 참조 보정
+{
+    if (saveStorage == null)
+    {
+        saveStorage = SaveStorage.Instance; // 싱글톤 저장 관리자 참조
+    }
 
+    if (saveStorage == null)
+    {
+        saveStorage = FindFirstObjectByType<SaveStorage>(); // 씬 내 저장 관리자 탐색
+    }
+}
 
+private void LoadCurrentSearchValueFromSave() // 현재 선택 저장본에서 탐색 충족도 불러오기
+{
+    RefreshSaveStorageReference(); // 저장 관리자 참조 보정
 
+    if (saveStorage == null)
+    {
+        return; // 저장 관리자가 없으면 기존 값 유지
+    }
 
+    currentSearchValue = Mathf.Max(0, saveStorage.GetCurrentSaveSearchValue()); // 저장된 탐색 충족도 반영
+}
+
+private void SaveCurrentSearchValueToSave() // 현재 탐색 충족도를 현재 선택 저장본에 저장
+{
+    RefreshSaveStorageReference(); // 저장 관리자 참조 보정
+
+    if (saveStorage == null)
+    {
+        return; // 저장 관리자가 없으면 저장하지 않음
+    }
+
+    saveStorage.SaveCurrentSearchValueToSelectedSave(currentSearchValue); // 현재 탐색 충족도 저장
+}
+
+private void SaveMovedTileAndResetSearchValue(TilePrefab movedTilePrefab) // 이동한 타일 저장 및 탐색 충족도 초기화
+{
+    if (movedTilePrefab == null)
+    {
+        return; // 이동 타일이 없으면 종료
+    }
+
+    RefreshSaveStorageReference(); // 저장 관리자 참조 보정
+
+    currentSearchValue = 0; // 타일 이동 시 현재 탐색 충족도 초기화
+
+    if (saveStorage != null)
+    {
+        saveStorage.SaveCurrentOwnedTileToSelectedSave(
+            movedTilePrefab.TileNumber,
+            movedTilePrefab.TilePrefabNumber,
+            true); // 현재 소속 타일 저장 + 저장본 탐색 충족도 0 초기화
+    }
+
+    UpdateSearchGauge(); // 탐색 게이지 갱신
+    UpdateMoveButtonState(); // 이동 버튼 상태 갱신
+}
 
 }
