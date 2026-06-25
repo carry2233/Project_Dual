@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc1f6ee89755c6045a251602d156144e, type: 3}
+  m_Name: 001_StatusEffectDefinitionSO
+  m_EditorClassIdentifier: Assembly-CSharp::StatusEffectDefinitionSO
+  statusEffectID: 1
+  statusEffectName: "\uBB34\uAC70\uC6B4 \uC9D0"
+  statusEffectIcon: {fileID: 21300000, guid: 9cc25ca9a27612645a52eb32b7d47c5e, type: 3}
+  statusEffectShortDescription: 
+  statusEffectDescription: "\uC544\uAD70\uCE90\uB9AD\uD130\uC758 \uC778\uBCA4\uD1A0\uB9AC\uC5D0
+    \uCD1D\uC544\uC774\uD15C\uBB34\uAC8C\uAC00 \uC801\uC815\uBB34\uAC8C\uB7C9\uC744
+    \uB118\uC744\uC2DC \uBD80\uC5EC\uB418\uBA70\n\uB118\uC740 \uBB34\uAC8C 1kg\uB2F9
+    1\uC911\uCCA9\uC744 \uC5BB\uC73C\uBA70 \uC911\uCCA9\uB2F9 [\uC704\uB825\uAC10\uC18C],
+    [\uC18D\uB3C4\uAC10\uC18C] 1\uC911\uCCA9\uC744 \uC5BB\uC74C."
+  statusEffectSlotSortPriority: 15
+  hasDuration: 0
+  maxStackLimit: 99
+  powerRateIncreaseStackValue: 0
+  powerRateDecreaseStackValue: 2
+  speedIncreaseStackValue: 0
+  speedDecreaseStackValue: 1
+  bodySizeIncreaseStackValue: 0
+  bodySizeDecreaseStackValue: 0
+  attackPowerIncreaseStackValue: 0
+  attackPowerDecreaseStackValue: 0
+  defenseIncreaseStackValue: 0
+  defenseDecreaseStackValue: 0
+  staggerResistanceIncreaseStackValue: 0
+  staggerResistanceDecreaseStackValue: 0
+  moveSpeedRateIncreaseStackValue: 0
+  moveSpeedRateDecreaseStackValue: 0

@@ -313,10 +313,9 @@ MonoBehaviour:
   eventUIParent: {fileID: 953863234}
   eventVisualParent: {fileID: 1672381467}
   rewardSlotContent: {fileID: 1671024234}
-  eventTriggerChancePercent: 50
+  eventTriggerChancePercent: 91
   eventButtonList: []
-  itemRewardEventList:
-  - {fileID: 284533135}
+  itemRewardEventList: []
   battleOccurrenceEventList:
   - {fileID: 870986696}
   battleSceneName: 003_Battle_Screen_Scene
@@ -10291,8 +10290,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleOccurrenceEvent
   eventID: 1
-  minEnemySpawnCount: 3
-  maxEnemySpawnCount: 6
+  minEnemySpawnCount: 1
+  maxEnemySpawnCount: 1
   enemyLevelCorrectionValue: 0
   minEnemySpawnDelay: 3
   maxEnemySpawnDelay: 8
@@ -11352,7 +11351,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1333899115}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99999994
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

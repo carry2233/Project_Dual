@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d3147d9ae80b7d48ace3532ea8730e3, type: 3}
+  m_Name: "001_02_\uC0EC\uB7FFAttackSkillDefinitionSO"
+  m_EditorClassIdentifier: Assembly-CSharp::AttackSkillDefinitionSO
+  attackSkillName: "\uB3CC\uC9C4"
+  firstRowID: 1
+  secondRowID: 2
+  attackSkillSlotPrefab: {fileID: 7606801988712462910, guid: f35bdf1f41551ff4c90a867db2bc39ae, type: 3}
+  attackSkillDirectionWallCheckDistance: 5
+  dashSoundClip: {fileID: 8300000, guid: 657e5a51669c97546b0061ab9c051224, type: 3}
+  dashSoundVolume: 1
+  dashSoundGroupType: 1
+  attackSkillCastDistance: 1.5
+  targetLocalCorrectionPosition: {x: 1.5, y: 0, z: 0}
+  canUseOnlyOnBrokenTarget: 1
+  attackExecutionList:
+  - animationListIndex: 1
+    attackStartDelay: 0.1
+    usePowerRateCorrection: 1
+    powerRateCorrectionValue: 90
+    useFixedPowerRate: 0
+    fixedPowerRateValue: 0
+    useHitEffect: 0
+    hitEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 0
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 0
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnScaleWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnScaleWhenFacingRight: {x: 0, y: 0, z: 0}
+    isFinishingAttack: 0
+  attackSkillAnimationList:
+  - animationClip: {fileID: 11400000, guid: 0c1ad51aab8be614eb12df6e63c803ab, type: 2}
+    delayAfterEnd: 0.3
+  - animationClip: {fileID: 11400000, guid: 7506491da2f7173429cf1f109f8ba898, type: 2}
+    delayAfterEnd: 0.3
+  attackSkillMotionEventList:
+  - knockbackAnimationListIndex: 0
+    selfKnockbackValue: -7
+    targetKnockbackValue: 0
+    useSelfKnockback: 1
+    useTargetKnockback: 0
+    selfKnockbackStartDelay: 0
+    targetKnockbackStartDelay: 0
+    directionFlipAnimationListIndex: 0
+    useSelfDirectionFlip: 0
+    useTargetDirectionFlip: 0
+    selfDirectionFlipStartDelay: 0
+    targetDirectionFlipStartDelay: 0
+  - knockbackAnimationListIndex: 1
+    selfKnockbackValue: 30
+    targetKnockbackValue: 11
+    useSelfKnockback: 1
+    useTargetKnockback: 1
+    selfKnockbackStartDelay: 0
+    targetKnockbackStartDelay: 0
+    directionFlipAnimationListIndex: 0
+    useSelfDirectionFlip: 0
+    useTargetDirectionFlip: 0
+    selfDirectionFlipStartDelay: 0
+    targetDirectionFlipStartDelay: 0
+  attackSkillSoundEventList:
+  - audioClip: {fileID: 8300000, guid: e82879725b40ce444bca27d19a75f42c, type: 3}
+    volume: 1
+    audioGroupType: 1
+    animationListIndex: 1
+    soundStartDelay: 0.1
+  selfStatusEffectApplyListOnAttackSkillEnd: []
+  targetStatusEffectApplyListOnAttackSkillEnd: []
+  attackSkillCriticalApplyList: []

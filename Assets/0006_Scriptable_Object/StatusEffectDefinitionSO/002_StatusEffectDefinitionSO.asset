@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc1f6ee89755c6045a251602d156144e, type: 3}
+  m_Name: 002_StatusEffectDefinitionSO
+  m_EditorClassIdentifier: Assembly-CSharp::StatusEffectDefinitionSO
+  statusEffectID: 2
+  statusEffectName: "\uC228\uAC00\uBFDC"
+  statusEffectIcon: {fileID: 21300000, guid: d38784e897724014b984a3b62137711e, type: 3}
+  statusEffectShortDescription: 
+  statusEffectDescription: "\uC911\uCCA9\uB2F9 [\uC704\uB825\uAC10\uC18C], [\uC18D\uB3C4\uAC10\uC18C]
+    1\uC911\uCCA9\uC744 \uC5BB\uC74C."
+  statusEffectSlotSortPriority: 16
+  hasDuration: 1
+  maxStackLimit: 99
+  powerRateIncreaseStackValue: 0
+  powerRateDecreaseStackValue: 3
+  speedIncreaseStackValue: 0
+  speedDecreaseStackValue: 1
+  bodySizeIncreaseStackValue: 0
+  bodySizeDecreaseStackValue: 0
+  attackPowerIncreaseStackValue: 0
+  attackPowerDecreaseStackValue: 0
+  defenseIncreaseStackValue: 0
+  defenseDecreaseStackValue: 0
+  staggerResistanceIncreaseStackValue: 0
+  staggerResistanceDecreaseStackValue: 0
+  moveSpeedRateIncreaseStackValue: 0
+  moveSpeedRateDecreaseStackValue: 0

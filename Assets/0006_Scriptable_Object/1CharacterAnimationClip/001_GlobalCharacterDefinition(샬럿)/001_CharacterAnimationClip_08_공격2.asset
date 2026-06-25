@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4add2113b20f8aa4f9ec735796cef28c, type: 3}
+  m_Name: "001_CharacterAnimationClip_08_\uACF5\uACA92"
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterAnimationClipSO
+  frameList:
+  - frameSprite: {fileID: 21300000, guid: 2bd7d1d6bb950ce48b3cb60289bd5e1c, type: 3}
+    useOverrideImageChangeInterval: 1
+    overrideImageChangeInterval: 0.1
+    useOverrideVisualLocalPosition: 0
+    overrideVisualLocalPosition: {x: 0, y: 0, z: 0}
+    useOverrideVisualLocalScale: 1
+    overrideVisualLocalScale: {x: 2, y: 2, z: 2}
+  effectSpawnEventList:
+  - useEffectSpawn: 1
+    spawnFrameIndex: 0
+    spawnLocalPositionWhenFacingLeft: {x: -0.13, y: 1.12, z: 0.001}
+    spawnLocalPositionWhenFacingRight: {x: 0.13, y: 1.12, z: 0.001}
+    spawnLocalRotationWhenFacingLeft: {x: -60, y: -20, z: 79}
+    spawnLocalRotationWhenFacingRight: {x: 60, y: 210, z: 79}
+    spawnLocalScaleWhenFacingLeft: {x: 2, y: 2, z: 2}
+    spawnLocalScaleWhenFacingRight: {x: 2, y: 2, z: 2}
+    effectStartTimelineTime: 0.14
+    effectLifetime: 0.8
+    effectPlaySpeedMultiplier: 1
+    effectPrefab: {fileID: 2692726740473535937, guid: eefd5308c9c6ca34184c93bf52890560, type: 3}

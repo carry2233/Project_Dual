@@ -336,7 +336,6 @@ MonoBehaviour:
   characterAnimationPlayer: {fileID: 4721317008947267112}
   duelSkillList:
   - {fileID: 11400000, guid: 9011163dc5c5532428728a2a572120ef, type: 2}
-  - {fileID: 11400000, guid: 0fdec9145893be34a91456f60f4916d6, type: 2}
   currentSelectedDuelSkillIndex: 0
   postDuelStopDuration: 0.3
   isCountingPostDuelStop: 0

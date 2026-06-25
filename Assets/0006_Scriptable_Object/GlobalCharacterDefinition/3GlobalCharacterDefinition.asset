@@ -25,7 +25,7 @@ MonoBehaviour:
   characterIndexVisualPrefabList: []
   characterName: 
   baseMaxHunger: 100
-  baseMaxHealth: 200
+  baseMaxHealth: 11111
   baseAttackPower: 10
   baseDefenseValue: 0
   baseBodySize: 4
@@ -33,7 +33,7 @@ MonoBehaviour:
   basePowerRatePercent: 100
   baseMoveSpeed: 5
   baseMoveSpeedPercent: 100
-  baseMaxStaggerAmount: 33
+  baseMaxStaggerAmount: 11
   baseStaggerResistancePercent: 0
   increaseMaxHealthPerLevel: 0
   increaseAttackPowerPerLevel: 0
