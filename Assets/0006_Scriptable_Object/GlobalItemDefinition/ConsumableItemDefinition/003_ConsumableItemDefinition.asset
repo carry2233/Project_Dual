@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 003_ConsumableItemDefinition
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableItemDefinition
   targetItemDefinition: {fileID: 11400000, guid: ddc9f45509725ef4ca01263e3f9d672c, type: 2}
-  applyHealthValue: 0
+  applyHealthValue: 70
   applyHungerValue: 0
   useNigrumValue: 1
   applyNigrumCapacityValue: 30

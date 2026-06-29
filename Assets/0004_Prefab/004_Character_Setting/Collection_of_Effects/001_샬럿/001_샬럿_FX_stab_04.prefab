@@ -9811,6 +9811,7 @@ GameObject:
   - component: {fileID: 3998392874473970484}
   - component: {fileID: 3825483899976179375}
   - component: {fileID: 7387074064489480102}
+  - component: {fileID: -758958852652673913}
   m_Layer: 0
   m_Name: "001_\uC0EC\uB7FF_FX_stab_04"
   m_TagString: Untagged
@@ -14696,3 +14697,20 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &-758958852652673913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2811154704308333647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73dcc61b1ef994447b1e0f9e0fc07013, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterEffectInstance
+  currentElapsedTime: 0
+  currentLifetime: 1
+  currentStartTimelineTime: 0
+  currentPlaySpeedMultiplier: 1
+  isInitialized: 0

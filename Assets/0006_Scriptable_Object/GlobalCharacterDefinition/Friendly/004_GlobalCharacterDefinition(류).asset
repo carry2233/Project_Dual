@@ -16,16 +16,18 @@ MonoBehaviour:
   secondRowID: 4
   hungerDecreaseIntervalMinute: 15
   hungerDecreaseAmount: 1
-  inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 2b7ec501f4eecec4eadc38edc3c27ec5, type: 3}
+  inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 414edd9174654e54287ffc0e35658615, type: 3}
   displayPriority: 4
-  detailUIPrefab: {fileID: 2177999571878758286, guid: 2f605ecbc84772444b4aeb3a282c9eef, type: 3}
+  detailUIPrefab: {fileID: 2177999571878758286, guid: b38a64863f2302d48bdac903870a242d, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: 02358bbf5d8f8ae4ea87c23c651c5a31, type: 3}
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 4da4317f4ccfa324eb884f1c1f2ba347, type: 3}
-  characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: d4d25fb84f0f37349818399be7d5bc03, type: 3}
+  characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: 31a8b3607676f4f46ae4a3e2bfe62948, type: 3}
   characterIndexVisualPrefabList:
-  - {fileID: 581678893387137466, guid: 4b65fdee37f75bb478b4756b68fdae19, type: 3}
-  - {fileID: 581678893387137466, guid: 3ba348bab02d0ee4cbacab2f26b1ab9b, type: 3}
-  - {fileID: 581678893387137466, guid: 83d95aabd593a9c45805c6e6a45115b4, type: 3}
+  - {fileID: 581678893387137466, guid: 6d4ceed3fabf29b49b8a1540e114e73e, type: 3}
+  - {fileID: 581678893387137466, guid: f2190b9ed049ea8468dd1be4d899a6c5, type: 3}
+  - {fileID: 581678893387137466, guid: 590db3b37db827549b2eec9ed73ac6ad, type: 3}
+  - {fileID: 581678893387137466, guid: 93ef5a2c316250647ae19e4dd5cdb6d1, type: 3}
+  - {fileID: 581678893387137466, guid: 1ae5c0c370fb3b04d9c485cb41081625, type: 3}
   characterName: "\uB958"
   baseMaxHunger: 100
   baseMaxHealth: 476
@@ -37,9 +39,9 @@ MonoBehaviour:
   baseMoveSpeed: 4
   baseMoveSpeedPercent: 115
   baseMaxStaggerAmount: 100
-  baseStaggerResistancePercent: 27
+  baseStaggerResistancePercent: 67
   increaseMaxHealthPerLevel: 32
-  increaseAttackPowerPerLevel: 6
+  increaseAttackPowerPerLevel: 4
   increaseDefenseValuePerLevel: 1
   increaseBodySizePerLevel: 0
   increaseSpeedStatPerLevel: 2

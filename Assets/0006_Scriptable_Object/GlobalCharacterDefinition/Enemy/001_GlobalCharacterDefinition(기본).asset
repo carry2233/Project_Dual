@@ -16,7 +16,7 @@ MonoBehaviour:
   secondRowID: 1
   hungerDecreaseIntervalMinute: 1
   hungerDecreaseAmount: 1
-  inGameCharacterPrefab: {fileID: 42997402686422953, guid: 2727bafa8e9b3fa4b9da2d8b7cb44330, type: 3}
+  inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 4d582af4b7eabc34d86201f888e4a580, type: 3}
   displayPriority: 0
   detailUIPrefab: {fileID: 0}
   battleCharacterListUIPrefab: {fileID: 0}
@@ -25,22 +25,22 @@ MonoBehaviour:
   characterIndexVisualPrefabList: []
   characterName: "\uBAAC\uC2A4\uD1301"
   baseMaxHunger: 100
-  baseMaxHealth: 200
-  baseAttackPower: 10
-  baseDefenseValue: 0
+  baseMaxHealth: 240
+  baseAttackPower: 21
+  baseDefenseValue: 11
   baseBodySize: 4
-  baseSpeedStat: 1
+  baseSpeedStat: 29
   basePowerRatePercent: 100
-  baseMoveSpeed: 5
+  baseMoveSpeed: 4
   baseMoveSpeedPercent: 100
-  baseMaxStaggerAmount: 33
-  baseStaggerResistancePercent: 0
-  increaseMaxHealthPerLevel: 0
-  increaseAttackPowerPerLevel: 0
-  increaseDefenseValuePerLevel: 0
+  baseMaxStaggerAmount: 100
+  baseStaggerResistancePercent: 46
+  increaseMaxHealthPerLevel: 20
+  increaseAttackPowerPerLevel: 1
+  increaseDefenseValuePerLevel: 1
   increaseBodySizePerLevel: 0
-  increaseSpeedStatPerLevel: 0
-  increasePowerRatePercentPerLevel: 0
+  increaseSpeedStatPerLevel: 3
+  increasePowerRatePercentPerLevel: 3
   increaseMoveSpeedPerLevel: 0
   increaseMoveSpeedPercentPerLevel: 0
   increaseMaxStaggerAmountPerLevel: 0

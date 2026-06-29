@@ -313,9 +313,10 @@ MonoBehaviour:
   eventUIParent: {fileID: 953863234}
   eventVisualParent: {fileID: 1672381467}
   rewardSlotContent: {fileID: 1671024234}
-  eventTriggerChancePercent: 91
+  eventTriggerChancePercent: 70
   eventButtonList: []
-  itemRewardEventList: []
+  itemRewardEventList:
+  - {fileID: 284533135}
   battleOccurrenceEventList:
   - {fileID: 870986696}
   battleSceneName: 003_Battle_Screen_Scene
@@ -4230,12 +4231,22 @@ MonoBehaviour:
     itemList:
     - {fileID: 11400000, guid: f8e984b7cc467ad46a054544fcc87e57, type: 2}
     - {fileID: 11400000, guid: 3dba8f87f311fba4f896010a8f6566a8, type: 2}
+    - {fileID: 11400000, guid: ddc9f45509725ef4ca01263e3f9d672c, type: 2}
+    - {fileID: 11400000, guid: 747a96da2c21d96499cbb471278cb78d, type: 2}
+    - {fileID: 11400000, guid: c1936552b6002564eabe211939d7f2fd, type: 2}
+    - {fileID: 11400000, guid: 13200418508b93e4593c382b16a35f2a, type: 2}
   - itemBundleID: 1
     itemList:
-    - {fileID: 11400000, guid: 3dba8f87f311fba4f896010a8f6566a8, type: 2}
-    - {fileID: 11400000, guid: ddc9f45509725ef4ca01263e3f9d672c, type: 2}
-  minRewardValue: 30
-  maxRewardValue: 50
+    - {fileID: 11400000, guid: f8e984b7cc467ad46a054544fcc87e57, type: 2}
+    - {fileID: 11400000, guid: c1936552b6002564eabe211939d7f2fd, type: 2}
+    - {fileID: 11400000, guid: 13200418508b93e4593c382b16a35f2a, type: 2}
+    - {fileID: 11400000, guid: 90d6427fc7763c94ba86c38dc753f4db, type: 2}
+    - {fileID: 11400000, guid: a2cb17796bd14bb408256045b8e29e62, type: 2}
+    - {fileID: 11400000, guid: aad8fb6dcb1f0fc458cab3585a679cc3, type: 2}
+    - {fileID: 11400000, guid: 65efb6b7b7e71394da4425e763dcb216, type: 2}
+    - {fileID: 11400000, guid: aa27e46c5ad39574dbbf33a62986784f, type: 2}
+  minRewardValue: 210
+  maxRewardValue: 300
   maxPickTryCount: 100
 --- !u!1 &288414530
 GameObject:
@@ -4847,7 +4858,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &316034537
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10290,17 +10301,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleOccurrenceEvent
   eventID: 1
-  minEnemySpawnCount: 1
-  maxEnemySpawnCount: 1
-  enemyLevelCorrectionValue: 0
-  minEnemySpawnDelay: 3
-  maxEnemySpawnDelay: 8
+  minEnemySpawnCount: 6
+  maxEnemySpawnCount: 8
+  enemyLevelCorrectionValue: 1
+  minEnemySpawnDelay: 6
+  maxEnemySpawnDelay: 15
   spawnableEnemyList:
-  - {fileID: 11400000, guid: 1dc7bb4d8bab03a4ab6115ba69895fc3, type: 2}
+  - {fileID: 11400000, guid: 5dbba4736686efa44bb7e9fe36775990, type: 2}
   executeItemRewardAfterBattle: 1
   postBattleItemRewardEvent: {fileID: 284533135}
   minBattleRequiredMinute: 30
-  maxBattleRequiredMinute: 90
+  maxBattleRequiredMinute: 50
   eventSlotPrefab: {fileID: 8611879191922770680, guid: b91ffb1c16ab68543a12379d98b17fb3, type: 3}
   afterBattleEventVisualPrefab: {fileID: 3823506397000569358, guid: cdbf15f9169de924b9a6971616173e8f, type: 3}
 --- !u!1 &876912534
@@ -12003,7 +12014,7 @@ RectTransform:
   m_Father: {fileID: 75676662}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -14398,7 +14409,7 @@ RectTransform:
   m_Father: {fileID: 798026099}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -20055,7 +20066,7 @@ MonoBehaviour:
   finalTileMoveCancelButton: {fileID: 225701193}
   moveTileSelectionCancelButton: {fileID: 315159699}
   baseEventPanel: {fileID: 5434375}
-  surpriseBattleChancePercent: 0
+  surpriseBattleChancePercent: 22
   surpriseBattleEventList:
   - {fileID: 870986696}
   eventInfoManager: {fileID: 0}
@@ -20217,7 +20228,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1932993059
 RectTransform:
   m_ObjectHideFlags: 0

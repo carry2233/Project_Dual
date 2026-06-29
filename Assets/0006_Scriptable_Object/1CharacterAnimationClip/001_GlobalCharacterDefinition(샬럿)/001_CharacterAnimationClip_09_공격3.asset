@@ -27,9 +27,9 @@ MonoBehaviour:
     spawnLocalPositionWhenFacingRight: {x: 0.9, y: 0.9, z: -0.2}
     spawnLocalRotationWhenFacingLeft: {x: 0, y: 90, z: 0}
     spawnLocalRotationWhenFacingRight: {x: 0, y: -90, z: 0}
-    spawnLocalScaleWhenFacingLeft: {x: 1, y: 1, z: 1}
-    spawnLocalScaleWhenFacingRight: {x: 1, y: 1, z: 1}
+    spawnLocalScaleWhenFacingLeft: {x: 2, y: 2, z: 2}
+    spawnLocalScaleWhenFacingRight: {x: 2, y: 2, z: 2}
     effectStartTimelineTime: 0
-    effectLifetime: 0.5
+    effectLifetime: 0.9
     effectPlaySpeedMultiplier: 0.7
     effectPrefab: {fileID: 2811154704308333647, guid: 0e99da6221f322548965401bbd516f4c, type: 3}

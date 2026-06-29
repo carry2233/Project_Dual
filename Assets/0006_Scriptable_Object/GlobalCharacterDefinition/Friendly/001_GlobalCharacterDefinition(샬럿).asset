@@ -23,9 +23,11 @@ MonoBehaviour:
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 309a0cb8b96dff442ac8d692f411b597, type: 3}
   characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: d4d25fb84f0f37349818399be7d5bc03, type: 3}
   characterIndexVisualPrefabList:
-  - {fileID: 581678893387137466, guid: 4b65fdee37f75bb478b4756b68fdae19, type: 3}
-  - {fileID: 581678893387137466, guid: 3ba348bab02d0ee4cbacab2f26b1ab9b, type: 3}
-  - {fileID: 581678893387137466, guid: 83d95aabd593a9c45805c6e6a45115b4, type: 3}
+  - {fileID: 581678893387137466, guid: 9bce2d2a640dc0c4497c5d00aed462ae, type: 3}
+  - {fileID: 581678893387137466, guid: 10e41410a98000b4ba3d2b95e21d958a, type: 3}
+  - {fileID: 581678893387137466, guid: 8fdebc8007570274ba56ef919624f2dc, type: 3}
+  - {fileID: 581678893387137466, guid: b4e78302f7077674ab0212b639102d06, type: 3}
+  - {fileID: 581678893387137466, guid: 6e0cf1f89b466054d893c3185dec70e3, type: 3}
   characterName: "\uC0EC\uB7FF"
   baseMaxHunger: 100
   baseMaxHealth: 436
@@ -37,8 +39,8 @@ MonoBehaviour:
   baseMoveSpeed: 4
   baseMoveSpeedPercent: 100
   baseMaxStaggerAmount: 100
-  baseStaggerResistancePercent: 40
-  increaseMaxHealthPerLevel: 43
+  baseStaggerResistancePercent: 67
+  increaseMaxHealthPerLevel: 26
   increaseAttackPowerPerLevel: 5
   increaseDefenseValuePerLevel: 1
   increaseBodySizePerLevel: 0

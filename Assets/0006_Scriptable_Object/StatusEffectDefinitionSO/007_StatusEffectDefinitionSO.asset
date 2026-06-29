@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StatusEffectDefinitionSO
   statusEffectID: 7
   statusEffectName: "\uC6D4\uD654\uC0B4\uC218"
-  statusEffectIcon: {fileID: 21300000, guid: d38784e897724014b984a3b62137711e, type: 3}
+  statusEffectIcon: {fileID: 21300000, guid: b489608c56325b048af0da2674ee6da6, type: 3}
   statusEffectShortDescription: 
   statusEffectDescription: "\uC911\uCCA9\uB2F9 \uC704\uB825\uC99D\uAC00  10\uC911\uCCA9,
     \uC774\uB3D9\uC18D\uB3C4\uB960 \uC99D\uAC00 10\uC911\uCCA9 \uC801\uC6A9"
   statusEffectSlotSortPriority: 21
   hasDuration: 1
-  maxStackLimit: 11
-  powerRateIncreaseStackValue: 10
+  maxStackLimit: 5
+  powerRateIncreaseStackValue: 14
   powerRateDecreaseStackValue: 0
   speedIncreaseStackValue: 0
   speedDecreaseStackValue: 1

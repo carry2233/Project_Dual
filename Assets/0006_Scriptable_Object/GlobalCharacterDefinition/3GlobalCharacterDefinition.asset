@@ -16,7 +16,7 @@ MonoBehaviour:
   secondRowID: 3
   hungerDecreaseIntervalMinute: 1
   hungerDecreaseAmount: 1
-  inGameCharacterPrefab: {fileID: 42997402686422953, guid: 2727bafa8e9b3fa4b9da2d8b7cb44330, type: 3}
+  inGameCharacterPrefab: {fileID: 0}
   displayPriority: 0
   detailUIPrefab: {fileID: 0}
   battleCharacterListUIPrefab: {fileID: 0}
@@ -37,14 +37,14 @@ MonoBehaviour:
   baseStaggerResistancePercent: 0
   increaseMaxHealthPerLevel: 0
   increaseAttackPowerPerLevel: 0
-  increaseDefenseValuePerLevel: 0
+  increaseDefenseValuePerLevel: 2
   increaseBodySizePerLevel: 0
-  increaseSpeedStatPerLevel: 0
+  increaseSpeedStatPerLevel: 3
   increasePowerRatePercentPerLevel: 0
   increaseMoveSpeedPerLevel: 0
   increaseMoveSpeedPercentPerLevel: 0
   increaseMaxStaggerAmountPerLevel: 0
-  increaseStaggerResistancePercentPerLevel: 0
+  increaseStaggerResistancePercentPerLevel: 3
   baseRequiredExperience: 10
   requiredExperienceLevelMultiplier: 5
   criticalAttackDamagePercent: 150

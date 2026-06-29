@@ -16,16 +16,18 @@ MonoBehaviour:
   secondRowID: 3
   hungerDecreaseIntervalMinute: 15
   hungerDecreaseAmount: 1
-  inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 2b7ec501f4eecec4eadc38edc3c27ec5, type: 3}
+  inGameCharacterPrefab: {fileID: 7664805818828389489, guid: 5babf991d2a54c944847663380051f4b, type: 3}
   displayPriority: 3
   detailUIPrefab: {fileID: 2177999571878758286, guid: 2f605ecbc84772444b4aeb3a282c9eef, type: 3}
   battleCharacterListUIPrefab: {fileID: 4704955229432645374, guid: 8b27109bf74edbd41a9cd7be5485dca2, type: 3}
   managementCharacterSlotPrefab: {fileID: 622968067797472308, guid: 3a13dfeb7f8310946a779e9cc6340ce2, type: 3}
-  characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: d4d25fb84f0f37349818399be7d5bc03, type: 3}
+  characterInventorySlotPrefab: {fileID: -3622398229014789026, guid: 8350e59f2251a7147a93cad5c1cbf0b4, type: 3}
   characterIndexVisualPrefabList:
-  - {fileID: 581678893387137466, guid: 4b65fdee37f75bb478b4756b68fdae19, type: 3}
-  - {fileID: 581678893387137466, guid: 3ba348bab02d0ee4cbacab2f26b1ab9b, type: 3}
-  - {fileID: 581678893387137466, guid: 83d95aabd593a9c45805c6e6a45115b4, type: 3}
+  - {fileID: 581678893387137466, guid: 0ea491f23f97bf64eaf0a93c9a4c8635, type: 3}
+  - {fileID: 581678893387137466, guid: 81804a9d66fcc524fad7d614db3e3f28, type: 3}
+  - {fileID: 581678893387137466, guid: a8129caa2f8f51d4fb4d07f1bcafa4b3, type: 3}
+  - {fileID: 581678893387137466, guid: 11e43df57d8e1494abb5fceda725ff08, type: 3}
+  - {fileID: 581678893387137466, guid: ebac8f0fc1893b34ea758019f52a46e1, type: 3}
   characterName: "\uB8E8\uCE58\uC544"
   baseMaxHunger: 100
   baseMaxHealth: 326
@@ -38,7 +40,7 @@ MonoBehaviour:
   baseMoveSpeedPercent: 100
   baseMaxStaggerAmount: 100
   baseStaggerResistancePercent: 40
-  increaseMaxHealthPerLevel: 37
+  increaseMaxHealthPerLevel: 43
   increaseAttackPowerPerLevel: 3
   increaseDefenseValuePerLevel: 1
   increaseBodySizePerLevel: 0

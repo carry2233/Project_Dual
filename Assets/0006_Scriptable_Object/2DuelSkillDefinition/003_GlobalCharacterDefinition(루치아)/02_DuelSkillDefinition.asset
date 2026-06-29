@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b190b465f7ece724dadf5ece230357b9, type: 3}
-  m_Name: 002_DuelSkillDefinition
+  m_Name: 02_DuelSkillDefinition
   m_EditorClassIdentifier: Assembly-CSharp::DuelSkillDefinitionSO
-  skillName: "\uBE48\uD2C8 \uC9C0\uB974\uAE30"
+  skillName: "\uBC84\uD2F0\uAE30"
   firstRowID: 1
-  secondRowID: 2
-  minimumSpeedRatePercent: 70
-  maximumSpeedRatePercent: 150
+  secondRowID: 6
+  minimumSpeedRatePercent: 100
+  maximumSpeedRatePercent: 110
   useOverrideSearchRange: 1
   overrideSearchRange: 200
   useOverrideDashStartDistance: 1
@@ -28,39 +28,39 @@ MonoBehaviour:
   duelSkillSlotPrefab: {fileID: 6310775288524787427, guid: 694d0e855d6d9034d983a635ee7b4cf9, type: 3}
   hitStaggerDamageData:
     useStaggerDamage: 1
-    staggerDamage: 24
+    staggerDamage: 8
   advantageStaggerDamageData:
     useStaggerDamage: 1
-    staggerDamage: 7
+    staggerDamage: 8
   evenStaggerDamageData:
     useStaggerDamage: 1
-    staggerDamage: 4
+    staggerDamage: 8
   disadvantageStaggerDamageData:
     useStaggerDamage: 0
     staggerDamage: 0
   damagedStaggerDamageData:
     useStaggerDamage: 0
     staggerDamage: 0
-  dashAnimationClip: {fileID: 11400000, guid: 8973932e5c131f54a8b735eb403bd6e9, type: 2}
+  dashAnimationClip: {fileID: 11400000, guid: 727fd013e4382ba40bceb6a515f7885e, type: 2}
   useDashAnimationLoop: 1
   dashStartSoundData:
     audioClip: {fileID: 8300000, guid: c266e86e5ec11e344bf66dede26cbc46, type: 3}
     volume: 0.7
     audioGroupType: 1
   hitResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: 7506491da2f7173429cf1f109f8ba898, type: 2}
+    animationClip: {fileID: 11400000, guid: 24663fdbf54f28147aa7c535c4bd50ed, type: 2}
     useLoop: 1
   advantageResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: 7506491da2f7173429cf1f109f8ba898, type: 2}
+    animationClip: {fileID: 11400000, guid: 24663fdbf54f28147aa7c535c4bd50ed, type: 2}
     useLoop: 1
   evenResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: 7506491da2f7173429cf1f109f8ba898, type: 2}
+    animationClip: {fileID: 11400000, guid: 24663fdbf54f28147aa7c535c4bd50ed, type: 2}
     useLoop: 1
   disadvantageResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: 7506491da2f7173429cf1f109f8ba898, type: 2}
+    animationClip: {fileID: 11400000, guid: 24663fdbf54f28147aa7c535c4bd50ed, type: 2}
     useLoop: 1
   damagedResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: fd79858063c4e9b42a9e687d6ef0c094, type: 2}
+    animationClip: {fileID: 11400000, guid: 00057af033a5aa2459ad60f5a5a92102, type: 2}
     useLoop: 1
   hitResolveSoundData:
     audioClip: {fileID: 8300000, guid: 5174415e9879415498f7b0dd794d19c5, type: 3}
@@ -83,8 +83,8 @@ MonoBehaviour:
     volume: 0.7
     audioGroupType: 1
   selfHitRepelOverride:
-    useOverrideRepelForce: 1
-    overrideRepelForce: 30
+    useOverrideRepelForce: 0
+    overrideRepelForce: -30
   selfAdvantageRepelOverride:
     useOverrideRepelForce: 0
     overrideRepelForce: 0
@@ -98,7 +98,7 @@ MonoBehaviour:
     useOverrideRepelForce: 0
     overrideRepelForce: 0
   targetHitRepelOverride:
-    useOverrideRepelForce: 1
+    useOverrideRepelForce: 0
     overrideRepelForce: 10
   targetAdvantageRepelOverride:
     useOverrideRepelForce: 0

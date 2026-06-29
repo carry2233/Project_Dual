@@ -15,7 +15,7 @@ MonoBehaviour:
   itemAID: 1
   itemBID: 7
   itemName: "\uACE0\uB300 \uAE08\uD654"
-  itemImage: {fileID: 21300000, guid: 0cccfe29b2372244f867338bbf9b9198, type: 3}
+  itemImage: {fileID: 21300000, guid: e626d73cfea04a84ba6eebdddd08b85f, type: 3}
   rewardItemDisplaySlotPrefab: {fileID: 6528388091847737991, guid: 108667848a8fef54f88a5acd23fa2319, type: 3}
   maxDurability: 10
   maxStackPerSlot: 10

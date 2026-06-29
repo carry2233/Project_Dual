@@ -21,15 +21,15 @@ MonoBehaviour:
     useOverrideVisualLocalScale: 1
     overrideVisualLocalScale: {x: 2, y: 2, z: 2}
   effectSpawnEventList:
-  - useEffectSpawn: 0
+  - useEffectSpawn: 1
     spawnFrameIndex: 0
-    spawnLocalPositionWhenFacingLeft: {x: 0, y: 0, z: 0}
-    spawnLocalPositionWhenFacingRight: {x: 0, y: 0, z: 0}
-    spawnLocalRotationWhenFacingLeft: {x: 0, y: 0, z: 0}
-    spawnLocalRotationWhenFacingRight: {x: 0, y: 0, z: 0}
-    spawnLocalScaleWhenFacingLeft: {x: 0, y: 0, z: 0}
-    spawnLocalScaleWhenFacingRight: {x: 0, y: 0, z: 0}
+    spawnLocalPositionWhenFacingLeft: {x: 0.3, y: 0.75, z: -0.2}
+    spawnLocalPositionWhenFacingRight: {x: -0.3, y: 0.75, z: -0.2}
+    spawnLocalRotationWhenFacingLeft: {x: 23, y: 30, z: 5}
+    spawnLocalRotationWhenFacingRight: {x: 23, y: -150, z: 5}
+    spawnLocalScaleWhenFacingLeft: {x: 1, y: 1, z: 1}
+    spawnLocalScaleWhenFacingRight: {x: 1, y: 1, z: 1}
     effectStartTimelineTime: 0
-    effectLifetime: 0
-    effectPlaySpeedMultiplier: 0
-    effectPrefab: {fileID: 0}
+    effectLifetime: 0.7
+    effectPlaySpeedMultiplier: 0.6
+    effectPrefab: {fileID: 6365969552910624233, guid: 1bc431463e426324383a05c0cde326c3, type: 3}

@@ -30,19 +30,19 @@ MonoBehaviour:
     powerRateCorrectionValue: 90
     useFixedPowerRate: 0
     fixedPowerRateValue: 0
-    useHitEffect: 0
+    useHitEffect: 1
     hitEffectData:
-      effectPrefab: {fileID: 0}
+      effectPrefab: {fileID: 3789640944139518167, guid: 97efcbf135230e9428cee3296241f767, type: 3}
       spawnDelay: 0
-      effectLifetime: 0
+      effectLifetime: 0.7
       effectStartTimelineTime: 0
-      effectPlaySpeedMultiplier: 0
-      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
-      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      effectPlaySpeedMultiplier: 0.8
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
       spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
       spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
-      spawnScaleWhenFacingLeft: {x: 0, y: 0, z: 0}
-      spawnScaleWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnScaleWhenFacingLeft: {x: 2, y: 1, z: 1}
+      spawnScaleWhenFacingRight: {x: 2, y: 1, z: 1}
     isFinishingAttack: 0
   attackSkillAnimationList:
   - animationClip: {fileID: 11400000, guid: 0c1ad51aab8be614eb12df6e63c803ab, type: 2}
@@ -81,5 +81,8 @@ MonoBehaviour:
     animationListIndex: 1
     soundStartDelay: 0.1
   selfStatusEffectApplyListOnAttackSkillEnd: []
-  targetStatusEffectApplyListOnAttackSkillEnd: []
+  targetStatusEffectApplyListOnAttackSkillEnd:
+  - statusEffectDefinition: {fileID: 11400000, guid: 3a69126d2ce364b4182eac2e68823a10, type: 2}
+    applyStack: 3
+    applyDuration: 12
   attackSkillCriticalApplyList: []

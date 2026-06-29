@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d3147d9ae80b7d48ace3532ea8730e3, type: 3}
+  m_Name: "003_02_\uB8E8\uCE58\uC544AttackSkillDefinitionSO"
+  m_EditorClassIdentifier: Assembly-CSharp::AttackSkillDefinitionSO
+  attackSkillName: "\uC9C4\uC555\uC0AC\uACA9"
+  firstRowID: 1
+  secondRowID: 8
+  attackSkillSlotPrefab: {fileID: 7606801988712462910, guid: f35bdf1f41551ff4c90a867db2bc39ae, type: 3}
+  attackSkillDirectionWallCheckDistance: 7
+  dashSoundClip: {fileID: 8300000, guid: 657e5a51669c97546b0061ab9c051224, type: 3}
+  dashSoundVolume: 1
+  dashSoundGroupType: 1
+  attackSkillCastDistance: 1.5
+  targetLocalCorrectionPosition: {x: 3, y: 0, z: 0}
+  canUseOnlyOnBrokenTarget: 1
+  attackExecutionList:
+  - animationListIndex: 3
+    attackStartDelay: 0
+    usePowerRateCorrection: 0
+    powerRateCorrectionValue: 0
+    useFixedPowerRate: 1
+    fixedPowerRateValue: 100
+    useHitEffect: 0
+    hitEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 0
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 0
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnScaleWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnScaleWhenFacingRight: {x: 0, y: 0, z: 0}
+    isFinishingAttack: 0
+  - animationListIndex: 4
+    attackStartDelay: 0
+    usePowerRateCorrection: 0
+    powerRateCorrectionValue: 0
+    useFixedPowerRate: 1
+    fixedPowerRateValue: 100
+    useHitEffect: 0
+    hitEffectData:
+      effectPrefab: {fileID: 0}
+      spawnDelay: 0
+      effectLifetime: 0
+      effectStartTimelineTime: 0
+      effectPlaySpeedMultiplier: 0
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnScaleWhenFacingLeft: {x: 0, y: 0, z: 0}
+      spawnScaleWhenFacingRight: {x: 0, y: 0, z: 0}
+    isFinishingAttack: 0
+  attackSkillAnimationList:
+  - animationClip: {fileID: 11400000, guid: 24663fdbf54f28147aa7c535c4bd50ed, type: 2}
+    delayAfterEnd: 0
+  - animationClip: {fileID: 11400000, guid: 6aa558bde0b8fab43a4029bb3cbcd4dd, type: 2}
+    delayAfterEnd: 0.4
+  - animationClip: {fileID: 11400000, guid: 24fcee3a87f3c8c40b3afa4176ff336b, type: 2}
+    delayAfterEnd: 0.4
+  - animationClip: {fileID: 11400000, guid: 887106a0ca941c3459e334dfd9334d29, type: 2}
+    delayAfterEnd: 0.2
+  - animationClip: {fileID: 11400000, guid: 887106a0ca941c3459e334dfd9334d29, type: 2}
+    delayAfterEnd: 0.5
+  attackSkillMotionEventList:
+  - knockbackAnimationListIndex: 1
+    selfKnockbackValue: -10
+    targetKnockbackValue: 0
+    useSelfKnockback: 1
+    useTargetKnockback: 0
+    selfKnockbackStartDelay: 0
+    targetKnockbackStartDelay: 0
+    directionFlipAnimationListIndex: 0
+    useSelfDirectionFlip: 0
+    useTargetDirectionFlip: 0
+    selfDirectionFlipStartDelay: 0
+    targetDirectionFlipStartDelay: 0
+  attackSkillSoundEventList:
+  - audioClip: {fileID: 8300000, guid: 482611fe6bc559142a00be6e726b4862, type: 3}
+    volume: 0.6
+    audioGroupType: 1
+    animationListIndex: 1
+    soundStartDelay: 0.1
+  - audioClip: {fileID: 8300000, guid: 62005deea1dc4495e8302de415dcd690, type: 3}
+    volume: 1
+    audioGroupType: 1
+    animationListIndex: 3
+    soundStartDelay: 0
+  - audioClip: {fileID: 8300000, guid: 62005deea1dc4495e8302de415dcd690, type: 3}
+    volume: 1
+    audioGroupType: 1
+    animationListIndex: 4
+    soundStartDelay: 0
+  selfStatusEffectApplyListOnAttackSkillEnd: []
+  targetStatusEffectApplyListOnAttackSkillEnd: []
+  attackSkillCriticalApplyList:
+  - attackExecutionListIndex: 1
+    applyCriticalDamage: 1
+    gainCriticalExperience: 1

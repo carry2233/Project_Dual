@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b190b465f7ece724dadf5ece230357b9, type: 3}
-  m_Name: 001_DuelSkillDefinition
+  m_Name: 02_DuelSkillDefinition
   m_EditorClassIdentifier: Assembly-CSharp::DuelSkillDefinitionSO
-  skillName: "\uD314\uAFC8\uCE58 \uCCD0\uB0B4\uAE30"
+  skillName: "\uC218\uC9C1\uBCA0"
   firstRowID: 1
-  secondRowID: 1
-  minimumSpeedRatePercent: 90
+  secondRowID: 8
+  minimumSpeedRatePercent: 100
   maximumSpeedRatePercent: 110
   useOverrideSearchRange: 1
   overrideSearchRange: 200
@@ -25,42 +25,42 @@ MonoBehaviour:
   overrideClashDistance: 1.2
   useOverrideDashMoveSpeed: 0
   overrideDashMoveSpeed: 3
-  duelSkillSlotPrefab: {fileID: 6310775288524787427, guid: fe50afa21ba6ee34e858b37c182c7592, type: 3}
+  duelSkillSlotPrefab: {fileID: 6310775288524787427, guid: 694d0e855d6d9034d983a635ee7b4cf9, type: 3}
   hitStaggerDamageData:
     useStaggerDamage: 1
-    staggerDamage: 6
+    staggerDamage: 37
   advantageStaggerDamageData:
     useStaggerDamage: 1
-    staggerDamage: 5
+    staggerDamage: 37
   evenStaggerDamageData:
     useStaggerDamage: 1
-    staggerDamage: 5
+    staggerDamage: 37
   disadvantageStaggerDamageData:
-    useStaggerDamage: 0
-    staggerDamage: 0
+    useStaggerDamage: 1
+    staggerDamage: 37
   damagedStaggerDamageData:
-    useStaggerDamage: 0
-    staggerDamage: 0
-  dashAnimationClip: {fileID: 11400000, guid: 8973932e5c131f54a8b735eb403bd6e9, type: 2}
+    useStaggerDamage: 1
+    staggerDamage: 37
+  dashAnimationClip: {fileID: 11400000, guid: b1ff061bca666c346b7fe939be17840b, type: 2}
   useDashAnimationLoop: 1
   dashStartSoundData:
     audioClip: {fileID: 8300000, guid: c266e86e5ec11e344bf66dede26cbc46, type: 3}
     volume: 0.7
     audioGroupType: 1
   hitResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: cbf0cca14ff8766469e0367857578944, type: 2}
+    animationClip: {fileID: 11400000, guid: 8aa440dba280adb43a1a66cffb5f21c0, type: 2}
     useLoop: 1
   advantageResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: cbf0cca14ff8766469e0367857578944, type: 2}
+    animationClip: {fileID: 11400000, guid: 8aa440dba280adb43a1a66cffb5f21c0, type: 2}
     useLoop: 1
   evenResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: cbf0cca14ff8766469e0367857578944, type: 2}
+    animationClip: {fileID: 11400000, guid: 8aa440dba280adb43a1a66cffb5f21c0, type: 2}
     useLoop: 1
   disadvantageResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: cbf0cca14ff8766469e0367857578944, type: 2}
+    animationClip: {fileID: 11400000, guid: 8aa440dba280adb43a1a66cffb5f21c0, type: 2}
     useLoop: 1
   damagedResolveAnimationData:
-    animationClip: {fileID: 11400000, guid: fd79858063c4e9b42a9e687d6ef0c094, type: 2}
+    animationClip: {fileID: 11400000, guid: a89ea7782bf6416419d8ec4c7ecea10e, type: 2}
     useLoop: 1
   hitResolveSoundData:
     audioClip: {fileID: 8300000, guid: 5174415e9879415498f7b0dd794d19c5, type: 3}
@@ -83,8 +83,8 @@ MonoBehaviour:
     volume: 0.7
     audioGroupType: 1
   selfHitRepelOverride:
-    useOverrideRepelForce: 0
-    overrideRepelForce: -30
+    useOverrideRepelForce: 1
+    overrideRepelForce: 20
   selfAdvantageRepelOverride:
     useOverrideRepelForce: 0
     overrideRepelForce: 0
@@ -139,19 +139,19 @@ MonoBehaviour:
       spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
       spawnScaleWhenFacingLeft: {x: 1, y: 1, z: 1}
       spawnScaleWhenFacingRight: {x: 1, y: 1, z: 1}
-    useTargetParentEffect: 0
+    useTargetParentEffect: 1
     targetParentEffectData:
-      effectPrefab: {fileID: 0}
+      effectPrefab: {fileID: 1801159220724218512, guid: aeb7a8925f99df84194d0193b14da62c, type: 3}
       spawnDelay: 0
-      effectLifetime: 1
+      effectLifetime: 0.7
       effectStartTimelineTime: 0
-      effectPlaySpeedMultiplier: 1
-      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
+      effectPlaySpeedMultiplier: 0.8
+      spawnPositionOffsetWhenFacingLeft: {x: 0, y: 0.5, z: 0}
       spawnRotationOffsetWhenFacingLeft: {x: 0, y: 0, z: 0}
-      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
+      spawnPositionOffsetWhenFacingRight: {x: 0, y: 0.5, z: 0}
       spawnRotationOffsetWhenFacingRight: {x: 0, y: 0, z: 0}
-      spawnScaleWhenFacingLeft: {x: 1, y: 1, z: 1}
-      spawnScaleWhenFacingRight: {x: 1, y: 1, z: 1}
+      spawnScaleWhenFacingLeft: {x: 2, y: 1, z: 1}
+      spawnScaleWhenFacingRight: {x: 2, y: 1, z: 1}
   advantageResolveEffectData:
     useBetweenCharactersEffect: 1
     betweenCharactersEffectData:

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StatusEffectDefinitionSO
   statusEffectID: 3
   statusEffectName: "\uC2E0\uC18D"
-  statusEffectIcon: {fileID: 21300000, guid: d38784e897724014b984a3b62137711e, type: 3}
+  statusEffectIcon: {fileID: 21300000, guid: d145dee6fb14a4b429637b8adbec8e08, type: 3}
   statusEffectShortDescription: 
   statusEffectDescription: "\uC911\uCCA9 1\uB2F9 \uC18D\uB3C4\uC99D\uAC00 1\uC911\uCCA9
     \uC801\uC6A9"
